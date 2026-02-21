@@ -1,4 +1,5 @@
 import ServicePageLayout from "@/components/ServicePageLayout";
+import educationHero from "@/assets/education-hero.jpg";
 
 const Education = () => (
   <ServicePageLayout
@@ -8,6 +9,7 @@ const Education = () => (
     bgColorClass="bg-education"
     accentColorClass="bg-education"
     textOnBgClass="text-education-foreground"
+    heroImage={educationHero}
     services={[
       "Whole-School PBS Framework Design",
       "Behaviour Policy Development",
