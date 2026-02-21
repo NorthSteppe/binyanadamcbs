@@ -66,7 +66,7 @@ const ServicePageLayout = ({
       <section className="py-20">
         <div className="container">
           <h2 className="text-3xl mb-12">What We Offer</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((service, i) => (
               <motion.div
                 key={service}
@@ -74,9 +74,9 @@ const ServicePageLayout = ({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
-                className={`rounded-lg p-5 border border-border bg-card`}
+                className="rounded-2xl p-6 border border-border/50 bg-card"
               >
-                <div className={`w-2 h-2 rounded-full mb-3 ${accentColorClass}`} />
+                <div className={`w-2.5 h-2.5 rounded-full mb-3 ${accentColorClass}`} />
                 <p className="text-sm font-medium text-card-foreground">{service}</p>
               </motion.div>
             ))}
@@ -85,7 +85,7 @@ const ServicePageLayout = ({
       </section>
 
       {/* Packages */}
-      <section className="py-20 bg-secondary">
+      <section className="py-20 bg-card">
         <div className="container">
           <h2 className="text-3xl mb-4">Packages</h2>
           <p className="text-muted-foreground mb-12 max-w-xl">
@@ -99,14 +99,14 @@ const ServicePageLayout = ({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.4 }}
-                className="rounded-xl p-8 bg-card border border-border"
+                className="rounded-2xl p-8 bg-background border border-border/50"
               >
-                <h3 className="text-xl mb-2 text-card-foreground">{pkg.name}</h3>
+                <h3 className="text-xl mb-2 text-foreground">{pkg.name}</h3>
                 <p className="text-sm text-muted-foreground mb-5">{pkg.description}</p>
                 <ul className="space-y-2 mb-5">
                   {pkg.includes.map((item) => (
-                    <li key={item} className="text-sm text-card-foreground flex items-start gap-2">
-                      <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${accentColorClass}`} />
+                    <li key={item} className="text-sm text-foreground flex items-start gap-2">
+                      <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${accentColorClass}`} />
                       {item}
                     </li>
                   ))}
@@ -125,7 +125,7 @@ const ServicePageLayout = ({
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
             We do not remove behaviour. We build capability. Let's start with a conversation.
           </p>
-          <Button size="lg" asChild>
+          <Button size="lg" asChild className="rounded-full px-8">
             <Link to="/contact">{ctaText}</Link>
           </Button>
         </div>
