@@ -1,4 +1,5 @@
 import ServicePageLayout from "@/components/ServicePageLayout";
+import organisationsHero from "@/assets/organisations-hero.jpg";
 
 const Organisations = () => (
   <ServicePageLayout
@@ -8,6 +9,7 @@ const Organisations = () => (
     bgColorClass="bg-business"
     accentColorClass="bg-business"
     textOnBgClass="text-business-foreground"
+    heroImage={organisationsHero}
     services={[
       "Organisational Behaviour Management (OBM)",
       "Behaviour Strategy Design",

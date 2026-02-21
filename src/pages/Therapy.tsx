@@ -1,4 +1,5 @@
 import ServicePageLayout from "@/components/ServicePageLayout";
+import therapyHero from "@/assets/therapy-hero.jpg";
 
 const Therapy = () => (
   <ServicePageLayout
@@ -8,6 +9,7 @@ const Therapy = () => (
     bgColorClass="bg-therapy"
     accentColorClass="bg-therapy"
     textOnBgClass="text-therapy-foreground"
+    heroImage={therapyHero}
     services={[
       "ACT-Informed Therapy",
       "Constructional Behavioural Intervention",

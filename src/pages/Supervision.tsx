@@ -1,4 +1,5 @@
 import ServicePageLayout from "@/components/ServicePageLayout";
+import supervisionHero from "@/assets/supervision-hero.jpg";
 
 const Supervision = () => (
   <ServicePageLayout
@@ -8,6 +9,7 @@ const Supervision = () => (
     bgColorClass="bg-supervision"
     accentColorClass="bg-supervision"
     textOnBgClass="text-supervision-foreground"
+    heroImage={supervisionHero}
     services={[
       "UKBA Supervision",
       "Case Formulation Supervision",

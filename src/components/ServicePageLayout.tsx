@@ -19,6 +19,7 @@ interface ServicePageLayoutProps {
   bgColorClass: string;
   accentColorClass: string;
   textOnBgClass: string;
+  heroImage?: string;
   services: string[];
   packages: ServicePackage[];
   ctaText?: string;
@@ -32,6 +33,7 @@ const ServicePageLayout = ({
   bgColorClass,
   accentColorClass,
   textOnBgClass,
+  heroImage,
   services,
   packages,
   ctaText = "Book a Consultation",
@@ -41,8 +43,13 @@ const ServicePageLayout = ({
       <Header />
 
       {/* Hero */}
-      <section className={`pt-32 pb-20 ${bgColorClass}`}>
-        <div className="container">
+      <section className={`relative pt-32 pb-20 overflow-hidden ${bgColorClass}`}>
+        {heroImage && (
+          <div className="absolute inset-0">
+            <img src={heroImage} alt="" className="w-full h-full object-cover opacity-20" />
+          </div>
+        )}
+        <div className="container relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

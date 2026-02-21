@@ -4,6 +4,7 @@ import { ArrowRight, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import heroLanding from "@/assets/hero-landing.jpg";
 
 const Index = () => {
   return (
@@ -49,18 +50,21 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="hidden lg:flex items-center justify-center"
+              className="hidden lg:block"
             >
-              <div className="relative w-full max-w-md aspect-square">
-                <div className="absolute inset-0 rounded-full bg-primary/10" />
-                <div className="absolute inset-8 rounded-full bg-primary/15" />
-                <div className="absolute inset-16 rounded-full bg-primary/20 flex items-center justify-center">
-                  <div className="text-center px-8">
-                    <blockquote className="text-xl text-foreground italic leading-relaxed mb-3">
-                      "We do not remove behaviour. We build capability."
-                    </blockquote>
-                    <p className="text-sm text-muted-foreground font-medium">Adam Dayan, MSc</p>
-                  </div>
+              <div className="relative">
+                <div className="rounded-3xl overflow-hidden shadow-2xl">
+                  <img 
+                    src={heroLanding} 
+                    alt="A caring professional supporting a child in a warm, bright setting" 
+                    className="w-full h-auto object-cover aspect-square"
+                  />
+                </div>
+                <div className="absolute -bottom-6 -left-6 bg-card rounded-2xl p-6 shadow-lg border border-border/50 max-w-xs">
+                  <blockquote className="text-sm text-foreground italic leading-relaxed mb-2">
+                    "We do not remove behaviour. We build capability."
+                  </blockquote>
+                  <p className="text-xs text-muted-foreground font-medium">Adam Dayan, MSc</p>
                 </div>
               </div>
             </motion.div>

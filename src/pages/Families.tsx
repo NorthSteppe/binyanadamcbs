@@ -1,4 +1,5 @@
 import ServicePageLayout from "@/components/ServicePageLayout";
+import familyHero from "@/assets/family-hero.jpg";
 
 const Families = () => (
   <ServicePageLayout
@@ -8,6 +9,7 @@ const Families = () => (
     bgColorClass="bg-family"
     accentColorClass="bg-family"
     textOnBgClass="text-family-foreground"
+    heroImage={familyHero}
     services={[
       "Behavioural Assessment at Home",
       "Parent Strategy Coaching",
