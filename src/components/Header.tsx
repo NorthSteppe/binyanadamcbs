@@ -1,21 +1,27 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/i18n/LanguageContext";
 import logo from "@/assets/binyan-logo.png";
-
-const navLinks = [
-  { label: "Services", path: "/services" },
-  { label: "Education", path: "/education" },
-  { label: "Therapy", path: "/therapy" },
-  { label: "Families", path: "/families" },
-  { label: "Organisations", path: "/organisations" },
-  { label: "Supervision", path: "/supervision" },
-];
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { language, setLanguage, t } = useLanguage();
+
+  const navLinks = [
+    { label: t.nav.services, path: "/services" },
+    { label: t.nav.education, path: "/education" },
+    { label: t.nav.therapy, path: "/therapy" },
+    { label: t.nav.families, path: "/families" },
+    { label: t.nav.organisations, path: "/organisations" },
+    { label: t.nav.supervision, path: "/supervision" },
+  ];
+
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "he" : "en");
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50">
@@ -42,19 +48,38 @@ const Header = () => {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleLanguage}
+            className="rounded-full gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <Globe size={16} />
+            {language === "en" ? "עברית" : "English"}
+          </Button>
           <Button variant="outline" size="sm" asChild className="rounded-full">
-            <Link to="/contact">Book a Consultation</Link>
+            <Link to="/contact">{t.nav.bookConsultation}</Link>
           </Button>
         </div>
 
         {/* Mobile menu button */}
-        <button
-          className="lg:hidden p-2 text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="lg:hidden flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLanguage}
+            className="rounded-full text-muted-foreground"
+          >
+            <Globe size={18} />
+          </Button>
+          <button
+            className="p-2 text-foreground"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile nav */}
@@ -77,7 +102,7 @@ const Header = () => {
             ))}
             <div className="pt-2 border-t border-border mt-2 flex flex-col gap-2">
               <Button variant="outline" size="sm" asChild className="rounded-full">
-                <Link to="/contact" onClick={() => setMobileOpen(false)}>Book a Consultation</Link>
+                <Link to="/contact" onClick={() => setMobileOpen(false)}>{t.nav.bookConsultation}</Link>
               </Button>
             </div>
           </nav>

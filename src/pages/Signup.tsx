@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -15,6 +16,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +24,9 @@ const Signup = () => {
     const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
+      toast({ title: t.signup.title, description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Check your email", description: "We've sent you a confirmation link." });
+      toast({ title: t.signup.successTitle, description: t.signup.successDescription });
       navigate("/login");
     }
   };
@@ -40,24 +42,24 @@ const Signup = () => {
           className="w-full max-w-md mx-auto px-6"
         >
           <div className="bg-card rounded-3xl p-10 border border-border/50">
-            <h1 className="text-3xl md:text-4xl mb-2 text-center">Sign Up</h1>
-            <p className="text-muted-foreground text-center mb-8">Create your Binyan account</p>
+            <h1 className="text-3xl md:text-4xl mb-2 text-center">{t.signup.title}</h1>
+            <p className="text-muted-foreground text-center mb-8">{t.signup.subtitle}</p>
             <form onSubmit={handleSignup} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t.signup.emailLabel}</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-xl" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t.signup.passwordLabel}</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="rounded-xl" />
               </div>
               <Button type="submit" className="w-full rounded-full" size="lg" disabled={loading}>
-                {loading ? "Creating account…" : "Sign Up"}
+                {loading ? t.signup.loading : t.signup.button}
               </Button>
             </form>
             <p className="text-sm text-muted-foreground text-center mt-6">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary font-medium hover:underline">Log In</Link>
+              {t.signup.hasAccount}{" "}
+              <Link to="/login" className="text-primary font-medium hover:underline">{t.signup.logInLink}</Link>
             </p>
           </div>
         </motion.div>

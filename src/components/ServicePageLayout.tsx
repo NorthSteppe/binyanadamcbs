@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -38,11 +39,12 @@ const ServicePageLayout = ({
   packages,
   ctaText = "Book a Consultation",
 }: ServicePageLayoutProps) => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero */}
       <section className={`relative pt-32 pb-20 overflow-hidden ${bgColorClass}`}>
         {heroImage && (
           <div className="absolute inset-0">
@@ -69,10 +71,9 @@ const ServicePageLayout = ({
         </div>
       </section>
 
-      {/* Services */}
       <section className="py-20">
         <div className="container">
-          <h2 className="text-3xl mb-12">What We Offer</h2>
+          <h2 className="text-3xl mb-12">{t.serviceLayout.whatWeOffer}</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((service, i) => (
               <motion.div
@@ -91,13 +92,10 @@ const ServicePageLayout = ({
         </div>
       </section>
 
-      {/* Packages */}
       <section className="py-20 bg-card">
         <div className="container">
-          <h2 className="text-3xl mb-4">Packages</h2>
-          <p className="text-muted-foreground mb-12 max-w-xl">
-            Clear, structured support tailored to your needs. Every package includes measurable outcomes and a collaborative approach.
-          </p>
+          <h2 className="text-3xl mb-4">{t.serviceLayout.packages}</h2>
+          <p className="text-muted-foreground mb-12 max-w-xl">{t.serviceLayout.packagesSubtitle}</p>
           <div className="grid md:grid-cols-2 gap-6">
             {packages.map((pkg, i) => (
               <motion.div
@@ -118,20 +116,17 @@ const ServicePageLayout = ({
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs text-muted-foreground italic">Ideal for: {pkg.ideal}</p>
+                <p className="text-xs text-muted-foreground italic">{t.serviceLayout.idealFor} {pkg.ideal}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20">
         <div className="container text-center">
-          <h2 className="text-3xl mb-4">Ready to Begin?</h2>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            We do not remove behaviour. We build capability. Let's start with a conversation.
-          </p>
+          <h2 className="text-3xl mb-4">{t.serviceLayout.readyTitle}</h2>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">{t.serviceLayout.readyText}</p>
           <Button size="lg" asChild className="rounded-full px-8">
             <Link to="/contact">{ctaText}</Link>
           </Button>
