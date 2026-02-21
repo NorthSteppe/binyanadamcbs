@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 import type { LucideIcon } from "lucide-react";
 
 interface ServiceCardProps {
@@ -11,6 +12,8 @@ interface ServiceCardProps {
 }
 
 const ServiceCard = ({ title, description, icon: Icon, path, colorClass }: ServiceCardProps) => {
+  const { t } = useLanguage();
+
   return (
     <Link
       to={path}
@@ -22,7 +25,7 @@ const ServiceCard = ({ title, description, icon: Icon, path, colorClass }: Servi
       <h3 className="text-xl mb-3 text-card-foreground">{title}</h3>
       <p className="text-sm text-muted-foreground leading-relaxed mb-5">{description}</p>
       <span className="inline-flex items-center gap-2 text-sm font-medium text-primary group-hover:gap-3 transition-all">
-        Learn more <ArrowRight size={16} />
+        {t.services.learnMore} <ArrowRight size={16} />
       </span>
     </Link>
   );

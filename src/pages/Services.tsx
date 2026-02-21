@@ -2,25 +2,18 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { School, Heart, Users, Building2, GraduationCap, CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ServiceCard from "@/components/ServiceCard";
 
-const credentials = [
-  "UKBA (Cert) Registered",
-  "15+ Years' Experience",
-  "Senior Leadership Team Member",
-  "MSc Applied Behaviour Analysis",
-  "MEd Psychology of Education (candidate)",
-  "UK-SBA & ACBS Member",
-];
-
 const Services = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* What We Do */}
       <section className="pt-32 pb-24">
         <div className="container">
           <motion.div
@@ -30,24 +23,21 @@ const Services = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">What We Do</p>
-            <h2 className="text-4xl md:text-5xl mb-5">Specialist Behavioural Services</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-              Five distinct pathways of support, each designed with clarity, dignity, and measurable outcomes at the centre.
-            </p>
+            <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">{t.services.tagline}</p>
+            <h2 className="text-4xl md:text-5xl mb-5">{t.services.title}</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-lg">{t.services.subtitle}</p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <ServiceCard title="PBS in Education" description="Whole-school behavioural culture built on clarity and dignity. From policy to practice." icon={School} path="/education" colorClass="bg-education text-education-foreground" />
-            <ServiceCard title="Therapy" description="Understanding behaviour through context, not blame. ACT-informed, constructional, and person-centred." icon={Heart} path="/therapy" colorClass="bg-therapy text-therapy-foreground" />
-            <ServiceCard title="Family Support" description="Support for families navigating complexity. Practical, personalised, and blame-free." icon={Users} path="/families" colorClass="bg-family text-family-foreground" />
-            <ServiceCard title="Organisations" description="Behavioural science applied to systems. Culture change, governance, and performance." icon={Building2} path="/organisations" colorClass="bg-business text-business-foreground" />
-            <ServiceCard title="Supervision" description="Developing thoughtful, ethical practitioners. UKBA supervision, mentoring, and reflective practice." icon={GraduationCap} path="/supervision" colorClass="bg-supervision text-supervision-foreground" />
+            <ServiceCard title={t.services.cards.education.title} description={t.services.cards.education.description} icon={School} path="/education" colorClass="bg-education text-education-foreground" />
+            <ServiceCard title={t.services.cards.therapy.title} description={t.services.cards.therapy.description} icon={Heart} path="/therapy" colorClass="bg-therapy text-therapy-foreground" />
+            <ServiceCard title={t.services.cards.family.title} description={t.services.cards.family.description} icon={Users} path="/families" colorClass="bg-family text-family-foreground" />
+            <ServiceCard title={t.services.cards.organisations.title} description={t.services.cards.organisations.description} icon={Building2} path="/organisations" colorClass="bg-business text-business-foreground" />
+            <ServiceCard title={t.services.cards.supervision.title} description={t.services.cards.supervision.description} icon={GraduationCap} path="/supervision" colorClass="bg-supervision text-supervision-foreground" />
           </div>
         </div>
       </section>
 
-      {/* Approach */}
       <section className="py-24 bg-card">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -57,15 +47,11 @@ const Services = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">Our Approach</p>
-              <h2 className="text-3xl md:text-4xl mb-6">Constructional, Not Reductional</h2>
-              <p className="text-muted-foreground leading-relaxed mb-6 text-base">
-                We don't seek to suppress, control, or eliminate behaviour. Instead, we build new capabilities, 
-                skills, and repertoires that make meaningful change possible. Every intervention starts with 
-                understanding context and ends with measurable growth.
-              </p>
+              <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">{t.services.approachTagline}</p>
+              <h2 className="text-3xl md:text-4xl mb-6">{t.services.approachTitle}</h2>
+              <p className="text-muted-foreground leading-relaxed mb-6 text-base">{t.services.approachText}</p>
               <div className="space-y-4">
-                {["Build repertoires, don't suppress behaviour", "Behaviour as communication, not defiance", "System-wide thinking for sustainable change", "Ethical, evidence-based, and culturally sensitive"].map((point) => (
+                {t.services.approachPoints.map((point) => (
                   <div key={point} className="flex items-start gap-3">
                     <CheckCircle2 className="text-primary mt-0.5 flex-shrink-0" size={20} />
                     <p className="text-foreground">{point}</p>
@@ -82,24 +68,23 @@ const Services = () => {
               className="bg-background rounded-3xl p-10 border border-border/50"
             >
               <blockquote className="text-2xl leading-relaxed text-foreground mb-6 italic">
-                "We do not remove behaviour. We build capability."
+                {t.services.quoteText}
               </blockquote>
               <div>
-                <p className="font-sans font-semibold text-foreground">Adam Dayan, MSc</p>
-                <p className="text-sm text-muted-foreground">UKBA (Cert) · Clinical Behaviour Analyst & Consultant</p>
+                <p className="font-sans font-semibold text-foreground">{t.services.quoteAuthor}</p>
+                <p className="text-sm text-muted-foreground">{t.services.quoteRole}</p>
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Credentials */}
       <section className="py-24">
         <div className="container text-center">
-          <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">Evidence & Credentials</p>
-          <h2 className="text-3xl md:text-4xl mb-12">Grounded in Science. Led with Integrity.</h2>
+          <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">{t.services.credentialsTagline}</p>
+          <h2 className="text-3xl md:text-4xl mb-12">{t.services.credentialsTitle}</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
-            {credentials.map((cred, i) => (
+            {t.services.credentials.map((cred, i) => (
               <motion.div
                 key={cred}
                 initial={{ opacity: 0, y: 10 }}
@@ -115,7 +100,6 @@ const Services = () => {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-24 bg-primary">
         <div className="container text-center">
           <motion.div
@@ -124,13 +108,11 @@ const Services = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-4xl text-primary-foreground mb-4">Let's Start a Conversation</h2>
-            <p className="text-primary-foreground/70 mb-8 max-w-md mx-auto">
-              Whether you're a school, family, organisation, or practitioner — we're here to help build capability.
-            </p>
+            <h2 className="text-3xl md:text-4xl text-primary-foreground mb-4">{t.services.ctaTitle}</h2>
+            <p className="text-primary-foreground/70 mb-8 max-w-md mx-auto">{t.services.ctaText}</p>
             <Button size="lg" variant="secondary" asChild className="rounded-full px-8">
               <Link to="/contact" className="inline-flex items-center gap-2">
-                Book a Consultation <ArrowRight size={18} />
+                {t.services.ctaButton} <ArrowRight size={18} />
               </Link>
             </Button>
           </motion.div>
