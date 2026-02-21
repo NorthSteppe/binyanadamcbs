@@ -39,25 +39,27 @@ const Login = () => {
           transition={{ duration: 0.6 }}
           className="w-full max-w-md mx-auto px-6"
         >
-          <h1 className="text-3xl md:text-4xl mb-2 text-center">Log In</h1>
-          <p className="text-muted-foreground text-center mb-8">Welcome back to Binyan</p>
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? "Logging in…" : "Log In"}
-            </Button>
-          </form>
-          <p className="text-sm text-muted-foreground text-center mt-6">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-primary font-medium hover:underline">Sign Up</Link>
-          </p>
+          <div className="bg-card rounded-3xl p-10 border border-border/50">
+            <h1 className="text-3xl md:text-4xl mb-2 text-center">Log In</h1>
+            <p className="text-muted-foreground text-center mb-8">Welcome back to Binyan</p>
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-xl" />
+              </div>
+              <Button type="submit" className="w-full rounded-full" size="lg" disabled={loading}>
+                {loading ? "Logging in…" : "Log In"}
+              </Button>
+            </form>
+            <p className="text-sm text-muted-foreground text-center mt-6">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-primary font-medium hover:underline">Sign Up</Link>
+            </p>
+          </div>
         </motion.div>
       </section>
       <Footer />
