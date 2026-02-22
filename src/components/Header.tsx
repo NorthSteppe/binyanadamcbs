@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Globe, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, Globe, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,7 +10,7 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { language, setLanguage, t } = useLanguage();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
 
   const navLinks = [
     { label: t.nav.services, path: "/services" },
@@ -64,6 +64,14 @@ const Header = () => {
 
           {user ? (
             <>
+              {isAdmin && (
+                <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
+                  <Link to="/admin/calendar">
+                    <Shield size={14} />
+                    Admin
+                  </Link>
+                </Button>
+              )}
               <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
                 <Link to="/portal">
                   <LayoutDashboard size={14} />
@@ -128,6 +136,14 @@ const Header = () => {
             <div className="pt-2 border-t border-border mt-2 flex flex-col gap-2">
               {user ? (
                 <>
+                  {isAdmin && (
+                    <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
+                      <Link to="/admin/calendar" onClick={() => setMobileOpen(false)}>
+                        <Shield size={14} />
+                        Admin
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
                     <Link to="/portal" onClick={() => setMobileOpen(false)}>
                       <LayoutDashboard size={14} />
