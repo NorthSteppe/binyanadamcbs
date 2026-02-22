@@ -13,6 +13,11 @@ interface ServicePackage {
   ideal: string;
 }
 
+export interface ServiceOffer {
+  name: string;
+  slug: string;
+}
+
 interface ServicePageLayoutProps {
   title: string;
   subtitle: string;
@@ -21,7 +26,8 @@ interface ServicePageLayoutProps {
   accentColorClass: string;
   textOnBgClass: string;
   heroImage?: string;
-  services: string[];
+  basePath: string;
+  services: (string | ServiceOffer)[];
   packages: ServicePackage[];
   ctaText?: string;
   children?: ReactNode;
@@ -35,11 +41,17 @@ const ServicePageLayout = ({
   accentColorClass,
   textOnBgClass,
   heroImage,
+  basePath,
   services,
   packages,
   ctaText = "Book a Consultation",
 }: ServicePageLayoutProps) => {
   const { t } = useLanguage();
+
+  const getServiceName = (service: string | ServiceOffer) =>
+    typeof service === "string" ? service : service.name;
+  const getServiceLink = (service: string | ServiceOffer) =>
+    typeof service === "string" ? "#" : `${basePath}/${service.slug}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,15 +89,19 @@ const ServicePageLayout = ({
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((service, i) => (
               <motion.div
-                key={service}
+                key={getServiceName(service)}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
-                className="rounded-2xl p-6 border border-border/50 bg-card"
               >
-                <div className={`w-2.5 h-2.5 rounded-full mb-3 ${accentColorClass}`} />
-                <p className="text-sm font-medium text-card-foreground">{service}</p>
+                <Link
+                  to={getServiceLink(service)}
+                  className="rounded-2xl p-6 border border-border/50 bg-card flex items-start gap-3 hover:border-primary/30 hover:shadow-sm transition-all block"
+                >
+                  <div className={`w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0 ${accentColorClass}`} />
+                  <p className="text-sm font-medium text-card-foreground">{getServiceName(service)}</p>
+                </Link>
               </motion.div>
             ))}
           </div>
