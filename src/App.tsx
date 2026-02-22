@@ -11,6 +11,7 @@ import Therapy from "./pages/Therapy";
 import Families from "./pages/Families";
 import Organisations from "./pages/Organisations";
 import Supervision from "./pages/Supervision";
+import OfferDetail from "./pages/OfferDetail";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/families" element={<Families />} />
             <Route path="/organisations" element={<Organisations />} />
             <Route path="/supervision" element={<Supervision />} />
+            <Route path="/:serviceArea/:offerSlug" element={<OfferDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

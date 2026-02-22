@@ -14,7 +14,8 @@ const Supervision = () => {
       accentColorClass="bg-supervision"
       textOnBgClass="text-supervision-foreground"
       heroImage={supervisionHero}
-      services={t.supervision.services as unknown as string[]}
+      basePath="/supervision"
+      services={t.supervision.services as unknown as any[]}
       packages={t.supervision.packages as unknown as { name: string; description: string; includes: string[]; ideal: string }[]}
       ctaText={t.supervision.ctaText}
     />

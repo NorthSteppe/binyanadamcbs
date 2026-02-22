@@ -14,7 +14,8 @@ const Organisations = () => {
       accentColorClass="bg-business"
       textOnBgClass="text-business-foreground"
       heroImage={organisationsHero}
-      services={t.organisations.services as unknown as string[]}
+      basePath="/organisations"
+      services={t.organisations.services as unknown as any[]}
       packages={t.organisations.packages as unknown as { name: string; description: string; includes: string[]; ideal: string }[]}
       ctaText={t.organisations.ctaText}
     />

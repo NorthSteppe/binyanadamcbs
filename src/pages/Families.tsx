@@ -14,7 +14,8 @@ const Families = () => {
       accentColorClass="bg-family"
       textOnBgClass="text-family-foreground"
       heroImage={familyHero}
-      services={t.families.services as unknown as string[]}
+      basePath="/families"
+      services={t.families.services as unknown as any[]}
       packages={t.families.packages as unknown as { name: string; description: string; includes: string[]; ideal: string }[]}
       ctaText={t.families.ctaText}
     />

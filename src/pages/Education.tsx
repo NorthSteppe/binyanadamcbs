@@ -14,7 +14,8 @@ const Education = () => {
       accentColorClass="bg-education"
       textOnBgClass="text-education-foreground"
       heroImage={educationHero}
-      services={t.education.services as unknown as string[]}
+      basePath="/education"
+      services={t.education.services as unknown as any[]}
       packages={t.education.packages as unknown as { name: string; description: string; includes: string[]; ideal: string }[]}
       ctaText={t.education.ctaText}
     />

@@ -14,7 +14,8 @@ const Therapy = () => {
       accentColorClass="bg-therapy"
       textOnBgClass="text-therapy-foreground"
       heroImage={therapyHero}
-      services={t.therapy.services as unknown as string[]}
+      basePath="/therapy"
+      services={t.therapy.services as unknown as any[]}
       packages={t.therapy.packages as unknown as { name: string; description: string; includes: string[]; ideal: string }[]}
       ctaText={t.therapy.ctaText}
     />
