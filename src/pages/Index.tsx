@@ -58,7 +58,7 @@ const Index = () => {
                   <img
 
                     alt="A caring professional supporting a child in a warm, bright setting"
-                    className="w-full h-auto object-cover aspect-square" src="https://photos.fife.usercontent.google.com/pw/AP1GczN5CiTAxR_7dUBQXNtFBmRfINgRidtuxY922zaubXKLaYadJuyO08AB=w683-h911-s-no-gm?authuser=0" />
+                    className="w-full h-auto object-cover aspect-square" src="/lovable-uploads/e9e3cfd8-13a3-4fe0-b61e-fe115682b95d.jpg" />
 
                 </div>
                 <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-6 shadow-lg border border-border/50 max-w-xs">
