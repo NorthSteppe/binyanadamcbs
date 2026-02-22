@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, LogIn, UserPlus } from "lucide-react";
@@ -9,10 +10,17 @@ import heroLanding from "@/assets/hero-landing.jpg";
 
 const Index = () => {
   const { t } = useLanguage();
+  const [showBigLogo, setShowBigLogo] = useState(true);
+
+  useEffect(() => {
+    const onScroll = () => setShowBigLogo(window.scrollY <= 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <Header hidelogo={showBigLogo} />
 
       <section className="flex-1 flex items-center pt-24">
         <div className="container py-24 md:py-32">
@@ -22,6 +30,14 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}>
 
+              <motion.img
+                src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
+                alt="Binyan"
+                className="h-24 md:h-32 mb-6"
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: showBigLogo ? 1 : 0, y: showBigLogo ? 0 : -20 }}
+                transition={{ duration: 0.3 }}
+              />
               <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
                 {t.landing.title}
               </h1>
