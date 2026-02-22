@@ -28,6 +28,7 @@ import Chat from "./pages/portal/Chat";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import ClientManagement from "./pages/admin/ClientManagement";
 import ClientDetail from "./pages/admin/ClientDetail";
+import TeamRequests from "./pages/admin/TeamRequests";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
               <Route path="/admin/clients" element={<AdminRoute><ClientManagement /></AdminRoute>} />
               <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
+              <Route path="/admin/team-requests" element={<AdminRoute><TeamRequests /></AdminRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
