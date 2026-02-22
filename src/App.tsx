@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Education from "./pages/Education";
@@ -24,6 +25,9 @@ import Resources from "./pages/portal/Resources";
 import Messages from "./pages/portal/Messages";
 import Booking from "./pages/portal/Booking";
 import Chat from "./pages/portal/Chat";
+import AdminCalendar from "./pages/admin/AdminCalendar";
+import ClientManagement from "./pages/admin/ClientManagement";
+import ClientDetail from "./pages/admin/ClientDetail";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +57,9 @@ const App = () => (
               <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
               <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
+              <Route path="/admin/clients" element={<AdminRoute><ClientManagement /></AdminRoute>} />
+              <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
