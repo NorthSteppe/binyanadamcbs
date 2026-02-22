@@ -37,7 +37,7 @@ const Footer = () => {
             <h4 className="text-sm font-sans font-semibold uppercase tracking-wider mb-4 text-background/50">{t.footer.contactTitle}</h4>
             <div className="flex flex-col gap-2 text-sm text-background/60">
               <span>{t.contact.location}</span>
-              <a href="mailto:info@binyancbs.co.uk" className="hover:text-background transition-colors">info@binyancbs.co.uk</a>
+              <a className="hover:text-background transition-colors" href="mailto:info@adamdayan@bacbs.com">adamdayan@bacbs.com</a>
               <Link to="/contact" className="hover:text-background transition-colors">{t.footer.links.bookConsultation}</Link>
             </div>
           </div>
@@ -47,8 +47,8 @@ const Footer = () => {
           © {new Date().getFullYear()} {t.footer.copyright}
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
+
 };
 
 export default Footer;
