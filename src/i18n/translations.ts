@@ -334,12 +334,15 @@ export const translations = {
       loading: "Logging in…",
       noAccount: "Don't have an account?",
       signUpLink: "Sign Up",
+      google: "Continue with Google",
+      or: "or",
     },
 
     // Signup page
     signup: {
       title: "Sign Up",
       subtitle: "Create your Binyan account",
+      nameLabel: "Full Name",
       emailLabel: "Email",
       passwordLabel: "Password",
       button: "Sign Up",
@@ -348,6 +351,7 @@ export const translations = {
       logInLink: "Log In",
       successTitle: "Check your email",
       successDescription: "We've sent you a confirmation link.",
+      google: "Continue with Google",
     },
 
     // Footer
@@ -1514,6 +1518,46 @@ export const translations = {
         }
       ]
     },
+
+    // Portal translations
+    portal: {
+      portal: "Portal",
+      logOut: "Log Out",
+      welcome: "Welcome back",
+      dashboardSubtitle: "Your client portal",
+      booking: "Book a Session",
+      messages: "Messages",
+      resources: "Resource Library",
+      aiChat: "AI Assistant",
+      upcoming: "Upcoming Sessions",
+      noSessions: "No upcoming sessions. Book one to get started.",
+      bookNew: "Book a Session",
+      resourceLibrary: "Resource Library",
+      resourceSubtitle: "Articles, guides, and materials to support your journey.",
+      noResources: "No resources available yet.",
+      messagesTitle: "Messages",
+      messagesSubtitle: "Communicate securely with your practitioner.",
+      noMessages: "No messages yet. Start a conversation.",
+      typeMessage: "Type a message...",
+      bookSession: "Book a Session",
+      bookSubtitle: "Select a time that works for you.",
+      sessionType: "Session Type",
+      selectType: "Select type",
+      date: "Date",
+      time: "Time",
+      duration: "Duration",
+      notes: "Notes (optional)",
+      notesPlaceholder: "Anything you'd like to discuss...",
+      confirmBooking: "Confirm Booking",
+      bookingSuccess: "Session booked!",
+      bookingConfirmed: "Session Booked",
+      bookingConfirmedText: "We'll confirm your appointment shortly.",
+      bookAnother: "Book Another",
+      aiAssistant: "AI Assistant",
+      aiSubtitle: "Ask questions about our services, behavioural approaches, or general guidance.",
+      aiWelcome: "Hi! I'm Binyan's AI assistant. How can I help you today?",
+      askAnything: "Ask anything...",
+    },
   },
 
   he: {
@@ -1849,12 +1893,15 @@ export const translations = {
       loading: "מתחבר…",
       noAccount: "אין לך חשבון?",
       signUpLink: "הרשמה",
+      google: "המשך עם Google",
+      or: "או",
     },
 
     // Signup page
     signup: {
       title: "הרשמה",
       subtitle: "יצירת חשבון בניין",
+      nameLabel: "שם מלא",
       emailLabel: "אימייל",
       passwordLabel: "סיסמה",
       button: "הרשמה",
@@ -1863,6 +1910,7 @@ export const translations = {
       logInLink: "התחברות",
       successTitle: "בדקו את האימייל",
       successDescription: "שלחנו לכם קישור לאישור.",
+      google: "המשך עם Google",
     },
 
     // Footer
@@ -1932,6 +1980,46 @@ export const translations = {
         { slug: "practitioner-development", title: "מסלולי פיתוח מטפלים", summary: "תוכניות פיתוח מובנות המנחות מטפלים ממיומנויות בסיסיות לפרקטיקה מתקדמת.", description: ["פיתוח מקצועי בניתוח התנהגות הוא מסע.", "אנחנו מעצבים תוכניות פיתוח אישיות הכוללות הנחיה, הכשרה וחונכות."], keyPoints: ["פיתוח מובנה ואישי", "מיושר עם סטנדרטים מקצועיים", "משלב הנחיה, הכשרה וחונכות"], whoIsThisFor: ["מטפלים בתחילת הקריירה", "מקצוענים באמצע הקריירה המחפשים התקדמות"], outcomes: ["תוכנית פיתוח מותאמת אישית", "ביטחון וזהות מקצועיים"] },
         { slug: "reflective-practice", title: "קבוצות פרקטיקה רפלקטיבית", summary: "מפגשים קבוצתיים מונחים המטפחים למידת עמיתים, רפלקציה וצמיחה מקצועית משותפת.", description: ["פרקטיקה רפלקטיבית חיונית לשמירה על איכות ולמניעת שחיקה.", "הקבוצות שלנו מספקות מרחב מובנה ומונחה ללמידת עמיתים ורפלקציה."], keyPoints: ["מסגרת הנחיה מובנית", "למידה ותמיכת עמיתים", "מונע בידוד ושחיקה"], whoIsThisFor: ["צוותי מטפלים בשירותי התנהגות", "מטפלים מבודדים המחפשים חיבור עמיתים"], outcomes: ["מיומנויות פרקטיקה רפלקטיבית משופרות", "הפחתת בידוד מקצועי ושחיקה"] }
       ]
+    },
+
+    // Portal translations
+    portal: {
+      portal: "פורטל",
+      logOut: "התנתק",
+      welcome: "ברוך שובך",
+      dashboardSubtitle: "הפורטל שלך",
+      booking: "קביעת פגישה",
+      messages: "הודעות",
+      resources: "ספריית משאבים",
+      aiChat: "עוזר AI",
+      upcoming: "פגישות קרובות",
+      noSessions: "אין פגישות קרובות. קבע אחת כדי להתחיל.",
+      bookNew: "קביעת פגישה",
+      resourceLibrary: "ספריית משאבים",
+      resourceSubtitle: "מאמרים, מדריכים וחומרים לתמיכה במסע שלך.",
+      noResources: "עדיין אין משאבים זמינים.",
+      messagesTitle: "הודעות",
+      messagesSubtitle: "תקשורת מאובטחת עם המטפל שלך.",
+      noMessages: "אין הודעות עדיין. התחל שיחה.",
+      typeMessage: "כתוב הודעה...",
+      bookSession: "קביעת פגישה",
+      bookSubtitle: "בחר זמן שמתאים לך.",
+      sessionType: "סוג פגישה",
+      selectType: "בחר סוג",
+      date: "תאריך",
+      time: "שעה",
+      duration: "משך",
+      notes: "הערות (אופציונלי)",
+      notesPlaceholder: "משהו שתרצה לדון בו...",
+      confirmBooking: "אישור הזמנה",
+      bookingSuccess: "הפגישה נקבעה!",
+      bookingConfirmed: "הפגישה נקבעה",
+      bookingConfirmedText: "נאשר את הפגישה בהקדם.",
+      bookAnother: "קבע פגישה נוספת",
+      aiAssistant: "עוזר AI",
+      aiSubtitle: "שאל שאלות על השירותים שלנו, גישות התנהגותיות או הדרכה כללית.",
+      aiWelcome: "שלום! אני העוזר של בניין. איך אוכל לעזור לך?",
+      askAnything: "שאל כל דבר...",
     },
   },
 } as const;
