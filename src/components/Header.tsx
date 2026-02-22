@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Globe, LogOut, LayoutDashboard, Shield } from "lucide-react";
+import { Menu, X, Globe, LogOut, LayoutDashboard, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,19 +65,29 @@ const Header = () => {
           {user ? (
             <>
               {isAdmin && (
-                <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
-                  <Link to="/admin/calendar">
-                    <Shield size={14} />
-                    Admin
+                <>
+                  <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
+                    <Link to="/admin/calendar">
+                      <Shield size={14} />
+                      Admin
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
+                    <Link to="/admin/team-requests">
+                      <Users size={14} />
+                      Requests
+                    </Link>
+                  </Button>
+                </>
+              )}
+              {!isAdmin && (
+                <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
+                  <Link to="/portal">
+                    <LayoutDashboard size={14} />
+                    {portalT.portal || "Portal"}
                   </Link>
                 </Button>
               )}
-              <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
-                <Link to="/portal">
-                  <LayoutDashboard size={14} />
-                  {portalT.portal || "Portal"}
-                </Link>
-              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -137,19 +147,29 @@ const Header = () => {
               {user ? (
                 <>
                   {isAdmin && (
-                    <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
-                      <Link to="/admin/calendar" onClick={() => setMobileOpen(false)}>
-                        <Shield size={14} />
-                        Admin
+                    <>
+                      <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
+                        <Link to="/admin/calendar" onClick={() => setMobileOpen(false)}>
+                          <Shield size={14} />
+                          Admin
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground">
+                        <Link to="/admin/team-requests" onClick={() => setMobileOpen(false)}>
+                          <Users size={14} />
+                          Requests
+                        </Link>
+                      </Button>
+                    </>
+                  )}
+                  {!isAdmin && (
+                    <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
+                      <Link to="/portal" onClick={() => setMobileOpen(false)}>
+                        <LayoutDashboard size={14} />
+                        {portalT.portal || "Portal"}
                       </Link>
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
-                    <Link to="/portal" onClick={() => setMobileOpen(false)}>
-                      <LayoutDashboard size={14} />
-                      {portalT.portal || "Portal"}
-                    </Link>
-                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => { signOut(); setMobileOpen(false); }} className="rounded-full gap-2">
                     <LogOut size={14} />
                     {portalT.logOut || "Log Out"}

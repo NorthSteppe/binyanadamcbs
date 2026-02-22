@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [accountType, setAccountType] = useState<"client" | "team">("client");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -32,7 +34,14 @@ const Signup = () => {
     if (error) {
       toast({ title: t.signup.title, description: error.message, variant: "destructive" });
     } else {
-      toast({ title: t.signup.successTitle, description: t.signup.successDescription });
+      // If team signup, insert a team request
+      if (accountType === "team") {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from("team_requests").insert({ user_id: session.user.id });
+        }
+      }
+      toast({ title: t.signup.successTitle, description: accountType === "team" ? "Account created. Your team access request is pending admin approval." : t.signup.successDescription });
       navigate("/login");
     }
   };
@@ -85,6 +94,22 @@ const Signup = () => {
               <div className="space-y-2">
                 <Label htmlFor="fullName">{(t as any).signup?.nameLabel || "Full Name"}</Label>
                 <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-xl" />
+              </div>
+              <div className="space-y-3">
+                <Label>I am signing up as</Label>
+                <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team")} className="flex gap-4">
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="client" id="role-client" />
+                    <Label htmlFor="role-client" className="cursor-pointer font-normal">Client</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="team" id="role-team" />
+                    <Label htmlFor="role-team" className="cursor-pointer font-normal">Team Member</Label>
+                  </div>
+                </RadioGroup>
+                {accountType === "team" && (
+                  <p className="text-xs text-muted-foreground">Team access requires admin approval after signup.</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">{t.signup.emailLabel}</Label>
