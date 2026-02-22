@@ -30,14 +30,27 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}>
 
-              <motion.img
-                src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
-                alt="Binyan"
-                className="h-24 md:h-32 mb-6"
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: showBigLogo ? 1 : 0, y: showBigLogo ? 0 : -20 }}
-                transition={{ duration: 0.3 }}
-              />
+              <div className="mb-8">
+                <motion.img
+                  src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
+                  alt="Binyan"
+                  className="h-24 md:h-32 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+                  initial={{ opacity: 1, y: 0 }}
+                  animate={{
+                    opacity: showBigLogo ? 1 : 0,
+                    y: showBigLogo ? [0, -6, 0] : -20,
+                  }}
+                  transition={showBigLogo ? { y: { duration: 3, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 0.3 } } : { duration: 0.3 }}
+                />
+                <motion.div
+                  className="mx-auto mt-2 h-3 w-20 md:w-28 rounded-full bg-foreground/10 blur-sm"
+                  animate={{
+                    opacity: showBigLogo ? [0.4, 0.2, 0.4] : 0,
+                    scaleX: showBigLogo ? [1, 0.85, 1] : 0.5,
+                  }}
+                  transition={showBigLogo ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
+                />
+              </div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
                 {t.landing.title}
               </h1>
