@@ -1519,6 +1519,39 @@ export const translations = {
       ]
     },
 
+    // About page
+    about: {
+      tagline: "About Us",
+      title: "Binyan Clinical Behaviour Services",
+      subtitle: "Constructional Behaviour Analysis for Education, Families, Therapy, and Organisations. Grounded in ethics. Driven by evidence. Built to last.",
+      missionTitle: "Our Mission",
+      missionText: "Binyan's mission is to support individuals, families, schools, and organisations to build capability through constructional, ethical, and evidence-based behavioural practice. We aim to utilise our skills and passion for working with people to encourage and help them discover their motivation to achieve their highest potential.",
+      specialisationsTitle: "Applications of Behaviour Analysis",
+      specialisationsSubtitle: "The areas of behaviour analysis that Binyan specialises in:",
+      specialisations: [
+        "PBS in Education (Whole-School & Individual)",
+        "ACT-Informed Therapy & Intervention",
+        "Family Support & Parent Coaching",
+        "Organisational Behaviour Management (OBM)",
+        "Supervision for Behaviour Practitioners",
+      ],
+      valuesTitle: "Our Values",
+      values: [
+        { title: "Constructional", description: "We build capability rather than suppress behaviour. Every intervention adds to a person's repertoire." },
+        { title: "Ethical", description: "Dignity, consent, and respect are non-negotiable in everything we do." },
+        { title: "Evidence-Based", description: "Our practice is grounded in the science of behaviour analysis and continuously evaluated." },
+        { title: "Collaborative", description: "We work with people, not on them. Partnership is at the heart of lasting change." },
+      ],
+      teamTitle: "Meet the Team",
+      teamSubtitle: "Dedicated professionals committed to building capability through behavioural science.",
+      team: [
+        { name: "Adam Dayan", role: "Director & Clinical Behaviour Analyst", bio: "MSc Applied Behaviour Analysis, UKBA (Cert). Over 15 years' experience in education, therapy, and organisational behaviour.", initials: "AD" },
+      ],
+      ctaTitle: "Let's Start a Conversation",
+      ctaText: "Whether you're a school, family, organisation, or practitioner — we're here to help build capability.",
+      ctaButton: "Book a Consultation",
+    },
+
     // Portal translations
     portal: {
       portal: "Portal",
@@ -2020,6 +2053,39 @@ export const translations = {
       aiSubtitle: "שאל שאלות על השירותים שלנו, גישות התנהגותיות או הדרכה כללית.",
       aiWelcome: "שלום! אני העוזר של בניין. איך אוכל לעזור לך?",
       askAnything: "שאל כל דבר...",
+    },
+
+    // About page
+    about: {
+      tagline: "אודותינו",
+      title: "בניין — שירותי התנהגות קליניים",
+      subtitle: "ניתוח התנהגות קונסטרוקציוני לחינוך, משפחות, טיפול וארגונים. מבוסס אתיקה. מונע על ידי ראיות. בנוי להחזיק מעמד.",
+      missionTitle: "המשימה שלנו",
+      missionText: "המשימה של בניין היא לתמוך באנשים, משפחות, בתי ספר וארגונים לבנות יכולת באמצעות פרקטיקה התנהגותית קונסטרוקציונית, אתית ומבוססת ראיות. אנו שואפים לנצל את הכישורים והתשוקה שלנו לעבודה עם אנשים כדי לעודד ולעזור להם לגלות את המוטיבציה שלהם להשיג את הפוטנציאל הגבוה ביותר שלהם.",
+      specialisationsTitle: "יישומי ניתוח התנהגות",
+      specialisationsSubtitle: "תחומי ניתוח ההתנהגות שבניין מתמחה בהם:",
+      specialisations: [
+        "PBS בחינוך (כלל בית-ספרי ואישי)",
+        "טיפול והתערבות מבוססי ACT",
+        "תמיכה משפחתית והדרכת הורים",
+        "ניהול התנהגות ארגונית (OBM)",
+        "הנחיה למקצוענים בתחום ההתנהגות",
+      ],
+      valuesTitle: "הערכים שלנו",
+      values: [
+        { title: "קונסטרוקציוני", description: "אנחנו בונים יכולת במקום לדכא התנהגות. כל התערבות מוסיפה לרפרטואר של האדם." },
+        { title: "אתי", description: "כבוד, הסכמה וכבוד הם בלתי ניתנים למשא ומתן בכל מה שאנחנו עושים." },
+        { title: "מבוסס ראיות", description: "הפרקטיקה שלנו מבוססת על מדע ניתוח ההתנהגות ומוערכת באופן מתמיד." },
+        { title: "שיתופי", description: "אנחנו עובדים עם אנשים, לא עליהם. שותפות היא בלב השינוי המתמשך." },
+      ],
+      teamTitle: "הכירו את הצוות",
+      teamSubtitle: "מקצוענים מסורים המחויבים לבניית יכולת באמצעות מדע ההתנהגות.",
+      team: [
+        { name: "אדם דיין", role: "מנהל ומנתח התנהגות קליני", bio: "MSc ניתוח התנהגות יישומי, UKBA (Cert). מעל 15 שנות ניסיון בחינוך, טיפול והתנהגות ארגונית.", initials: "אד" },
+      ],
+      ctaTitle: "בואו נתחיל שיחה",
+      ctaText: "בין אם אתם בית ספר, משפחה, ארגון או מטפל — אנחנו כאן לעזור לבנות יכולת.",
+      ctaButton: "קביעת ייעוץ",
     },
   },
 } as const;

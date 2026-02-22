@@ -15,6 +15,7 @@ import Families from "./pages/Families";
 import Organisations from "./pages/Organisations";
 import Supervision from "./pages/Supervision";
 import OfferDetail from "./pages/OfferDetail";
+import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/organisations" element={<Organisations />} />
               <Route path="/supervision" element={<Supervision />} />
               <Route path="/:serviceArea/:offerSlug" element={<OfferDetail />} />
+              <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />

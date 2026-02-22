@@ -25,7 +25,8 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   { label: t.nav.therapy, path: "/therapy" },
   { label: t.nav.families, path: "/families" },
   { label: t.nav.organisations, path: "/organisations" },
-  { label: t.nav.supervision, path: "/supervision" }];
+  { label: t.nav.supervision, path: "/supervision" },
+  { label: (t as any).about?.tagline || "About Us", path: "/about" }];
 
 
   const portalT = (t as any).portal || {};
