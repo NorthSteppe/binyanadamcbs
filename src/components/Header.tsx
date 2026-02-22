@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Globe, LogOut, LayoutDashboard, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,16 @@ import logo from "@/assets/binyan-logo.png";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { language, setLanguage, t } = useLanguage();
   const { user, isAdmin, signOut } = useAuth();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const navLinks = [
   { label: t.nav.services, path: "/services" },
@@ -28,10 +35,10 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50">
-      <div className="container flex items-center justify-between h-16 md:h-20">
+    <header className={`fixed top-0 left-0 right-0 z-50 border-b border-border/30 transition-all duration-300 ${scrolled ? "bg-background/70 backdrop-blur-xl backdrop-saturate-150 shadow-sm" : "bg-background/40 backdrop-blur-md"}`}>
+      <div className={`container flex items-center justify-between transition-all duration-300 ${scrolled ? "h-14 md:h-16" : "h-20 md:h-24"}`}>
         <Link to="/" className="flex items-center gap-3">
-          <img alt="Binyan Clinical Behaviour Services" className="h-10 md:h-12" src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" />
+          <img alt="Binyan Clinical Behaviour Services" className={`transition-all duration-300 ${scrolled ? "h-9 md:h-10" : "h-14 md:h-16"}`} src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" />
         </Link>
 
         {/* Desktop nav */}

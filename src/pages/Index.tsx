@@ -14,7 +14,7 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <section className="flex-1 flex items-center pt-20">
+      <section className="flex-1 flex items-center pt-24">
         <div className="container py-24 md:py-32">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
