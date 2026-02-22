@@ -57,8 +57,8 @@ const Index = () => {
                 <div className="rounded-3xl overflow-hidden shadow-2xl">
                   <img
 
-                    alt="A caring professional supporting a child in a warm, bright setting"
-                    className="w-full h-auto object-cover aspect-square" src="/lovable-uploads/e9e3cfd8-13a3-4fe0-b61e-fe115682b95d.jpg" />
+                    alt="A professional guiding a child in a hands-on learning activity"
+                    className="w-full h-auto object-cover aspect-square" src="/lovable-uploads/20251210_082121.jpg" />
 
                 </div>
                 <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-6 shadow-lg border border-border/50 max-w-xs">
