@@ -20,8 +20,8 @@ const Index = () => {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
+              transition={{ duration: 0.8 }}>
+
               <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
                 {t.landing.title}
               </h1>
@@ -51,15 +51,15 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="hidden lg:block"
-            >
+              className="hidden lg:block">
+
               <div className="relative">
                 <div className="rounded-3xl overflow-hidden shadow-2xl">
                   <img
-                    src={heroLanding}
+
                     alt="A caring professional supporting a child in a warm, bright setting"
-                    className="w-full h-auto object-cover aspect-square"
-                  />
+                    className="w-full h-auto object-cover aspect-square" src="https://photos.fife.usercontent.google.com/pw/AP1GczN5CiTAxR_7dUBQXNtFBmRfINgRidtuxY922zaubXKLaYadJuyO08AB=w683-h911-s-no-gm?authuser=0" />
+
                 </div>
                 <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-6 shadow-lg border border-border/50 max-w-xs">
                   <blockquote className="text-sm text-foreground italic leading-relaxed mb-2">
@@ -74,8 +74,8 @@ const Index = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;
