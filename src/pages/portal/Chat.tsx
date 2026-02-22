@@ -4,6 +4,7 @@ import { Bot, Send, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,6 +15,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
 const Chat = () => {
   const { t } = useLanguage();
+  const { session } = useAuth();
   const portalT = (t as any).portal || {};
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -25,7 +27,7 @@ const Chat = () => {
   }, [messages]);
 
   const send = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !session?.access_token) return;
     const userMsg: Msg = { role: "user", content: input.trim() };
     setInput("");
     setMessages((prev) => [...prev, userMsg]);
@@ -48,7 +50,7 @@ const Chat = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
