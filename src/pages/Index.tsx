@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,10 +8,17 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   const { t } = useLanguage();
+  const [showBigLogo, setShowBigLogo] = useState(true);
+
+  useEffect(() => {
+    const onScroll = () => setShowBigLogo(window.scrollY <= 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <Header hidelogo={showBigLogo} />
 
       <section className="flex-1 flex items-center pt-24">
         <div className="container py-24 md:py-32">
@@ -20,7 +28,7 @@ const Index = () => {
                 <img
                   src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
                   alt="Binyan"
-                  className="h-24 md:h-32"
+                  className={`h-24 md:h-32 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-opacity duration-300 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
                 />
               </div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
