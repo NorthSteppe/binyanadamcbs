@@ -1545,7 +1545,8 @@ export const translations = {
       teamTitle: "Meet the Team",
       teamSubtitle: "Dedicated professionals committed to building capability through behavioural science.",
       team: [
-        { name: "Adam Dayan", role: "Director & Clinical Behaviour Analyst", bio: "MSc Applied Behaviour Analysis, UKBA (Cert). Over 15 years' experience in education, therapy, and organisational behaviour.", initials: "AD" },
+        { name: "Adam Dayan", role: "Director & Clinical Behaviour Analyst", bio: "MSc Applied Behaviour Analysis, UKBA (Cert). Over 15 years' experience in education, therapy, and organisational behaviour.", initials: "AD", slug: "adam-dayan" },
+        { name: "Brionny Pearson", role: "Therapist & Educator", bio: "QTS-qualified teacher pursuing her Masters in ABA at Bangor University. An exceptional educator and therapist bridging classroom and clinical practice.", initials: "BP", slug: "brionny-pearson" },
       ],
       ctaTitle: "Let's Start a Conversation",
       ctaText: "Whether you're a school, family, organisation, or practitioner — we're here to help build capability.",
@@ -2081,7 +2082,8 @@ export const translations = {
       teamTitle: "הכירו את הצוות",
       teamSubtitle: "מקצוענים מסורים המחויבים לבניית יכולת באמצעות מדע ההתנהגות.",
       team: [
-        { name: "אדם דיין", role: "מנהל ומנתח התנהגות קליני", bio: "MSc ניתוח התנהגות יישומי, UKBA (Cert). מעל 15 שנות ניסיון בחינוך, טיפול והתנהגות ארגונית.", initials: "אד" },
+        { name: "אדם דיין", role: "מנהל ומנתח התנהגות קליני", bio: "MSc ניתוח התנהגות יישומי, UKBA (Cert). מעל 15 שנות ניסיון בחינוך, טיפול והתנהגות ארגונית.", initials: "אד", slug: "adam-dayan" },
+        { name: "בריוני פירסון", role: "מטפלת ומחנכת", bio: "מורה מוסמכת (QTS) הלומדת תואר שני ב-ABA באוניברסיטת בנגור. מחנכת ומטפלת מצטיינת המגשרת בין הכיתה לפרקטיקה הקלינית.", initials: "בפ", slug: "brionny-pearson" },
       ],
       ctaTitle: "בואו נתחיל שיחה",
       ctaText: "בין אם אתם בית ספר, משפחה, ארגון או מטפל — אנחנו כאן לעזור לבנות יכולת.",

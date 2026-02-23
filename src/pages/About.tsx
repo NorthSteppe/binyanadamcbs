@@ -32,6 +32,7 @@ const About = () => {
     role: string;
     bio: string;
     initials: string;
+    slug?: string;
   }>;
 
   const values = about.values as Array<{ title: string; description: string }>;
@@ -198,24 +199,34 @@ const About = () => {
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {team.map((member, i) => (
-              <motion.div
-                key={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i + 1}
-                className="group text-center p-8 rounded-3xl bg-card border border-border/50 shadow-sm hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 text-2xl font-bold text-primary group-hover:bg-primary/20 transition-colors">
-                  {member.initials}
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-1">{member.name}</h3>
-                <p className="text-sm text-primary font-medium mb-3">{member.role}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
-              </motion.div>
-            ))}
+            {team.map((member, i) => {
+              const cardContent = (
+                <motion.div
+                  key={i}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={fadeUp}
+                  custom={i + 1}
+                  className="group text-center p-8 rounded-3xl bg-card border border-border/50 shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                >
+                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 text-2xl font-bold text-primary group-hover:bg-primary/20 transition-colors">
+                    {member.initials}
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-1">{member.name}</h3>
+                  <p className="text-sm text-primary font-medium mb-3">{member.role}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
+                </motion.div>
+              );
+
+              return member.slug ? (
+                <Link key={i} to={`/team/${member.slug}`} className="no-underline">
+                  {cardContent}
+                </Link>
+              ) : (
+                cardContent
+              );
+            })}
           </div>
         </div>
       </section>
