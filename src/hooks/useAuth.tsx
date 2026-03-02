@@ -8,6 +8,8 @@ interface AuthContextType {
   profile: { full_name: string; avatar_url: string | null } | null;
   roles: string[];
   isAdmin: boolean;
+  isTeamMember: boolean;
+  isStaff: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -18,6 +20,8 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   roles: [],
   isAdmin: false,
+  isTeamMember: false,
+  isStaff: false,
   loading: true,
   signOut: async () => {},
 });
@@ -79,7 +83,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, roles, isAdmin: roles.includes("admin"), loading, signOut }}>
+    <AuthContext.Provider value={{
+      session, user, profile, roles,
+      isAdmin: roles.includes("admin"),
+      isTeamMember: roles.includes("team_member"),
+      isStaff: roles.includes("admin") || roles.includes("team_member"),
+      loading, signOut
+    }}>
       {children}
     </AuthContext.Provider>
   );

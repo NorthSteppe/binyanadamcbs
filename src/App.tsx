@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/i18n/LanguageContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
+import StaffRoute from "@/components/StaffRoute";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Education from "./pages/Education";
@@ -35,6 +36,9 @@ import TeamRequests from "./pages/admin/TeamRequests";
 import HeroImageManager from "./pages/admin/HeroImageManager";
 import SiteContentManager from "./pages/admin/SiteContentManager";
 import TeamMemberManager from "./pages/admin/TeamMemberManager";
+import ServiceOptionsManager from "./pages/admin/ServiceOptionsManager";
+import ClientAssignments from "./pages/admin/ClientAssignments";
+import TodoManager from "./pages/admin/TodoManager";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +71,7 @@ const App = () => (
               <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
               <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              {/* Admin-only routes */}
               <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
               <Route path="/admin/clients" element={<AdminRoute><ClientManagement /></AdminRoute>} />
               <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
@@ -74,6 +79,11 @@ const App = () => (
               <Route path="/admin/hero-images" element={<AdminRoute><HeroImageManager /></AdminRoute>} />
               <Route path="/admin/site-content" element={<AdminRoute><SiteContentManager /></AdminRoute>} />
               <Route path="/admin/team-members" element={<AdminRoute><TeamMemberManager /></AdminRoute>} />
+              <Route path="/admin/service-options" element={<AdminRoute><ServiceOptionsManager /></AdminRoute>} />
+              <Route path="/admin/assignments" element={<AdminRoute><ClientAssignments /></AdminRoute>} />
+              {/* Staff routes (admin + team members) */}
+              <Route path="/staff/todos" element={<StaffRoute><TodoManager /></StaffRoute>} />
+              <Route path="/staff/resources" element={<StaffRoute><Resources /></StaffRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

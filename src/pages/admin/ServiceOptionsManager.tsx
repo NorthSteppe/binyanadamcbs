@@ -1,0 +1,109 @@
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Plus, Trash2, Save, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
+interface ServiceOption {
+  id: string;
+  name: string;
+  description: string;
+  duration_minutes: number;
+  is_active: boolean;
+  display_order: number;
+}
+
+const ServiceOptionsManager = () => {
+  const { toast } = useToast();
+  const [services, setServices] = useState<ServiceOption[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetch = async () => {
+    const { data } = await supabase.from("service_options").select("*").order("display_order");
+    if (data) setServices(data as ServiceOption[]);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetch(); }, []);
+
+  const addService = async () => {
+    const { error } = await supabase.from("service_options").insert({ name: "New Service", description: "", duration_minutes: 60, display_order: services.length });
+    if (!error) { fetch(); toast({ title: "Service added" }); }
+  };
+
+  const updateService = async (svc: ServiceOption) => {
+    const { error } = await supabase.from("service_options").update({
+      name: svc.name, description: svc.description, duration_minutes: svc.duration_minutes,
+      is_active: svc.is_active, display_order: svc.display_order,
+    }).eq("id", svc.id);
+    if (!error) toast({ title: "Updated" });
+    else toast({ title: "Error", description: error.message, variant: "destructive" });
+  };
+
+  const deleteService = async (id: string) => {
+    await supabase.from("service_options").delete().eq("id", id);
+    fetch();
+    toast({ title: "Deleted" });
+  };
+
+  const update = (id: string, field: string, value: any) => {
+    setServices(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <section className="pt-28 pb-20">
+        <div className="container max-w-3xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="text-3xl mb-2 flex items-center gap-3"><Settings size={28} className="text-primary" /> Service Options</h1>
+            <p className="text-muted-foreground mb-8">Manage booking options available to clients.</p>
+          </motion.div>
+
+          <Button onClick={addService} className="rounded-full gap-2 mb-6"><Plus size={16} /> Add Service</Button>
+
+          {loading ? <p className="text-muted-foreground">Loading...</p> : (
+            <div className="space-y-4">
+              {services.map((svc) => (
+                <div key={svc.id} className="bg-card rounded-xl border border-border/50 p-5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Input value={svc.name} onChange={(e) => update(svc.id, "name", e.target.value)} className="font-semibold" />
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs whitespace-nowrap">Active</Label>
+                      <Switch checked={svc.is_active} onCheckedChange={(v) => update(svc.id, "is_active", v)} />
+                    </div>
+                  </div>
+                  <Textarea value={svc.description} onChange={(e) => update(svc.id, "description", e.target.value)} placeholder="Description" className="text-sm" />
+                  <div className="flex gap-3 items-end">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Duration (min)</Label>
+                      <Input type="number" value={svc.duration_minutes} onChange={(e) => update(svc.id, "duration_minutes", parseInt(e.target.value) || 60)} className="w-24" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Order</Label>
+                      <Input type="number" value={svc.display_order} onChange={(e) => update(svc.id, "display_order", parseInt(e.target.value) || 0)} className="w-20" />
+                    </div>
+                    <div className="ms-auto flex gap-2">
+                      <Button size="sm" variant="outline" className="rounded-full gap-1" onClick={() => updateService(svc)}><Save size={14} /> Save</Button>
+                      <Button size="sm" variant="destructive" className="rounded-full gap-1" onClick={() => deleteService(svc.id)}><Trash2 size={14} /></Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+      <Footer />
+    </div>
+  );
+};
+
+export default ServiceOptionsManager;
