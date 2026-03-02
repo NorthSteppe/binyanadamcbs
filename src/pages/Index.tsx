@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HeroCarousel from "@/components/HeroCarousel";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -20,24 +21,25 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header hidelogo={showBigLogo} />
 
-      <section className="flex-1 flex items-center pt-24">
-        <div className="container py-24 md:py-32">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <section className="flex-1 flex items-center pt-20">
+        <div className="container py-16 md:py-24">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Text column */}
             <div>
-              <div className="mb-8">
+              <div className="mb-6">
                 <img
                   src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
                   alt="Binyan"
-                  className={`h-24 md:h-32 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-opacity duration-300 ${showBigLogo ? "opacity-100" : "opacity-0"}`} />
-
+                  className={`h-16 md:h-20 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-opacity duration-300 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
+                />
               </div>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl text-foreground leading-tight mb-4">
                 {t.landing.title}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-lg">
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg">
                 {t.landing.subtitle}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button size="lg" asChild className="rounded-full px-8">
                   <Link to="/services" className="inline-flex items-center gap-2">
                     {t.landing.exploreServices} <CirclePlus size={18} />
@@ -56,17 +58,12 @@ const Index = () => {
               </div>
             </div>
 
+            {/* Image carousel column */}
             <div className="hidden lg:block">
               <div className="relative">
-                <div className="rounded-3xl overflow-hidden shadow-2xl">
-                  <img
-                    alt="A professional guiding a child in a hands-on learning activity"
-                    className="w-full h-auto object-cover aspect-square"
-                    src="/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg" />
-
-                </div>
-                <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-6 shadow-lg border border-border/50 max-w-xs">
-                  <blockquote className="text-sm text-foreground italic leading-relaxed mb-2">
+                <HeroCarousel />
+                <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-5 shadow-lg border border-border/50 max-w-xs">
+                  <blockquote className="text-sm text-foreground italic leading-relaxed mb-1">
                     {t.landing.quote}
                   </blockquote>
                   <p className="text-xs text-muted-foreground font-medium">{t.landing.quoteAuthor}</p>
@@ -78,8 +75,8 @@ const Index = () => {
       </section>
 
       <Footer />
-    </div>);
-
+    </div>
+  );
 };
 
 export default Index;
