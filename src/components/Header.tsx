@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, ImageIcon, Calendar, ChevronDown } from "lucide-react";
+import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, ImageIcon, FileEdit, Calendar, ChevronDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -101,6 +101,12 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
                         Team Requests
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/site-content" className="gap-2">
+                        <FileEdit size={14} />
+                        Site Content
+                      </Link>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               }
@@ -183,6 +189,10 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
                       <Link to="/admin/team-requests" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
                         <Users size={14} />
                         Team Requests
+                      </Link>
+                      <Link to="/admin/site-content" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
+                        <FileEdit size={14} />
+                        Site Content
                       </Link>
                     </>
               }

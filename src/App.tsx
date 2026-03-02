@@ -33,6 +33,7 @@ import ClientManagement from "./pages/admin/ClientManagement";
 import ClientDetail from "./pages/admin/ClientDetail";
 import TeamRequests from "./pages/admin/TeamRequests";
 import HeroImageManager from "./pages/admin/HeroImageManager";
+import SiteContentManager from "./pages/admin/SiteContentManager";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
               <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
               <Route path="/admin/team-requests" element={<AdminRoute><TeamRequests /></AdminRoute>} />
               <Route path="/admin/hero-images" element={<AdminRoute><HeroImageManager /></AdminRoute>} />
+              <Route path="/admin/site-content" element={<AdminRoute><SiteContentManager /></AdminRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
