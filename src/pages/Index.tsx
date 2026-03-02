@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus, CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
@@ -28,8 +28,8 @@ const Index = () => {
                 <img
                   src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
                   alt="Binyan"
-                  className={`h-24 md:h-32 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-opacity duration-300 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
-                />
+                  className={`h-24 md:h-32 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-opacity duration-300 ${showBigLogo ? "opacity-100" : "opacity-0"}`} />
+
               </div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
                 {t.landing.title}
@@ -40,7 +40,7 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild className="rounded-full px-8">
                   <Link to="/services" className="inline-flex items-center gap-2">
-                    {t.landing.exploreServices} <ArrowRight size={18} />
+                    {t.landing.exploreServices} <CirclePlus size={18} />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild className="rounded-full px-8">
@@ -62,8 +62,8 @@ const Index = () => {
                   <img
                     alt="A professional guiding a child in a hands-on learning activity"
                     className="w-full h-auto object-cover aspect-square"
-                    src="/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"
-                  />
+                    src="/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg" />
+
                 </div>
                 <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-6 shadow-lg border border-border/50 max-w-xs">
                   <blockquote className="text-sm text-foreground italic leading-relaxed mb-2">
@@ -78,8 +78,8 @@ const Index = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;

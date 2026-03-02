@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Globe, LogOut, LayoutDashboard, Shield, Users } from "lucide-react";
+import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/binyan-logo.png";
 
-const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
+const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -128,7 +128,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu">
 
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileOpen ? <Waves size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>

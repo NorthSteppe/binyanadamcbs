@@ -9,8 +9,8 @@ const Footer = () => {
       <div className="container py-16">
         <div className="grid md:grid-cols-4 gap-10">
           <div className="md:col-span-2">
-            <h3 className="text-2xl mb-4">Binyan</h3>
-            <p className="text-background/60 max-w-md text-sm leading-relaxed">
+            <h3 className="text-2xl mb-4">Binyan Adam CBS</h3>
+            <p className="text-background/60 max-w-md text-sm leading-relaxed font-bold">
               {t.footer.description}
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-xs text-background/40">
@@ -23,7 +23,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-sm font-sans font-semibold uppercase tracking-wider mb-4 text-background/50">{t.footer.servicesTitle}</h4>
+            <h4 className="text-sm font-sans uppercase tracking-wider mb-4 text-background/50 font-bold">{t.footer.servicesTitle}</h4>
             <nav className="flex flex-col gap-2 text-sm">
               <Link to="/education" className="text-background/60 hover:text-background transition-colors">{t.footer.links.education}</Link>
               <Link to="/therapy" className="text-background/60 hover:text-background transition-colors">{t.footer.links.therapy}</Link>
@@ -34,7 +34,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-sm font-sans font-semibold uppercase tracking-wider mb-4 text-background/50">{t.footer.contactTitle}</h4>
+            <h4 className="text-sm font-sans uppercase tracking-wider mb-4 text-background/50 font-bold">{t.footer.contactTitle}</h4>
             <div className="flex flex-col gap-2 text-sm text-background/60">
               <span>{t.contact.location}</span>
               <a className="hover:text-background transition-colors" href="mailto:adamdayan@bacbs.com">adamdayan@bacbs.com</a>
