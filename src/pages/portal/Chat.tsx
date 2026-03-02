@@ -120,7 +120,7 @@ const Chat = () => {
               {messages.length === 0 && (
                 <div className="text-center py-16">
                   <Bot className="mx-auto text-muted-foreground/40 mb-3" size={48} />
-                  <p className="text-muted-foreground text-sm">{portalT.aiWelcome || "Hi! I'm Binyan's AI assistant. How can I help you today?"}</p>
+                  <p className="text-muted-foreground text-sm">{portalT.aiWelcome || "Hi! I'm Binyan Adam's AI assistant. How can I help you today?"}</p>
                 </div>
               )}
               {messages.map((msg, i) => (

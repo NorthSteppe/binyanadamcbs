@@ -327,7 +327,7 @@ export const translations = {
     // Login page
     login: {
       title: "Log In",
-      subtitle: "Welcome back to Binyan",
+      subtitle: "Welcome back to Binyan Adam",
       emailLabel: "Email",
       passwordLabel: "Password",
       button: "Log In",
@@ -341,7 +341,7 @@ export const translations = {
     // Signup page
     signup: {
       title: "Sign Up",
-      subtitle: "Create your Binyan account",
+      subtitle: "Create your Binyan Adam account",
       nameLabel: "Full Name",
       emailLabel: "Email",
       passwordLabel: "Password",
@@ -359,7 +359,7 @@ export const translations = {
       description: "Constructional Behaviour Services. Building capability and well-being through collaborative, ethical, and evidence-based practice.\n\n\nWe do not remove behaviour. We build capability.",
       servicesTitle: "Services",
       contactTitle: "Contact",
-      copyright: "Binyan Clinical Behaviour Services. All rights reserved.",
+      copyright: "Binyan Adam Clinical Behaviour Services. All rights reserved.",
       links: {
         education: "PBS in Education",
         therapy: "Therapy",
@@ -1522,7 +1522,7 @@ export const translations = {
     // About page
     about: {
       tagline: "About Us",
-      title: "Binyan Clinical Behaviour Services",
+      title: "Binyan Adam Clinical Behaviour Services",
       subtitle: "Constructional Behaviour Analysis for Education, Families, Therapy, and Organisations. Grounded in ethics. Driven by evidence. Built to last.",
       missionTitle: "Our Mission",
       missionText: "Binyan's mission is to support individuals, families, schools, and organisations to build capability through constructional, ethical, and evidence-based behavioural practice. We aim to utilise our skills and passion for working with people to encourage and help them discover their motivation to achieve their highest potential.",

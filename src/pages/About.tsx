@@ -70,7 +70,7 @@ const About = () => {
               <div className="rounded-3xl overflow-hidden shadow-2xl">
                 <img
                   src="/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"
-                  alt="Binyan team working with clients"
+                  alt="Binyan Adam team working with clients"
                   className="w-full h-auto object-cover aspect-[4/3]"
                 />
               </div>
