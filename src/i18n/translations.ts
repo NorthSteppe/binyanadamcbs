@@ -15,8 +15,8 @@ export const translations = {
 
     // Landing page
     landing: {
-      title: "Welcome to Binyan",
-      subtitle: "Constructional Behaviour Analysis for Education, Families, Therapy, and Organisations. Grounded in ethics. Driven by evidence. Built to last.",
+      title: "Welcome to Binyan Adam",
+      subtitle: "Constructional Behaviour Services to support individuals, organisations, and families. ",
       exploreServices: "Explore Services",
       logIn: "Log In",
       signUp: "Sign Up",
@@ -356,7 +356,7 @@ export const translations = {
 
     // Footer
     footer: {
-      description: "Clinical Behaviour Services. Building behavioural capability through constructional, ethical, and evidence-based practice. We do not remove behaviour. We build capability.",
+      description: "Constructional Behaviour Services. Building capability and well-being through collaborative, ethical, and evidence-based practice.\n\n\nWe do not remove behaviour. We build capability.",
       servicesTitle: "Services",
       contactTitle: "Contact",
       copyright: "Binyan Clinical Behaviour Services. All rights reserved.",
