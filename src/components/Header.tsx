@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, ImageIcon } from "lucide-react";
+import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, ImageIcon, Calendar, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,27 +74,36 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
           {user ?
           <>
               {isAdmin &&
-            <>
-                  <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
-                    <Link to="/admin/calendar">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="default" size="sm" className="rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
                       <Shield size={14} />
                       Admin
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
-                    <Link to="/admin/hero-images">
-                      <ImageIcon size={14} />
-                      Hero Images
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
-                    <Link to="/admin/team-requests">
-                      <Users size={14} />
-                      Requests
-                    </Link>
-                  </Button>
-                </>
-            }
+                      <ChevronDown size={12} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/calendar" className="gap-2">
+                        <Calendar size={14} />
+                        Calendar
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/hero-images" className="gap-2">
+                        <ImageIcon size={14} />
+                        Hero Images
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/team-requests" className="gap-2">
+                        <Users size={14} />
+                        Team Requests
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              }
               {!isAdmin &&
             <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
                   <Link to="/portal">
@@ -162,24 +172,18 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
             <>
                   {isAdmin &&
               <>
-                      <Button variant="outline" size="sm" asChild className="rounded-full gap-2 border-primary/30 text-primary">
-                        <Link to="/admin/calendar" onClick={() => setMobileOpen(false)}>
-                          <Shield size={14} />
-                          Admin
-                        </Link>
-                      </Button>
-                      <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground">
-                        <Link to="/admin/hero-images" onClick={() => setMobileOpen(false)}>
-                          <ImageIcon size={14} />
-                          Hero Images
-                        </Link>
-                      </Button>
-                      <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground">
-                        <Link to="/admin/team-requests" onClick={() => setMobileOpen(false)}>
-                          <Users size={14} />
-                          Requests
-                        </Link>
-                      </Button>
+                      <Link to="/admin/calendar" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-primary bg-primary/10">
+                        <Calendar size={14} />
+                        Calendar
+                      </Link>
+                      <Link to="/admin/hero-images" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
+                        <ImageIcon size={14} />
+                        Hero Images
+                      </Link>
+                      <Link to="/admin/team-requests" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
+                        <Users size={14} />
+                        Team Requests
+                      </Link>
                     </>
               }
                   {!isAdmin &&
