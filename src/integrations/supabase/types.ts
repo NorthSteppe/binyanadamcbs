@@ -56,6 +56,8 @@ export type Database = {
           image_url: string
           interval_seconds: number
           is_active: boolean
+          quote_author: string
+          quote_text: string
           updated_at: string
         }
         Insert: {
@@ -66,6 +68,8 @@ export type Database = {
           image_url: string
           interval_seconds?: number
           is_active?: boolean
+          quote_author?: string
+          quote_text?: string
           updated_at?: string
         }
         Update: {
@@ -76,6 +80,8 @@ export type Database = {
           image_url?: string
           interval_seconds?: number
           is_active?: boolean
+          quote_author?: string
+          quote_text?: string
           updated_at?: string
         }
         Relationships: []

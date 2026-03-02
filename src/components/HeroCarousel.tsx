@@ -2,11 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import { useHeroImages } from "@/hooks/useHeroImages";
 import { cn } from "@/lib/utils";
 
-const HeroCarousel = () => {
+interface HeroCarouselProps {
+  onQuoteChange?: (quote: { text: string; author: string }) => void;
+}
+
+const HeroCarousel = ({ onQuoteChange }: HeroCarouselProps) => {
   const { data: images } = useHeroImages(true);
   const [current, setCurrent] = useState(0);
 
-  const interval = images?.[0]?.interval_seconds ?? 5;
+  const interval = images?.[current]?.interval_seconds ?? 5;
 
   const next = useCallback(() => {
     if (!images || images.length <= 1) return;
@@ -18,6 +22,12 @@ const HeroCarousel = () => {
     const timer = setInterval(next, interval * 1000);
     return () => clearInterval(timer);
   }, [images, interval, next]);
+
+  useEffect(() => {
+    if (!images || images.length === 0) return;
+    const img = images[current];
+    onQuoteChange?.({ text: img.quote_text, author: img.quote_author });
+  }, [current, images, onQuoteChange]);
 
   // Fallback when no images uploaded yet
   if (!images || images.length === 0) {

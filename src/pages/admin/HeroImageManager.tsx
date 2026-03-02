@@ -16,6 +16,8 @@ interface PendingUpload {
   previewUrl: string;
   alt_text: string;
   display_order: number;
+  quote_text: string;
+  quote_author: string;
 }
 
 const HeroImageManager = () => {
@@ -39,6 +41,8 @@ const HeroImageManager = () => {
       previewUrl: URL.createObjectURL(file),
       alt_text: file.name.replace(/\.[^.]+$/, ""),
       display_order: existingPendingMax + 1 + i,
+      quote_text: "",
+      quote_author: "",
     }));
     setPendingUploads((prev) => [...prev, ...newPending]);
     if (fileRef.current) fileRef.current.value = "";
@@ -69,6 +73,8 @@ const HeroImageManager = () => {
           image_url: urlData.publicUrl,
           alt_text: pending.alt_text,
           display_order: pending.display_order,
+          quote_text: pending.quote_text,
+          quote_author: pending.quote_author,
           is_active: true,
         });
         if (insertError) throw insertError;
@@ -127,6 +133,16 @@ const HeroImageManager = () => {
                     placeholder="Alt text / description"
                     onChange={(e) => updatePending(idx, { alt_text: e.target.value })}
                   />
+                  <Input
+                    value={p.quote_text}
+                    placeholder="Quote text (shown under image)"
+                    onChange={(e) => updatePending(idx, { quote_text: e.target.value })}
+                  />
+                  <Input
+                    value={p.quote_author}
+                    placeholder="Quote author"
+                    onChange={(e) => updatePending(idx, { quote_author: e.target.value })}
+                  />
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     Display order:
                     <Input
@@ -175,6 +191,18 @@ const HeroImageManager = () => {
                     {img.alt_text || "Click to add alt text"}
                   </p>
                 )}
+                <Input
+                  className="text-xs h-7"
+                  defaultValue={img.quote_text}
+                  placeholder="Quote text"
+                  onBlur={(e) => update.mutate({ id: img.id, quote_text: e.target.value })}
+                />
+                <Input
+                  className="text-xs h-7"
+                  defaultValue={img.quote_author}
+                  placeholder="Quote author"
+                  onBlur={(e) => update.mutate({ id: img.id, quote_author: e.target.value })}
+                />
                 <label className="flex items-center gap-2 text-xs text-muted-foreground">
                   Interval (sec):
                   <Input type="number" className="w-16 h-7 text-xs" defaultValue={img.interval_seconds} min={1} max={30}
