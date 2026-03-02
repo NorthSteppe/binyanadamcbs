@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_assignments: {
+        Row: {
+          assignee_id: string
+          client_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          assignee_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          assignee_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      client_documents: {
+        Row: {
+          client_id: string
+          created_at: string
+          file_name: string
+          file_type: string
+          file_url: string
+          id: string
+          notes: string
+          uploaded_by: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          file_name: string
+          file_type?: string
+          file_url: string
+          id?: string
+          notes?: string
+          uploaded_by: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          file_name?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          notes?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       client_notes: {
         Row: {
           author_id: string
@@ -42,6 +96,42 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      client_todos: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          is_completed: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
           title?: string
           updated_at?: string
         }
@@ -167,6 +257,39 @@ export type Database = {
           file_url?: string | null
           id?: string
           title?: string
+        }
+        Relationships: []
+      }
+      service_options: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -340,7 +463,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "client"
+      app_role: "admin" | "client" | "team_member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -468,7 +591,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "client"],
+      app_role: ["admin", "client", "team_member"],
     },
   },
 } as const
