@@ -107,6 +107,12 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
                         Site Content
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/team-members" className="gap-2">
+                        <Users size={14} />
+                        Team Members
+                      </Link>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               }
@@ -193,6 +199,10 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
                       <Link to="/admin/site-content" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
                         <FileEdit size={14} />
                         Site Content
+                      </Link>
+                      <Link to="/admin/team-members" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
+                        <Users size={14} />
+                        Team Members
                       </Link>
                     </>
               }
