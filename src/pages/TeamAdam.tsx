@@ -54,7 +54,7 @@ const TeamAdam = () => {
                 Adam Dayan
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg">
-                Adam is the founder and director of Binyan Clinical Behaviour Services. With over 15 years of experience across education, therapy, and organisational settings, Adam brings a deeply constructional and ethical approach to behaviour analysis.
+                Adam is the founder and director of Binyan Adam Clinical Behaviour Services. With over 15 years of experience across education, therapy, and organisational settings, Adam brings a deeply constructional and ethical approach to behaviour analysis.
               </p>
 
               <div className="space-y-4 mb-10">

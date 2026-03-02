@@ -29,7 +29,7 @@ const Index = () => {
               <div className="mb-6">
                 <img
                   src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
-                  alt="Binyan"
+                  alt="Binyan Adam"
                   className={`h-16 md:h-20 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-opacity duration-300 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
                 />
               </div>

@@ -75,7 +75,7 @@ const TeamBrionny = () => {
                 <div className="flex items-start gap-3">
                   <Heart size={20} className="text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Therapist at Binyan</p>
+                    <p className="text-sm font-semibold text-foreground">Therapist at Binyan Adam</p>
                     <p className="text-sm text-muted-foreground">Providing person-centred, constructional support across education and clinical settings</p>
                   </div>
                 </div>
@@ -108,10 +108,10 @@ const TeamBrionny = () => {
                   Brionny's strength lies in her rare combination of teaching experience and therapeutic skill. With Qualified Teacher Status and years of hands-on classroom experience, she understands the realities of educational environments — the pressures on staff, the complexity of pupil needs, and the importance of practical, implementable strategies.
                 </p>
                 <p>
-                  Now pursuing her Masters in Applied Behaviour Analysis at Bangor University, Brionny is deepening her understanding of the science that underpins effective practice. This academic grounding, combined with her natural warmth and ability to build rapport, makes her an invaluable member of the Binyan team.
+                  Now pursuing her Masters in Applied Behaviour Analysis at Bangor University, Brionny is deepening her understanding of the science that underpins effective practice. This academic grounding, combined with her natural warmth and ability to build rapport, makes her an invaluable member of the Binyan Adam team.
                 </p>
                 <p>
-                  Whether she is delivering therapy, supporting a school team, or working alongside families, Brionny brings the same commitment to dignity, evidence, and building capability that defines the Binyan approach.
+                  Whether she is delivering therapy, supporting a school team, or working alongside families, Brionny brings the same commitment to dignity, evidence, and building capability that defines the Binyan Adam approach.
                 </p>
               </div>
             </motion.div>
