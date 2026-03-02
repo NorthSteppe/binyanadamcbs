@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { LogIn, UserPlus, CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,11 @@ import HeroCarousel from "@/components/HeroCarousel";
 const Index = () => {
   const { t } = useLanguage();
   const [showBigLogo, setShowBigLogo] = useState(true);
+  const [quote, setQuote] = useState({ text: "", author: "" });
+
+  const handleQuoteChange = useCallback((q: { text: string; author: string }) => {
+    setQuote(q);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setShowBigLogo(window.scrollY <= 60);
@@ -61,13 +66,15 @@ const Index = () => {
             {/* Image carousel column */}
             <div className="hidden lg:block">
               <div className="relative">
-                <HeroCarousel />
-                <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-5 shadow-lg border border-border/50 max-w-xs">
-                  <blockquote className="text-sm text-foreground italic leading-relaxed mb-1">
-                    {t.landing.quote}
-                  </blockquote>
-                  <p className="text-xs text-muted-foreground font-medium">{t.landing.quoteAuthor}</p>
-                </div>
+                <HeroCarousel onQuoteChange={handleQuoteChange} />
+                {(quote.text || t.landing.quote) && (
+                  <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-5 shadow-lg border border-border/50 max-w-xs">
+                    <blockquote className="text-sm text-foreground italic leading-relaxed mb-1">
+                      {quote.text || t.landing.quote}
+                    </blockquote>
+                    <p className="text-xs text-muted-foreground font-medium">{quote.author || t.landing.quoteAuthor}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

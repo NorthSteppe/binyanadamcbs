@@ -9,6 +9,8 @@ export interface HeroImage {
   display_order: number;
   is_active: boolean;
   interval_seconds: number;
+  quote_text: string;
+  quote_author: string;
   created_at: string;
   updated_at: string;
 }
