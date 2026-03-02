@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves } from "lucide-react";
+import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -78,6 +78,12 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
                     <Link to="/admin/calendar">
                       <Shield size={14} />
                       Admin
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
+                    <Link to="/admin/hero-images">
+                      <ImageIcon size={14} />
+                      Hero Images
                     </Link>
                   </Button>
                   <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
@@ -160,6 +166,12 @@ const Header = ({ hidelogo = false }: {hidelogo?: boolean;}) => {
                         <Link to="/admin/calendar" onClick={() => setMobileOpen(false)}>
                           <Shield size={14} />
                           Admin
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground">
+                        <Link to="/admin/hero-images" onClick={() => setMobileOpen(false)}>
+                          <ImageIcon size={14} />
+                          Hero Images
                         </Link>
                       </Button>
                       <Button variant="ghost" size="sm" asChild className="rounded-full gap-2 text-muted-foreground">
