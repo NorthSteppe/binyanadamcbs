@@ -7,6 +7,7 @@ const Therapy = () => {
 
   return (
     <ServicePageLayout
+      pageKey="therapy"
       title={t.therapy.title}
       subtitle={t.therapy.subtitle}
       tagline={t.therapy.tagline}

@@ -7,6 +7,7 @@ const Education = () => {
 
   return (
     <ServicePageLayout
+      pageKey="education"
       title={t.education.title}
       subtitle={t.education.subtitle}
       tagline={t.education.tagline}

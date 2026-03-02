@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { usePageContent } from "@/hooks/useSiteContent";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -26,6 +27,7 @@ interface ServicePageLayoutProps {
   accentColorClass: string;
   textOnBgClass: string;
   heroImage?: string;
+  pageKey: string;
   basePath: string;
   services: (string | ServiceOffer)[];
   packages: ServicePackage[];
@@ -41,12 +43,15 @@ const ServicePageLayout = ({
   accentColorClass,
   textOnBgClass,
   heroImage,
+  pageKey,
   basePath,
   services,
   packages,
   ctaText = "Book a Consultation",
 }: ServicePageLayoutProps) => {
   const { t } = useLanguage();
+  const { data: content } = usePageContent(pageKey);
+  const displayImage = content?.image_url || heroImage;
 
   const getServiceName = (service: string | ServiceOffer) =>
     typeof service === "string" ? service : service.name;
@@ -58,9 +63,9 @@ const ServicePageLayout = ({
       <Header />
 
       <section className={`relative pt-32 pb-20 overflow-hidden ${bgColorClass}`}>
-        {heroImage && (
+        {displayImage && (
           <div className="absolute inset-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover opacity-20" />
+            <img src={displayImage} alt={content?.alt_text || ""} className="w-full h-full object-cover opacity-20" />
           </div>
         )}
         <div className="container relative z-10">
@@ -79,6 +84,12 @@ const ServicePageLayout = ({
             <p className={`text-lg md:text-xl leading-relaxed ${textOnBgClass} opacity-80 max-w-2xl`}>
               {tagline}
             </p>
+            {content?.quote_text && (
+              <blockquote className={`mt-6 border-l-4 border-current/30 pl-4 italic ${textOnBgClass} opacity-70`}>
+                <p className="text-base">{content.quote_text}</p>
+                {content.quote_author && <footer className="text-sm mt-1 not-italic">— {content.quote_author}</footer>}
+              </blockquote>
+            )}
           </motion.div>
         </div>
       </section>

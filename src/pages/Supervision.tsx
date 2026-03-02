@@ -7,6 +7,7 @@ const Supervision = () => {
 
   return (
     <ServicePageLayout
+      pageKey="supervision"
       title={t.supervision.title}
       subtitle={t.supervision.subtitle}
       tagline={t.supervision.tagline}

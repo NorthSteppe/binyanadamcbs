@@ -7,6 +7,7 @@ const Families = () => {
 
   return (
     <ServicePageLayout
+      pageKey="families"
       title={t.families.title}
       subtitle={t.families.subtitle}
       tagline={t.families.tagline}

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, GraduationCap, Heart, Building2, Users, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { usePageContent } from "@/hooks/useSiteContent";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -18,6 +19,7 @@ const fadeUp = {
 const About = () => {
   const { t } = useLanguage();
   const about = (t as any).about;
+  const { data: content } = usePageContent("about");
 
   const specialisations = [
     { icon: GraduationCap, label: about.specialisations[0] },
@@ -69,10 +71,16 @@ const About = () => {
             >
               <div className="rounded-3xl overflow-hidden shadow-2xl">
                 <img
-                  src="/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"
-                  alt="Binyan Adam team working with clients"
+                  src={content?.image_url || "/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"}
+                  alt={content?.alt_text || "Binyan Adam team working with clients"}
                   className="w-full h-auto object-cover aspect-[4/3]"
                 />
+                {content?.quote_text && (
+                  <div className="p-4 bg-card">
+                    <blockquote className="text-sm italic text-muted-foreground">{content.quote_text}</blockquote>
+                    {content.quote_author && <p className="text-xs text-muted-foreground mt-1">— {content.quote_author}</p>}
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
