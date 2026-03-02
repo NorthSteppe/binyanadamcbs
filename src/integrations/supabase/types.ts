@@ -239,6 +239,48 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          avatar_url: string | null
+          bio: string
+          created_at: string
+          display_order: number
+          id: string
+          initials: string
+          is_active: boolean
+          name: string
+          role: string
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          initials?: string
+          is_active?: boolean
+          name: string
+          role?: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          initials?: string
+          is_active?: boolean
+          name?: string
+          role?: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_requests: {
         Row: {
           created_at: string

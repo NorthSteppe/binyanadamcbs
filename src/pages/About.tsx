@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, GraduationCap, Heart, Building2, Users, BookO
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { usePageContent } from "@/hooks/useSiteContent";
+import { useTeamMembers } from "@/hooks/useTeamMembers";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -20,6 +21,7 @@ const About = () => {
   const { t } = useLanguage();
   const about = (t as any).about;
   const { data: content } = usePageContent("about");
+  const { data: teamMembers } = useTeamMembers();
 
   const specialisations = [
     { icon: GraduationCap, label: about.specialisations[0] },
@@ -28,14 +30,6 @@ const About = () => {
     { icon: Building2, label: about.specialisations[3] },
     { icon: BookOpen, label: about.specialisations[4] },
   ];
-
-  const team = about.team as Array<{
-    name: string;
-    role: string;
-    bio: string;
-    initials: string;
-    slug?: string;
-  }>;
 
   const values = about.values as Array<{ title: string; description: string }>;
 
@@ -207,10 +201,10 @@ const About = () => {
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {team.map((member, i) => {
+            {(teamMembers || []).map((member, i) => {
               const cardContent = (
                 <motion.div
-                  key={i}
+                  key={member.id}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
@@ -218,9 +212,13 @@ const About = () => {
                   custom={i + 1}
                   className="group text-center p-8 rounded-3xl bg-card border border-border/50 shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer"
                 >
-                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 text-2xl font-bold text-primary group-hover:bg-primary/20 transition-colors">
-                    {member.initials}
-                  </div>
+                  {member.avatar_url ? (
+                    <img src={member.avatar_url} alt={member.name} className="w-24 h-24 rounded-full object-cover mx-auto mb-5" />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 text-2xl font-bold text-primary group-hover:bg-primary/20 transition-colors">
+                      {member.initials}
+                    </div>
+                  )}
                   <h3 className="text-xl font-semibold text-foreground mb-1">{member.name}</h3>
                   <p className="text-sm text-primary font-medium mb-3">{member.role}</p>
                   <p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
@@ -228,11 +226,11 @@ const About = () => {
               );
 
               return member.slug ? (
-                <Link key={i} to={`/team/${member.slug}`} className="no-underline">
+                <Link key={member.id} to={`/team/${member.slug}`} className="no-underline">
                   {cardContent}
                 </Link>
               ) : (
-                cardContent
+                <div key={member.id}>{cardContent}</div>
               );
             })}
           </div>
