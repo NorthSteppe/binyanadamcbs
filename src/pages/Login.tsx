@@ -19,23 +19,34 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { user, loading: authLoading } = useAuth();
+  const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
 
-  // Redirect if already signed in
+  // Redirect if already signed in — role-based
   if (!authLoading && user) {
+    if (isAdmin) return <Navigate to="/admin" replace />;
+    if (isTeamMember) return <Navigate to="/staff" replace />;
     return <Navigate to="/portal" replace />;
   }
+
+  const getRedirectPath = async (userId: string) => {
+    const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const roles = data?.map(r => r.role) || [];
+    if (roles.includes("admin")) return "/admin";
+    if (roles.includes("team_member")) return "/staff";
+    return "/portal";
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Welcome back!" });
-      navigate("/portal");
+      const path = await getRedirectPath(data.user.id);
+      navigate(path);
     }
   };
 

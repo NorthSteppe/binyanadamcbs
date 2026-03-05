@@ -24,12 +24,17 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
+// Client portal
 import Dashboard from "./pages/portal/Dashboard";
 import Resources from "./pages/portal/Resources";
 import Messages from "./pages/portal/Messages";
 import Booking from "./pages/portal/Booking";
 import Chat from "./pages/portal/Chat";
 import Toolkit from "./pages/portal/Toolkit";
+import ToolkitACTMatrix from "./pages/portal/ToolkitACTMatrix";
+import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
+// Admin portal
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import ClientManagement from "./pages/admin/ClientManagement";
 import ClientDetail from "./pages/admin/ClientDetail";
@@ -39,6 +44,9 @@ import SiteContentManager from "./pages/admin/SiteContentManager";
 import TeamMemberManager from "./pages/admin/TeamMemberManager";
 import ServiceOptionsManager from "./pages/admin/ServiceOptionsManager";
 import ClientAssignments from "./pages/admin/ClientAssignments";
+// Staff portal
+import StaffDashboard from "./pages/staff/StaffDashboard";
+import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
 import TodoManager from "./pages/admin/TodoManager";
 
 const queryClient = new QueryClient();
@@ -53,6 +61,7 @@ const App = () => (
           <BrowserRouter>
             <ScrollToTop />
             <Routes>
+              {/* Public */}
               <Route path="/" element={<Index />} />
               <Route path="/services" element={<Services />} />
               <Route path="/education" element={<Education />} />
@@ -67,13 +76,19 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+
+              {/* Client portal */}
               <Route path="/portal" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/portal/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
               <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
               <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
-              {/* Admin-only routes */}
+              <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
+              <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
+
+              {/* Admin portal */}
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
               <Route path="/admin/clients" element={<AdminRoute><ClientManagement /></AdminRoute>} />
               <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
@@ -83,9 +98,13 @@ const App = () => (
               <Route path="/admin/team-members" element={<AdminRoute><TeamMemberManager /></AdminRoute>} />
               <Route path="/admin/service-options" element={<AdminRoute><ServiceOptionsManager /></AdminRoute>} />
               <Route path="/admin/assignments" element={<AdminRoute><ClientAssignments /></AdminRoute>} />
-              {/* Staff routes (admin + team members) */}
+
+              {/* Staff/Therapist portal */}
+              <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
               <Route path="/staff/todos" element={<StaffRoute><TodoManager /></StaffRoute>} />
               <Route path="/staff/resources" element={<StaffRoute><Resources /></StaffRoute>} />
+              <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

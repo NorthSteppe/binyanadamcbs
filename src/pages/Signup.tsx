@@ -22,10 +22,12 @@ const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { user, loading: authLoading } = useAuth();
+  const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
 
-  // Redirect if already signed in
+  // Redirect if already signed in — role-based
   if (!authLoading && user) {
+    if (isAdmin) return <Navigate to="/admin" replace />;
+    if (isTeamMember) return <Navigate to="/staff" replace />;
     return <Navigate to="/portal" replace />;
   }
 
