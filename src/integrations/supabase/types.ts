@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      act_matrix_entries: {
+        Row: {
+          avoidance_behaviours: string
+          committed_actions: string
+          created_at: string
+          filled_by: string
+          id: string
+          internal_obstacles: string
+          notes: string
+          user_id: string
+          values_text: string
+        }
+        Insert: {
+          avoidance_behaviours?: string
+          committed_actions?: string
+          created_at?: string
+          filled_by: string
+          id?: string
+          internal_obstacles?: string
+          notes?: string
+          user_id: string
+          values_text?: string
+        }
+        Update: {
+          avoidance_behaviours?: string
+          committed_actions?: string
+          created_at?: string
+          filled_by?: string
+          id?: string
+          internal_obstacles?: string
+          notes?: string
+          user_id?: string
+          values_text?: string
+        }
+        Relationships: []
+      }
       client_assignments: {
         Row: {
           assignee_id: string
