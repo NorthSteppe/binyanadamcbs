@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, ImageIcon, FileEdit, Calendar, ChevronDown, Settings, UserPlus, ListTodo, BookOpen } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, LogIn, UserPlus2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/binyan-logo.png";
 
 const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -33,6 +31,12 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const portalT = (t as any).portal || {};
   const toggleLanguage = () => setLanguage(language === "en" ? "he" : "en");
 
+  const getPortalLink = () => {
+    if (isAdmin) return { path: "/admin", label: "Admin Portal", icon: Shield };
+    if (isTeamMember) return { path: "/staff", label: "Therapist Portal", icon: Users };
+    return { path: "/portal", label: portalT.portal || "Portal", icon: LayoutDashboard };
+  };
+
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 border-b border-border/30 transition-all duration-300 ${scrolled ? "bg-background/70 backdrop-blur-xl backdrop-saturate-150 shadow-sm" : "bg-background/40 backdrop-blur-md"}`}>
       <div className={`container flex items-center justify-between transition-all duration-300 ${scrolled ? "h-14 md:h-16" : "h-20 md:h-24"}`}>
@@ -57,55 +61,27 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
 
           {user ? (
             <>
-              {isAdmin && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="default" size="sm" className="rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-                      <Shield size={14} /> Admin <ChevronDown size={12} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem asChild><Link to="/admin/calendar" className="gap-2"><Calendar size={14} /> Calendar</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/admin/clients" className="gap-2"><Users size={14} /> Clients</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/admin/assignments" className="gap-2"><UserPlus size={14} /> Assignments</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/admin/service-options" className="gap-2"><Settings size={14} /> Service Options</Link></DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild><Link to="/admin/hero-images" className="gap-2"><ImageIcon size={14} /> Hero Images</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/admin/site-content" className="gap-2"><FileEdit size={14} /> Site Content</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/admin/team-members" className="gap-2"><Users size={14} /> Team Members</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/admin/team-requests" className="gap-2"><Users size={14} /> Team Requests</Link></DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild><Link to="/staff/todos" className="gap-2"><ListTodo size={14} /> Client To-Dos</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/staff/resources" className="gap-2"><BookOpen size={14} /> Resources</Link></DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              {isTeamMember && !isAdmin && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="default" size="sm" className="rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-                      <Users size={14} /> Team <ChevronDown size={12} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem asChild><Link to="/staff/todos" className="gap-2"><ListTodo size={14} /> Client To-Dos</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link to="/staff/resources" className="gap-2"><BookOpen size={14} /> Resources</Link></DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              {!isStaff && (
-                <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
-                  <Link to="/portal"><LayoutDashboard size={14} /> {portalT.portal || "Portal"}</Link>
-                </Button>
-              )}
+              {(() => {
+                const portal = getPortalLink();
+                return (
+                  <Button variant="default" size="sm" asChild className="rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Link to={portal.path}><portal.icon size={14} /> {portal.label}</Link>
+                  </Button>
+                );
+              })()}
               <Button variant="ghost" size="sm" onClick={signOut} className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
                 <LogOut size={14} /> {portalT.logOut || "Log Out"}
               </Button>
             </>
           ) : (
-            <Button variant="outline" size="sm" asChild className="rounded-full">
-              <Link to="/contact">{t.nav.bookConsultation}</Link>
-            </Button>
+            <>
+              <Button variant="ghost" size="sm" asChild className="rounded-full gap-2">
+                <Link to="/login"><LogIn size={14} /> Log In</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
+                <Link to="/signup"><UserPlus2 size={14} /> Sign Up</Link>
+              </Button>
+            </>
           )}
         </div>
 
@@ -130,31 +106,27 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
             <div className="pt-2 border-t border-border mt-2 flex flex-col gap-2">
               {user ? (
                 <>
-                  {isAdmin && (
-                    <>
-                      <Link to="/admin/calendar" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-primary bg-primary/10"><Calendar size={14} /> Admin Panel</Link>
-                      <Link to="/staff/todos" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5"><ListTodo size={14} /> Client To-Dos</Link>
-                    </>
-                  )}
-                  {isTeamMember && !isAdmin && (
-                    <>
-                      <Link to="/staff/todos" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-primary bg-primary/10"><ListTodo size={14} /> Client To-Dos</Link>
-                      <Link to="/staff/resources" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5"><BookOpen size={14} /> Resources</Link>
-                    </>
-                  )}
-                  {!isStaff && (
-                    <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
-                      <Link to="/portal" onClick={() => setMobileOpen(false)}><LayoutDashboard size={14} /> {portalT.portal || "Portal"}</Link>
-                    </Button>
-                  )}
+                  {(() => {
+                    const portal = getPortalLink();
+                    return (
+                      <Link to={portal.path} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-primary bg-primary/10">
+                        <portal.icon size={14} /> {portal.label}
+                      </Link>
+                    );
+                  })()}
                   <Button variant="ghost" size="sm" onClick={() => { signOut(); setMobileOpen(false); }} className="rounded-full gap-2">
                     <LogOut size={14} /> {portalT.logOut || "Log Out"}
                   </Button>
                 </>
               ) : (
-                <Button variant="outline" size="sm" asChild className="rounded-full">
-                  <Link to="/contact" onClick={() => setMobileOpen(false)}>{t.nav.bookConsultation}</Link>
-                </Button>
+                <>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
+                    <LogIn size={14} /> Log In
+                  </Link>
+                  <Link to="/signup" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
+                    <UserPlus2 size={14} /> Sign Up
+                  </Link>
+                </>
               )}
             </div>
           </nav>

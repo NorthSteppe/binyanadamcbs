@@ -1,10 +1,14 @@
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Wrench } from "lucide-react";
+import { Wrench, Timer, Grid3x3 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingAIChat from "@/components/FloatingAIChat";
-import PomodoroTimer from "@/components/portal/PomodoroTimer";
-import ACTMatrix from "@/components/portal/ACTMatrix";
+
+const clientTools = [
+  { label: "ACT Matrix", path: "/portal/toolkit/act-matrix", icon: Grid3x3, description: "Map your values, obstacles, and committed actions using the ACT framework." },
+  { label: "Pomodoro Timer", path: "/portal/toolkit/pomodoro", icon: Timer, description: "Stay focused with timed work and break intervals." },
+];
 
 const Toolkit = () => {
   return (
@@ -17,27 +21,25 @@ const Toolkit = () => {
               <div className="bg-primary/10 text-primary rounded-xl p-2.5">
                 <Wrench size={22} />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">Toolkit</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground">Client Toolkit</h1>
             </div>
-            <p className="text-muted-foreground mb-12 ml-14">Tools to support your focus and wellbeing.</p>
+            <p className="text-muted-foreground mb-10 ml-14">Tools to support your focus and wellbeing.</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* ACT Matrix */}
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="md:col-span-2">
-              <div className="bg-card border border-border/50 rounded-2xl p-6 md:p-8">
-                <h2 className="text-lg font-semibold text-foreground mb-6 text-center">ACT Matrix</h2>
-                <ACTMatrix />
-              </div>
-            </motion.div>
-
-            {/* Pomodoro Timer */}
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="md:col-span-2 max-w-2xl mx-auto w-full">
-              <div className="bg-card border border-border/50 rounded-2xl p-8">
-                <h2 className="text-lg font-semibold text-foreground mb-6 text-center">Pomodoro Timer</h2>
-                <PomodoroTimer />
-              </div>
-            </motion.div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {clientTools.map((tool, i) => (
+              <motion.div key={tool.path} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
+                <Link to={tool.path} className="bg-card border border-border/50 rounded-2xl p-6 flex items-start gap-4 hover:border-primary/30 hover:shadow-sm transition-all block h-full">
+                  <div className="bg-primary/10 text-primary rounded-xl p-3 shrink-0">
+                    <tool.icon size={22} />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-card-foreground">{tool.label}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{tool.description}</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
