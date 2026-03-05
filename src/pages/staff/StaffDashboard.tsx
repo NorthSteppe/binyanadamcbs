@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, ListTodo, BookOpen, Wrench } from "lucide-react";
+import { Users, ListTodo, BookOpen, Wrench, Calendar } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 
 const therapistTools = [
+  { label: "Calendar", path: "/staff/calendar", icon: Calendar, description: "View and manage sessions" },
+  { label: "Staff To-Dos", path: "/staff/staff-todos", icon: ListTodo, description: "Personal task list for staff" },
   { label: "Client To-Dos", path: "/staff/todos", icon: ListTodo, description: "Manage task lists for your assigned clients" },
   { label: "Resources", path: "/staff/resources", icon: BookOpen, description: "Manage the resource library" },
   { label: "ACT Matrix", path: "/staff/toolkit/act-matrix", icon: Wrench, description: "Fill in ACT Matrix for assigned clients" },

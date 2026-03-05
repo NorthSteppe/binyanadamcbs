@@ -48,6 +48,7 @@ import ClientAssignments from "./pages/admin/ClientAssignments";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
 import TodoManager from "./pages/admin/TodoManager";
+import StaffTodoManager from "./pages/admin/StaffTodoManager";
 
 const queryClient = new QueryClient();
 
@@ -98,10 +99,13 @@ const App = () => (
               <Route path="/admin/team-members" element={<AdminRoute><TeamMemberManager /></AdminRoute>} />
               <Route path="/admin/service-options" element={<AdminRoute><ServiceOptionsManager /></AdminRoute>} />
               <Route path="/admin/assignments" element={<AdminRoute><ClientAssignments /></AdminRoute>} />
+              <Route path="/admin/staff-todos" element={<AdminRoute><StaffTodoManager /></AdminRoute>} />
 
               {/* Staff/Therapist portal */}
               <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
+              <Route path="/staff/calendar" element={<StaffRoute><AdminCalendar /></StaffRoute>} />
               <Route path="/staff/todos" element={<StaffRoute><TodoManager /></StaffRoute>} />
+              <Route path="/staff/staff-todos" element={<StaffRoute><StaffTodoManager /></StaffRoute>} />
               <Route path="/staff/resources" element={<StaffRoute><Resources /></StaffRoute>} />
               <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
 
