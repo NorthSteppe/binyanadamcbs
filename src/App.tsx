@@ -29,6 +29,7 @@ import Resources from "./pages/portal/Resources";
 import Messages from "./pages/portal/Messages";
 import Booking from "./pages/portal/Booking";
 import Chat from "./pages/portal/Chat";
+import Toolkit from "./pages/portal/Toolkit";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import ClientManagement from "./pages/admin/ClientManagement";
 import ClientDetail from "./pages/admin/ClientDetail";
@@ -71,6 +72,7 @@ const App = () => (
               <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
               <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
               {/* Admin-only routes */}
               <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
               <Route path="/admin/clients" element={<AdminRoute><ClientManagement /></AdminRoute>} />
