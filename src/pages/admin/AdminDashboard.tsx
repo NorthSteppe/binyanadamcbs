@@ -17,6 +17,7 @@ const adminTools = [
 ];
 
 const therapistTools = [
+  { label: "Staff To-Dos", path: "/admin/staff-todos", icon: ListTodo, description: "Personal task list for staff" },
   { label: "Client To-Dos", path: "/staff/todos", icon: ListTodo, description: "Manage client task lists" },
   { label: "Resources", path: "/staff/resources", icon: BookOpen, description: "Manage the resource library" },
   { label: "ACT Matrix", path: "/staff/toolkit/act-matrix", icon: Wrench, description: "Fill in ACT Matrix for clients" },
