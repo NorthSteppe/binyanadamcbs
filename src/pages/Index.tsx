@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { LogIn, UserPlus, CirclePlus } from "lucide-react";
+import { LogIn, UserPlus, CirclePlus, Shield, Users, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
@@ -9,6 +10,7 @@ import HeroCarousel from "@/components/HeroCarousel";
 
 const Index = () => {
   const { t } = useLanguage();
+  const { user, isAdmin, isTeamMember } = useAuth();
   const [showBigLogo, setShowBigLogo] = useState(true);
   const [quote, setQuote] = useState({ text: "", author: "" });
 
@@ -50,16 +52,26 @@ const Index = () => {
                     {t.landing.exploreServices} <CirclePlus size={18} />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="rounded-full px-8">
-                  <Link to="/login" className="inline-flex items-center gap-2">
-                    <LogIn size={18} /> {t.landing.logIn}
-                  </Link>
-                </Button>
-                <Button size="lg" variant="ghost" asChild className="rounded-full px-8">
-                  <Link to="/signup" className="inline-flex items-center gap-2">
-                    <UserPlus size={18} /> {t.landing.signUp}
-                  </Link>
-                </Button>
+                {user ? (
+                  <Button size="lg" variant="outline" asChild className="rounded-full px-8">
+                    <Link to={isAdmin ? "/admin" : isTeamMember ? "/staff" : "/portal"} className="inline-flex items-center gap-2">
+                      {isAdmin ? <><Shield size={18} /> Admin Portal</> : isTeamMember ? <><Users size={18} /> Therapist Portal</> : <><LayoutDashboard size={18} /> My Portal</>}
+                    </Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button size="lg" variant="outline" asChild className="rounded-full px-8">
+                      <Link to="/login" className="inline-flex items-center gap-2">
+                        <LogIn size={18} /> {t.landing.logIn}
+                      </Link>
+                    </Button>
+                    <Button size="lg" variant="ghost" asChild className="rounded-full px-8">
+                      <Link to="/signup" className="inline-flex items-center gap-2">
+                        <UserPlus size={18} /> {t.landing.signUp}
+                      </Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
 
