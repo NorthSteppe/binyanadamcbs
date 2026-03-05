@@ -4,6 +4,7 @@ import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, LogIn, User
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationBell from "@/components/NotificationBell";
 
 const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -61,6 +62,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
 
           {user ? (
             <>
+              <NotificationBell />
               {(() => {
                 const portal = getPortalLink();
                 return (
@@ -87,6 +89,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
 
         {/* Mobile menu button */}
         <div className="lg:hidden flex items-center gap-2">
+          {user && <NotificationBell />}
           <Button variant="ghost" size="icon" onClick={toggleLanguage} className="rounded-full text-muted-foreground"><Globe size={18} /></Button>
           <button className="p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
             {mobileOpen ? <Waves size={24} /> : <Menu size={24} />}
