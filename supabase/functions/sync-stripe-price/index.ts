@@ -25,7 +25,13 @@ serve(async (req) => {
     const { data: userData } = await supabaseClient.auth.getUser(token);
     if (!userData.user) throw new Error("Not authenticated");
 
-    const { data: roles } = await supabaseClient
+    // Use service role client to check roles (bypasses RLS)
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { data: roles } = await adminClient
       .from("user_roles")
       .select("role")
       .eq("user_id", userData.user.id)
@@ -41,11 +47,7 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Fetch current service option
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    // Fetch current service option (reuse adminClient from above)
 
     const { data: svc } = await adminClient
       .from("service_options")
