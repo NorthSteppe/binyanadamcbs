@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, CheckCircle2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CheckCircle2, CreditCard, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -18,6 +19,8 @@ interface ServiceOption {
   name: string;
   description: string;
   duration_minutes: number;
+  price_cents: number;
+  stripe_price_id: string | null;
 }
 
 const TIME_SLOTS = [
@@ -31,6 +34,7 @@ const Booking = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const portalT = (t as any).portal || {};
+  const [searchParams] = useSearchParams();
 
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [selectedService, setSelectedService] = useState<ServiceOption | null>(null);
@@ -39,35 +43,74 @@ const Booking = () => {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [canceled, setCanceled] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("success") === "true") setSuccess(true);
+    if (searchParams.get("canceled") === "true") setCanceled(true);
+  }, [searchParams]);
 
   useEffect(() => {
     supabase.from("service_options").select("*").eq("is_active", true).order("display_order")
-      .then(({ data }) => { if (data) setServices(data as ServiceOption[]); });
+      .then(({ data }) => { if (data) setServices(data as unknown as ServiceOption[]); });
   }, []);
 
   const handleBook = async () => {
     if (!user || !selectedService || !selectedDate || !selectedTime) return;
     setLoading(true);
 
-    const [h, m] = selectedTime.split(":");
-    const sessionDate = new Date(selectedDate);
-    sessionDate.setHours(parseInt(h), parseInt(m), 0, 0);
+    const isPaid = selectedService.price_cents > 0 && selectedService.stripe_price_id;
 
-    const { error } = await supabase.from("sessions").insert({
-      client_id: user.id,
-      title: selectedService.name,
-      description: description || null,
-      session_date: sessionDate.toISOString(),
-      duration_minutes: selectedService.duration_minutes,
-    });
+    if (isPaid) {
+      // Redirect to Stripe Checkout
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          service_option_id: selectedService.id,
+          date: selectedDate.toISOString(),
+          time: selectedTime,
+          description,
+        },
+      });
 
-    setLoading(false);
-    if (error) {
-      toast({ title: "Booking failed", description: error.message, variant: "destructive" });
+      setLoading(false);
+      if (error || data?.error) {
+        toast({ title: "Payment failed", description: data?.error || error?.message, variant: "destructive" });
+      } else if (data?.url) {
+        window.open(data.url, "_blank");
+      }
     } else {
-      setSuccess(true);
-      toast({ title: portalT.bookingSuccess || "Session booked!" });
+      // Free service — book directly
+      const [h, m] = selectedTime.split(":");
+      const sessionDate = new Date(selectedDate);
+      sessionDate.setHours(parseInt(h), parseInt(m), 0, 0);
+
+      const { error } = await supabase.from("sessions").insert({
+        client_id: user.id,
+        title: selectedService.name,
+        description: description || null,
+        session_date: sessionDate.toISOString(),
+        duration_minutes: selectedService.duration_minutes,
+      });
+
+      setLoading(false);
+      if (error) {
+        toast({ title: "Booking failed", description: error.message, variant: "destructive" });
+      } else {
+        setSuccess(true);
+        toast({ title: portalT.bookingSuccess || "Session booked!" });
+      }
     }
+  };
+
+  const resetForm = () => {
+    setSuccess(false);
+    setCanceled(false);
+    setSelectedService(null);
+    setSelectedDate(undefined);
+    setSelectedTime("");
+    setDescription("");
+    // Clear URL params
+    window.history.replaceState({}, "", "/portal/booking");
   };
 
   if (success) {
@@ -79,9 +122,30 @@ const Booking = () => {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto">
               <CheckCircle2 className="mx-auto text-primary mb-4" size={48} />
               <h1 className="text-3xl mb-3">{portalT.bookingConfirmed || "Session Booked"}</h1>
-              <p className="text-muted-foreground mb-6">{portalT.bookingConfirmedText || "We'll confirm your appointment shortly."}</p>
-              <Button onClick={() => { setSuccess(false); setSelectedService(null); setSelectedDate(undefined); setSelectedTime(""); setDescription(""); }} variant="outline" className="rounded-full">
+              <p className="text-muted-foreground mb-6">{portalT.bookingConfirmedText || "Your payment was received and we'll confirm your appointment shortly."}</p>
+              <Button onClick={resetForm} variant="outline" className="rounded-full">
                 {portalT.bookAnother || "Book Another"}
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (canceled) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <section className="pt-28 pb-20">
+          <div className="container text-center">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto">
+              <XCircle className="mx-auto text-destructive mb-4" size={48} />
+              <h1 className="text-3xl mb-3">Payment Cancelled</h1>
+              <p className="text-muted-foreground mb-6">Your payment was not completed. You can try again below.</p>
+              <Button onClick={resetForm} variant="outline" className="rounded-full">
+                Try Again
               </Button>
             </motion.div>
           </div>
@@ -119,7 +183,14 @@ const Booking = () => {
                       : "border-border/50 bg-card hover:border-primary/30"
                   )}
                 >
-                  <p className="font-semibold text-foreground">{svc.name}</p>
+                  <div className="flex justify-between items-start">
+                    <p className="font-semibold text-foreground">{svc.name}</p>
+                    {svc.price_cents > 0 && (
+                      <span className="text-sm font-bold text-primary">
+                        £{(svc.price_cents / 100).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">{svc.description}</p>
                   <p className="text-xs text-primary font-medium mt-2 flex items-center gap-1">
                     <Clock size={12} /> {svc.duration_minutes} minutes
@@ -131,7 +202,6 @@ const Booking = () => {
 
           {selectedService && (
             <div className="grid md:grid-cols-2 gap-6 mb-8">
-              {/* Step 2: Date */}
               <div>
                 <Label className="text-base font-semibold mb-3 block">2. Pick a Date</Label>
                 <div className="bg-card rounded-xl border border-border/50 p-4 flex justify-center">
@@ -144,8 +214,6 @@ const Booking = () => {
                   />
                 </div>
               </div>
-
-              {/* Step 3: Time */}
               <div>
                 <Label className="text-base font-semibold mb-3 block">3. Choose a Time</Label>
                 <div className="grid grid-cols-3 gap-2">
@@ -178,14 +246,30 @@ const Booking = () => {
                 placeholder="Anything you'd like to discuss..."
               />
               <div className="bg-muted rounded-xl p-4 mb-4 text-sm">
-                <p className="font-semibold text-foreground">{selectedService.name}</p>
-                <p className="text-muted-foreground">
-                  {selectedDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at {selectedTime} · {selectedService.duration_minutes} min
-                </p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-foreground">{selectedService.name}</p>
+                    <p className="text-muted-foreground">
+                      {selectedDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at {selectedTime} · {selectedService.duration_minutes} min
+                    </p>
+                  </div>
+                  {selectedService.price_cents > 0 && (
+                    <p className="text-lg font-bold text-primary">£{(selectedService.price_cents / 100).toFixed(2)}</p>
+                  )}
+                </div>
               </div>
               <Button onClick={handleBook} className="w-full rounded-full" size="lg" disabled={loading}>
-                <CalendarIcon size={18} className="me-2" />
-                {loading ? "Booking..." : "Confirm Booking"}
+                {selectedService.price_cents > 0 ? (
+                  <>
+                    <CreditCard size={18} className="me-2" />
+                    {loading ? "Redirecting to payment..." : `Pay £${(selectedService.price_cents / 100).toFixed(2)} & Book`}
+                  </>
+                ) : (
+                  <>
+                    <CalendarIcon size={18} className="me-2" />
+                    {loading ? "Booking..." : "Confirm Booking"}
+                  </>
+                )}
               </Button>
             </motion.div>
           )}
