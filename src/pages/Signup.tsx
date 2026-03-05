@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/hooks/useAuth";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,12 @@ const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { user, loading: authLoading } = useAuth();
+
+  // Redirect if already signed in
+  if (!authLoading && user) {
+    return <Navigate to="/portal" replace />;
+  }
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
