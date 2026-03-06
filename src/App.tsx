@@ -44,6 +44,7 @@ import SiteContentManager from "./pages/admin/SiteContentManager";
 import TeamMemberManager from "./pages/admin/TeamMemberManager";
 import ServiceOptionsManager from "./pages/admin/ServiceOptionsManager";
 import ClientAssignments from "./pages/admin/ClientAssignments";
+import UserManagement from "./pages/admin/UserManagement";
 // Staff portal
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffACTMatrix from "./pages/staff/StaffACTMatrix";

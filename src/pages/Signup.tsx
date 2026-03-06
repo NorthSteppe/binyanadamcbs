@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
@@ -19,10 +20,28 @@ const Signup = () => {
   const [fullName, setFullName] = useState("");
   const [accountType, setAccountType] = useState<"client" | "team">("client");
   const [loading, setLoading] = useState(false);
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [googleRoleChoice, setGoogleRoleChoice] = useState<"client" | "team">("client");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
   const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
+
+  // After Google OAuth, check if user just signed up (no roles yet except default client)
+  // and if they selected team, submit a team request
+  useEffect(() => {
+    if (!authLoading && user) {
+      const pendingRole = sessionStorage.getItem("pending_google_role");
+      if (pendingRole === "team") {
+        sessionStorage.removeItem("pending_google_role");
+        supabase.from("team_requests").insert({ user_id: user.id }).then(() => {
+          toast({ title: "Team access requested", description: "Your request is pending admin approval." });
+        });
+      } else {
+        sessionStorage.removeItem("pending_google_role");
+      }
+    }
+  }, [user, authLoading]);
 
   // Redirect if already signed in — role-based
   if (!authLoading && user) {
@@ -43,7 +62,6 @@ const Signup = () => {
     if (error) {
       toast({ title: t.signup.title, description: error.message, variant: "destructive" });
     } else {
-      // If team signup, insert a team request
       if (accountType === "team") {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
@@ -56,6 +74,16 @@ const Signup = () => {
   };
 
   const handleGoogleSignup = async () => {
+    // Show role selection dialog first
+    setShowRoleDialog(true);
+  };
+
+  const confirmGoogleSignup = async () => {
+    setShowRoleDialog(false);
+    // Store choice so we can act on it after redirect
+    if (googleRoleChoice === "team") {
+      sessionStorage.setItem("pending_google_role", "team");
+    }
     const { error } = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
@@ -67,6 +95,35 @@ const Signup = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* Google role selection dialog */}
+      <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>What type of account do you need?</DialogTitle>
+          </DialogHeader>
+          <RadioGroup value={googleRoleChoice} onValueChange={(v) => setGoogleRoleChoice(v as any)} className="space-y-3 pt-2">
+            <div className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 cursor-pointer">
+              <RadioGroupItem value="client" id="g-client" />
+              <Label htmlFor="g-client" className="cursor-pointer flex-1">
+                <span className="font-medium">Client</span>
+                <p className="text-xs text-muted-foreground">Access the client portal, book sessions, and use tools.</p>
+              </Label>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 cursor-pointer">
+              <RadioGroupItem value="team" id="g-team" />
+              <Label htmlFor="g-team" className="cursor-pointer flex-1">
+                <span className="font-medium">Therapist / Staff</span>
+                <p className="text-xs text-muted-foreground">Request team access (requires admin approval).</p>
+              </Label>
+            </div>
+          </RadioGroup>
+          <Button className="w-full rounded-full mt-2" onClick={confirmGoogleSignup}>
+            Continue with Google
+          </Button>
+        </DialogContent>
+      </Dialog>
+
       <section className="pt-32 pb-24 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -75,6 +132,10 @@ const Signup = () => {
           className="w-full max-w-md mx-auto px-6"
         >
           <div className="bg-card rounded-3xl p-10 border border-border/50">
+            {/* Binyan Adam Logo */}
+            <div className="flex justify-center mb-6">
+              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-16" />
+            </div>
             <h1 className="text-3xl md:text-4xl mb-2 text-center">{t.signup.title}</h1>
             <p className="text-muted-foreground text-center mb-8">{t.signup.subtitle}</p>
 

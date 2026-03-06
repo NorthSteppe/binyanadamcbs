@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit, ListTodo, BookOpen, Wrench } from "lucide-react";
+import { Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit, ListTodo, BookOpen, Wrench, UserCog } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 
 const adminTools = [
+  { label: "Users", path: "/admin/users", icon: UserCog, description: "Manage all users, roles, and access" },
   { label: "Calendar", path: "/admin/calendar", icon: Calendar, description: "View and manage all scheduled sessions" },
   { label: "Clients", path: "/admin/clients", icon: Users, description: "Manage client profiles and records" },
   { label: "Assignments", path: "/admin/assignments", icon: UserPlus, description: "Assign staff to clients" },
