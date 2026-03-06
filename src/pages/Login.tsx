@@ -70,6 +70,10 @@ const Login = () => {
           className="w-full max-w-md mx-auto px-6"
         >
           <div className="bg-card rounded-3xl p-10 border border-border/50">
+            {/* Binyan Adam Logo */}
+            <div className="flex justify-center mb-6">
+              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-16" />
+            </div>
             <h1 className="text-3xl md:text-4xl mb-2 text-center">{t.login.title}</h1>
             <p className="text-muted-foreground text-center mb-8">{t.login.subtitle}</p>
 
