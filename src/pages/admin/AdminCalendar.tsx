@@ -45,6 +45,8 @@ type CalendarEvent = {
   meetingUrl?: string;
   meetingPlatform?: string;
   attendeeIds?: string[];
+  notes?: string;
+  plaudRecordingId?: string;
 };
 
 type ViewMode = "month" | "week" | "day";
@@ -180,6 +182,8 @@ const AdminCalendar = () => {
           meetingUrl: s.meeting_url || "",
           meetingPlatform: s.meeting_platform || "",
           attendeeIds: s.attendee_ids || [],
+          notes: s.notes || "",
+          plaudRecordingId: s.plaud_recording_id || "",
         });
       });
     }
@@ -884,6 +888,17 @@ const AdminCalendar = () => {
                 </div>
               )}
               {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
+              {selectedEvent.notes && (
+                <div className="mt-2 border-t border-border pt-3">
+                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📝 Session Notes</Label>
+                  <div className="bg-muted/50 rounded p-3 text-sm whitespace-pre-wrap max-h-48 overflow-y-auto font-light">
+                    {selectedEvent.notes}
+                  </div>
+                  {selectedEvent.plaudRecordingId && (
+                    <p className="text-[10px] text-muted-foreground mt-1">Plaud Recording: {selectedEvent.plaudRecordingId}</p>
+                  )}
+                </div>
+              )}
               <div className="flex gap-2 pt-2">
                 {selectedEvent.type === "session" && (
                   <Button variant="outline" size="sm" className="gap-1" onClick={() => openEdit(selectedEvent)}>
