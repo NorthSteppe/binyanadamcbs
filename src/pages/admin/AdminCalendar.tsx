@@ -501,6 +501,7 @@ const AdminCalendar = () => {
   const handleEventClick = (e: React.MouseEvent, event: CalendarEvent) => {
     e.stopPropagation();
     setSelectedEvent(event);
+    setPasteNotes("");
     setDetailOpen(true);
   };
 
