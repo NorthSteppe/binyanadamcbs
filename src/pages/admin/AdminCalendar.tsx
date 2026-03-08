@@ -80,11 +80,11 @@ const AdminCalendar = () => {
   const [editOpen, setEditOpen] = useState(false);
 
   // New session form
-  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "" });
+  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
   // New task form
   const [newTask, setNewTask] = useState({ title: "", assigned_to: "", description: "" });
   // Edit session form
-  const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled" });
+  const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
   const [editSessionId, setEditSessionId] = useState("");
 
   // Drag state
