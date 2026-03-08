@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,15 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChevronLeft, ChevronRight, Plus, Shield, CalendarDays,
-  LayoutGrid, List, Clock, Trash2, Edit2, Eye, ListTodo
+  LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
+  Sparkles, Loader2, CheckCircle2, Flag, X
 } from "lucide-react";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
   addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks,
-  addDays, subDays, eachHourOfInterval, startOfDay, endOfDay,
-  isToday as isDateToday, parseISO, differenceInMinutes, setHours, setMinutes
+  addDays, subDays, startOfDay, endOfDay,
+  parseISO, differenceInMinutes
 } from "date-fns";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,11 +38,26 @@ type CalendarEvent = {
   description?: string;
 };
 
+type AISuggestion = {
+  title: string;
+  description: string;
+  priority: string;
+  estimated_minutes: number;
+  suggested_time: string;
+  reason: string;
+};
+
 type ViewMode = "month" | "week" | "day";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const SUGGEST_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-suggest-tasks`;
 
-const PersonalCalendar = () => {
+interface PersonalCalendarProps {
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
+}
+
+const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: PersonalCalendarProps) => {
   const { session } = useAuth();
   const qc = useQueryClient();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -58,6 +75,9 @@ const PersonalCalendar = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [showSuggestionsPanel, setShowSuggestionsPanel] = useState(false);
 
   // Date range based on view
   const { rangeStart, rangeEnd } = useMemo(() => {
@@ -142,6 +162,32 @@ const PersonalCalendar = () => {
     enabled: !!session,
   });
 
+  // All tasks for AI context
+  const { data: allTasks = [] } = useQuery({
+    queryKey: ["all_user_tasks_for_ai"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_tasks")
+        .select("id, title, description, priority, status, due_date, estimated_minutes, is_completed, labels")
+        .eq("is_completed", false)
+        .order("due_date", { ascending: true, nullsFirst: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session,
+  });
+
+  const { data: allProjects = [] } = useQuery({
+    queryKey: ["user_projects_for_ai"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_projects").select("id, name, color").eq("is_archived", false);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session,
+  });
+
   // Build unified events
   const events = useMemo(() => {
     const result: CalendarEvent[] = [];
@@ -156,7 +202,6 @@ const PersonalCalendar = () => {
       });
     }
     if (showTasks) {
-      // Tasks with scheduled time
       scheduledTasksWithTime.forEach((t: any) => {
         const start = parseISO(t.scheduled_start);
         const end = t.scheduled_end ? parseISO(t.scheduled_end) : new Date(start.getTime() + 30 * 60000);
@@ -165,9 +210,8 @@ const PersonalCalendar = () => {
           type: "task", color: "#3b82f6", priority: t.priority, status: t.status, description: t.description,
         });
       });
-      // Tasks with due_date but no scheduled time (show as all-day in month view)
       scheduledTasks.forEach((t: any) => {
-        if (t.scheduled_start) return; // already added above
+        if (t.scheduled_start) return;
         if (!t.due_date) return;
         const d = parseISO(t.due_date);
         result.push({
@@ -187,7 +231,6 @@ const PersonalCalendar = () => {
     return result;
   }, [sessions, scheduledTasks, scheduledTasksWithTime, focusBlocks, showSessions, showTasks, showFocus]);
 
-  // Events grouped by day key
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
     events.forEach((e) => {
@@ -217,22 +260,29 @@ const PersonalCalendar = () => {
   });
 
   const createTask = useMutation({
-    mutationFn: async () => {
-      if (!selectedDate) return;
-      const [sh, sm] = newEvent.start.split(":").map(Number);
-      const [eh, em] = newEvent.end.split(":").map(Number);
-      const s = new Date(selectedDate); s.setHours(sh, sm, 0, 0);
-      const e = new Date(selectedDate); e.setHours(eh, em, 0, 0);
+    mutationFn: async (overrides?: { title: string; description: string; priority: string; start: string; end: string }) => {
+      const date = selectedDate || new Date();
+      const t = overrides || newEvent;
+      const [sh, sm] = t.start.split(":").map(Number);
+      const [eh, em] = t.end.split(":").map(Number);
+      const s = new Date(date); s.setHours(sh, sm, 0, 0);
+      const e = new Date(date); e.setHours(eh, em, 0, 0);
       const { error } = await supabase.from("user_tasks").insert({
-        user_id: session!.user.id, title: newEvent.title || "New Task",
-        description: newEvent.description, priority: newEvent.priority,
+        user_id: session!.user.id, title: t.title || "New Task",
+        description: t.description, priority: t.priority,
         scheduled_start: s.toISOString(), scheduled_end: e.toISOString(),
-        due_date: selectedDate.toISOString(),
+        due_date: date.toISOString(),
         estimated_minutes: differenceInMinutes(e, s),
       });
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["scheduled_tasks"] }); qc.invalidateQueries({ queryKey: ["user_tasks"] }); closeCreateDialog(); toast.success("Task created"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["scheduled_tasks"] });
+      qc.invalidateQueries({ queryKey: ["user_tasks"] });
+      qc.invalidateQueries({ queryKey: ["all_user_tasks_for_ai"] });
+      closeCreateDialog();
+      toast.success("Task created");
+    },
     onError: () => toast.error("Failed to create task"),
   });
 
@@ -277,21 +327,65 @@ const PersonalCalendar = () => {
     onError: () => toast.error("Failed to reschedule"),
   });
 
+  // AI Suggestions
+  const fetchSuggestions = useCallback(async () => {
+    if (!session) return;
+    setIsLoadingSuggestions(true);
+    setShowSuggestionsPanel(true);
+    try {
+      const resp = await fetch(SUGGEST_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          tasks: allTasks.map((t: any) => ({
+            title: t.title, priority: t.priority, status: t.status,
+            due_date: t.due_date, estimated_minutes: t.estimated_minutes, labels: t.labels,
+          })),
+          projects: allProjects.map((p: any) => ({ name: p.name })),
+          date: format(new Date(), "yyyy-MM-dd"),
+        }),
+      });
+      if (resp.status === 429) { toast.error("Rate limited. Try again shortly."); return; }
+      if (resp.status === 402) { toast.error("AI credits required. Top up in workspace settings."); return; }
+      if (!resp.ok) throw new Error("Failed");
+      const data = await resp.json();
+      setAiSuggestions(data.suggestions || []);
+    } catch {
+      toast.error("Failed to get AI suggestions");
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  }, [session, allTasks, allProjects]);
+
+  const addSuggestionAsTask = (s: AISuggestion) => {
+    const [h, m] = s.suggested_time.split(":").map(Number);
+    const endH = h + Math.floor((m + s.estimated_minutes) / 60);
+    const endM = (m + s.estimated_minutes) % 60;
+    setSelectedDate(new Date());
+    createTask.mutate({
+      title: s.title,
+      description: s.description,
+      priority: s.priority,
+      start: s.suggested_time,
+      end: `${endH.toString().padStart(2, "0")}:${endM.toString().padStart(2, "0")}`,
+    });
+    setAiSuggestions((prev) => prev.filter((x) => x.title !== s.title));
+  };
+
+  // Drag handlers
   const handleDragStart = (e: React.DragEvent, event: CalendarEvent) => {
     e.stopPropagation();
     setDraggedEvent(event);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", event.id);
-    // Make ghost semi-transparent
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = "0.5";
-    }
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = "0.5";
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = "1";
-    }
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = "1";
     setDraggedEvent(null);
     setDropTarget(null);
   };
@@ -302,29 +396,20 @@ const PersonalCalendar = () => {
     setDropTarget(cellKey);
   };
 
-  const handleDragLeave = () => {
-    setDropTarget(null);
-  };
+  const handleDragLeave = () => setDropTarget(null);
 
   const handleDrop = (e: React.DragEvent, day: Date, hour: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDropTarget(null);
+    e.preventDefault(); e.stopPropagation(); setDropTarget(null);
     if (!draggedEvent) return;
-    const newStart = new Date(day);
-    newStart.setHours(hour, 0, 0, 0);
-    // Don't reschedule if same time
+    const newStart = new Date(day); newStart.setHours(hour, 0, 0, 0);
     if (draggedEvent.start.getTime() === newStart.getTime()) return;
     rescheduleEvent.mutate({ event: draggedEvent, newStart });
     setDraggedEvent(null);
   };
 
   const handleMonthDrop = (e: React.DragEvent, day: Date) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDropTarget(null);
+    e.preventDefault(); e.stopPropagation(); setDropTarget(null);
     if (!draggedEvent) return;
-    // Keep original time, change the date
     const newStart = new Date(day);
     newStart.setHours(draggedEvent.start.getHours(), draggedEvent.start.getMinutes(), 0, 0);
     if (draggedEvent.start.getTime() === newStart.getTime()) return;
@@ -362,7 +447,6 @@ const PersonalCalendar = () => {
     setDetailDialogOpen(true);
   };
 
-  // Scroll to current hour in week/day view
   useEffect(() => {
     if ((viewMode === "week" || viewMode === "day") && scrollRef.current) {
       const now = new Date();
@@ -374,18 +458,26 @@ const PersonalCalendar = () => {
   const today = new Date();
 
   const priorityColor = (p?: string) => {
-    if (p === "urgent") return "bg-red-500";
+    if (p === "urgent") return "bg-destructive";
     if (p === "high") return "bg-orange-500";
     if (p === "medium") return "bg-amber-400";
-    return "bg-slate-400";
+    return "bg-muted-foreground/50";
   };
 
+  const priorityBadgeColor = (p: string) => {
+    if (p === "urgent") return "destructive";
+    if (p === "high") return "default";
+    return "secondary";
+  };
+
+  const calendarHeight = isFullscreen ? "h-[calc(100vh-180px)]" : "max-h-[500px]";
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <h2 className="text-lg font-semibold text-foreground">Personal Calendar</h2>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
             <TabsList className="h-8">
               <TabsTrigger value="month" className="text-xs gap-1 px-2"><LayoutGrid size={12} /> Month</TabsTrigger>
@@ -393,8 +485,21 @@ const PersonalCalendar = () => {
               <TabsTrigger value="day" className="text-xs gap-1 px-2"><List size={12} /> Day</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="text-xs">Today</Button>
-          <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}><Shield size={14} /></Button>
+          <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="text-xs h-8">Today</Button>
+          <Button
+            variant={showSuggestionsPanel ? "default" : "outline"} size="sm"
+            onClick={fetchSuggestions} disabled={isLoadingSuggestions}
+            className="text-xs h-8 gap-1"
+          >
+            {isLoadingSuggestions ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+            AI Suggest
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)} className="h-8"><Shield size={14} /></Button>
+          {onToggleFullscreen && (
+            <Button variant="outline" size="sm" onClick={onToggleFullscreen} className="h-8">
+              {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -414,205 +519,281 @@ const PersonalCalendar = () => {
         </label>
       </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ChevronLeft size={18} /></Button>
-        <h3 className="text-sm font-semibold">{headerLabel()}</h3>
-        <Button variant="ghost" size="icon" onClick={() => navigate(1)}><ChevronRight size={18} /></Button>
-      </div>
+      <div className={`flex gap-4 ${isFullscreen ? "flex-col lg:flex-row" : "flex-col"}`}>
+        {/* Main Calendar */}
+        <div className={`flex-1 min-w-0 ${showSuggestionsPanel && isFullscreen ? "lg:w-3/4" : "w-full"}`}>
+          {/* Navigation */}
+          <div className="flex items-center justify-between mb-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ChevronLeft size={18} /></Button>
+            <h3 className="text-sm font-semibold">{headerLabel()}</h3>
+            <Button variant="ghost" size="icon" onClick={() => navigate(1)}><ChevronRight size={18} /></Button>
+          </div>
 
-      {/* Month View */}
-      {viewMode === "month" && (
-        <div className="grid grid-cols-7 gap-1">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-            <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-1">{d}</div>
-          ))}
-          {days.map((day) => {
-            const key = format(day, "yyyy-MM-dd");
-            const dayEvents = eventsByDay.get(key) || [];
-            const isToday = isSameDay(day, today);
-            const isCurrentMonth = isSameMonth(day, currentDate);
-            const isOver = dropTarget === `month-${key}`;
-            return (
-              <motion.div
-                key={key} whileHover={{ scale: 1.02 }}
-                onClick={() => handleDayClick(day)}
-                onDragOver={(e) => handleDragOver(e, `month-${key}`)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleMonthDrop(e, day)}
-                className={`relative rounded-lg p-1 min-h-[80px] text-left border transition-colors cursor-pointer
-                  ${isToday ? "border-primary bg-primary/5" : "border-transparent hover:border-border"}
-                  ${!isCurrentMonth ? "opacity-40" : ""}
-                  ${isOver ? "bg-primary/10 border-primary" : ""}`}
-              >
-                <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
-                  {format(day, "d")}
-                </span>
-                <div className="space-y-0.5 mt-0.5">
-                  {dayEvents.slice(0, 3).map((ev) => (
-                    <div
-                      key={ev.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, ev)}
-                      onDragEnd={handleDragEnd}
-                      onClick={(e) => handleEventClick(e, ev)}
-                      className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
-                      style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
-                    >
-                      {ev.type === "task" && ev.priority && (
-                        <span className={`inline-block w-1.5 h-1.5 rounded-full mr-0.5 ${priorityColor(ev.priority)}`} />
+          {/* Month View */}
+          {viewMode === "month" && (
+            <div className="grid grid-cols-7 gap-1">
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-1">{d}</div>
+              ))}
+              {days.map((day) => {
+                const key = format(day, "yyyy-MM-dd");
+                const dayEvents = eventsByDay.get(key) || [];
+                const isToday = isSameDay(day, today);
+                const isCurrentMonth = isSameMonth(day, currentDate);
+                const isOver = dropTarget === `month-${key}`;
+                const maxEvents = isFullscreen ? 5 : 3;
+                return (
+                  <motion.div
+                    key={key} whileHover={{ scale: 1.01 }}
+                    onClick={() => handleDayClick(day)}
+                    onDragOver={(e) => handleDragOver(e, `month-${key}`)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleMonthDrop(e, day)}
+                    className={`relative rounded-lg p-1 text-left border transition-colors cursor-pointer
+                      ${isFullscreen ? "min-h-[100px]" : "min-h-[80px]"}
+                      ${isToday ? "border-primary bg-primary/5" : "border-transparent hover:border-border"}
+                      ${!isCurrentMonth ? "opacity-40" : ""}
+                      ${isOver ? "bg-primary/10 border-primary" : ""}`}
+                  >
+                    <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
+                      {format(day, "d")}
+                    </span>
+                    <div className="space-y-0.5 mt-0.5">
+                      {dayEvents.slice(0, maxEvents).map((ev) => (
+                        <div
+                          key={ev.id} draggable
+                          onDragStart={(e) => handleDragStart(e, ev)}
+                          onDragEnd={handleDragEnd}
+                          onClick={(e) => handleEventClick(e, ev)}
+                          className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
+                          style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
+                        >
+                          {ev.type === "task" && ev.priority && (
+                            <span className={`inline-block w-1.5 h-1.5 rounded-full mr-0.5 ${priorityColor(ev.priority)}`} />
+                          )}
+                          {ev.title}
+                        </div>
+                      ))}
+                      {dayEvents.length > maxEvents && (
+                        <span className="text-[8px] text-muted-foreground">+{dayEvents.length - maxEvents} more</span>
                       )}
-                      {ev.title}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Week View */}
+          {viewMode === "week" && (
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div className="grid grid-cols-[50px_repeat(7,1fr)] border-b border-border bg-muted/30">
+                <div className="p-1" />
+                {days.map((day) => (
+                  <div
+                    key={day.toISOString()}
+                    className={`text-center py-2 text-xs font-medium cursor-pointer hover:bg-muted/50 transition-colors
+                      ${isSameDay(day, today) ? "text-primary bg-primary/5" : "text-foreground"}`}
+                    onClick={() => { setCurrentDate(day); setViewMode("day"); }}
+                  >
+                    <div>{format(day, "EEE")}</div>
+                    <div className={`text-lg font-bold ${isSameDay(day, today) ? "text-primary" : ""}`}>{format(day, "d")}</div>
+                  </div>
+                ))}
+              </div>
+              <div ref={scrollRef} className={`overflow-y-auto ${calendarHeight}`}>
+                <div className="grid grid-cols-[50px_repeat(7,1fr)] relative">
+                  {HOURS.map((hour) => (
+                    <div key={hour} className="contents">
+                      <div className="text-[10px] text-muted-foreground text-right pr-2 py-1 h-16 border-b border-border/30">
+                        {hour.toString().padStart(2, "0")}:00
+                      </div>
+                      {days.map((day) => {
+                        const key = format(day, "yyyy-MM-dd");
+                        const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+                        const cellKey = `week-${key}-${hour}`;
+                        const isOver = dropTarget === cellKey;
+                        return (
+                          <div
+                            key={`${key}-${hour}`}
+                            className={`h-16 border-b border-l border-border/30 relative cursor-pointer transition-colors
+                              ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
+                            onClick={() => {
+                              const d = new Date(day); d.setHours(hour, 0, 0, 0);
+                              setSelectedDate(d);
+                              setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
+                              setCreateDialogOpen(true);
+                            }}
+                            onDragOver={(e) => handleDragOver(e, cellKey)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, day, hour)}
+                          >
+                            {hourEvents.map((ev) => {
+                              const duration = differenceInMinutes(ev.end, ev.start);
+                              const heightPx = Math.max(16, (duration / 60) * 64);
+                              const topPx = (ev.start.getMinutes() / 60) * 64;
+                              return (
+                                <div
+                                  key={ev.id} draggable
+                                  onDragStart={(e) => handleDragStart(e, ev)}
+                                  onDragEnd={handleDragEnd}
+                                  onClick={(e) => handleEventClick(e, ev)}
+                                  className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-grab active:cursor-grabbing hover:opacity-80 z-10"
+                                  style={{
+                                    top: `${topPx}px`, height: `${heightPx}px`,
+                                    backgroundColor: `${ev.color}25`, color: ev.color,
+                                    borderLeft: `2px solid ${ev.color}`,
+                                  }}
+                                >
+                                  {ev.title}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
                     </div>
                   ))}
-                  {dayEvents.length > 3 && (
-                    <span className="text-[8px] text-muted-foreground">+{dayEvents.length - 3} more</span>
-                  )}
                 </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Week View */}
-      {viewMode === "week" && (
-        <div className="border border-border rounded-lg overflow-hidden">
-          {/* Day headers */}
-          <div className="grid grid-cols-[50px_repeat(7,1fr)] border-b border-border bg-muted/30">
-            <div className="p-1" />
-            {days.map((day) => (
-              <div
-                key={day.toISOString()}
-                className={`text-center py-2 text-xs font-medium cursor-pointer hover:bg-muted/50 transition-colors
-                  ${isSameDay(day, today) ? "text-primary bg-primary/5" : "text-foreground"}`}
-                onClick={() => { setCurrentDate(day); setViewMode("day"); }}
-              >
-                <div>{format(day, "EEE")}</div>
-                <div className={`text-lg font-bold ${isSameDay(day, today) ? "text-primary" : ""}`}>{format(day, "d")}</div>
               </div>
-            ))}
-          </div>
-          {/* Time grid */}
-          <div ref={scrollRef} className="max-h-[500px] overflow-y-auto">
-            <div className="grid grid-cols-[50px_repeat(7,1fr)] relative">
-              {HOURS.map((hour) => (
-                <div key={hour} className="contents">
-                  <div className="text-[10px] text-muted-foreground text-right pr-2 py-1 h-16 border-b border-border/30">
-                    {hour.toString().padStart(2, "0")}:00
-                  </div>
-                  {days.map((day) => {
-                    const key = format(day, "yyyy-MM-dd");
-                    const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
-                    const cellKey = `week-${key}-${hour}`;
-                    const isOver = dropTarget === cellKey;
-                    return (
-                      <div
-                        key={`${key}-${hour}`}
-                        className={`h-16 border-b border-l border-border/30 relative cursor-pointer transition-colors
-                          ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
-                        onClick={() => {
-                          const d = new Date(day);
-                          d.setHours(hour, 0, 0, 0);
-                          setSelectedDate(d);
-                          setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
-                          setCreateDialogOpen(true);
-                        }}
-                        onDragOver={(e) => handleDragOver(e, cellKey)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, day, hour)}
-                      >
+            </div>
+          )}
+
+          {/* Day View */}
+          {viewMode === "day" && (
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div ref={scrollRef} className={`overflow-y-auto ${calendarHeight}`}>
+                {HOURS.map((hour) => {
+                  const key = format(currentDate, "yyyy-MM-dd");
+                  const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+                  const cellKey = `day-${key}-${hour}`;
+                  const isOver = dropTarget === cellKey;
+                  return (
+                    <div
+                      key={hour}
+                      className={`flex border-b border-border/30 min-h-[64px] cursor-pointer transition-colors
+                        ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
+                      onClick={() => {
+                        const d = new Date(currentDate); d.setHours(hour, 0, 0, 0);
+                        setSelectedDate(d);
+                        setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
+                        setCreateDialogOpen(true);
+                      }}
+                      onDragOver={(e) => handleDragOver(e, cellKey)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, currentDate, hour)}
+                    >
+                      <div className="w-16 text-[11px] text-muted-foreground text-right pr-3 pt-1 flex-shrink-0">
+                        {hour.toString().padStart(2, "0")}:00
+                      </div>
+                      <div className="flex-1 relative py-0.5 space-y-0.5">
                         {hourEvents.map((ev) => {
                           const duration = differenceInMinutes(ev.end, ev.start);
-                          const heightPx = Math.max(16, (duration / 60) * 64);
-                          const topPx = (ev.start.getMinutes() / 60) * 64;
                           return (
                             <div
-                              key={ev.id}
-                              draggable
+                              key={ev.id} draggable
                               onDragStart={(e) => handleDragStart(e, ev)}
                               onDragEnd={handleDragEnd}
                               onClick={(e) => handleEventClick(e, ev)}
-                              className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-grab active:cursor-grabbing hover:opacity-80 z-10"
+                              className="rounded px-2 py-1 text-xs font-medium cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
                               style={{
-                                top: `${topPx}px`, height: `${heightPx}px`,
-                                backgroundColor: `${ev.color}25`, color: ev.color,
-                                borderLeft: `2px solid ${ev.color}`,
+                                backgroundColor: `${ev.color}20`, color: ev.color,
+                                borderLeft: `3px solid ${ev.color}`,
                               }}
                             >
-                              {ev.title}
+                              <div className="flex items-center gap-2">
+                                <span>{ev.title}</span>
+                                <span className="text-[10px] opacity-70">{duration}min</span>
+                              </div>
+                              {ev.description && <p className="text-[10px] opacity-60 mt-0.5 truncate">{ev.description}</p>}
                             </div>
                           );
                         })}
                       </div>
-                    );
-                  })}
-                </div>
-              ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* Day View */}
-      {viewMode === "day" && (
-        <div className="border border-border rounded-lg overflow-hidden">
-          <div ref={scrollRef} className="max-h-[500px] overflow-y-auto">
-            {HOURS.map((hour) => {
-              const key = format(currentDate, "yyyy-MM-dd");
-              const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
-              const cellKey = `day-${key}-${hour}`;
-              const isOver = dropTarget === cellKey;
-              return (
-                <div
-                  key={hour}
-                  className={`flex border-b border-border/30 min-h-[64px] cursor-pointer transition-colors
-                    ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
-                  onClick={() => {
-                    const d = new Date(currentDate);
-                    d.setHours(hour, 0, 0, 0);
-                    setSelectedDate(d);
-                    setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
-                    setCreateDialogOpen(true);
-                  }}
-                  onDragOver={(e) => handleDragOver(e, cellKey)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, currentDate, hour)}
-                >
-                  <div className="w-16 text-[11px] text-muted-foreground text-right pr-3 pt-1 flex-shrink-0">
-                    {hour.toString().padStart(2, "0")}:00
-                  </div>
-                  <div className="flex-1 relative py-0.5 space-y-0.5">
-                    {hourEvents.map((ev) => {
-                      const duration = differenceInMinutes(ev.end, ev.start);
-                      return (
-                        <div
-                          key={ev.id}
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, ev)}
-                          onDragEnd={handleDragEnd}
-                          onClick={(e) => handleEventClick(e, ev)}
-                          className="rounded px-2 py-1 text-xs font-medium cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
-                          style={{
-                            backgroundColor: `${ev.color}20`, color: ev.color,
-                            borderLeft: `3px solid ${ev.color}`,
-                          }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span>{ev.title}</span>
-                            <span className="text-[10px] opacity-70">{duration}min</span>
-                          </div>
-                          {ev.description && <p className="text-[10px] opacity-60 mt-0.5 truncate">{ev.description}</p>}
-                        </div>
-                      );
-                    })}
+        {/* AI Suggestions Panel */}
+        <AnimatePresence>
+          {showSuggestionsPanel && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className={`${isFullscreen ? "lg:w-80" : "w-full"} flex-shrink-0`}
+            >
+              <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5 text-foreground">
+                    <Sparkles size={14} className="text-primary" /> AI Suggestions
+                  </h3>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={fetchSuggestions} disabled={isLoadingSuggestions}>
+                      {isLoadingSuggestions ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowSuggestionsPanel(false)}>
+                      <X size={12} />
+                    </Button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+
+                {isLoadingSuggestions && aiSuggestions.length === 0 && (
+                  <div className="py-8 text-center">
+                    <Loader2 className="animate-spin mx-auto text-primary mb-2" size={20} />
+                    <p className="text-xs text-muted-foreground">Analysing your tasks and projects…</p>
+                  </div>
+                )}
+
+                {!isLoadingSuggestions && aiSuggestions.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No suggestions yet. Click the refresh button to generate AI task recommendations.
+                  </p>
+                )}
+
+                <ScrollArea className={isFullscreen ? "max-h-[calc(100vh-320px)]" : "max-h-[300px]"}>
+                  <div className="space-y-2 pr-2">
+                    {aiSuggestions.map((s, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="border border-border rounded-lg p-3 space-y-2 hover:border-primary/30 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-xs font-medium text-foreground leading-tight">{s.title}</h4>
+                          <Badge variant={priorityBadgeColor(s.priority) as any} className="text-[9px] shrink-0 capitalize">
+                            {s.priority}
+                          </Badge>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">{s.description}</p>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                          <span className="flex items-center gap-0.5"><Clock size={10} />{s.suggested_time}</span>
+                          <span>·</span>
+                          <span>{s.estimated_minutes}min</span>
+                        </div>
+                        <p className="text-[9px] text-muted-foreground/70 italic">{s.reason}</p>
+                        <Button
+                          size="sm" variant="outline"
+                          className="w-full text-xs h-7 gap-1"
+                          onClick={() => addSuggestionAsTask(s)}
+                        >
+                          <Plus size={12} /> Add to Calendar
+                        </Button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Create Event Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -626,34 +807,19 @@ const PersonalCalendar = () => {
             <div>
               <Label className="text-xs">Type</Label>
               <div className="flex gap-2 mt-1">
-                <Button
-                  variant={createType === "focus" ? "default" : "outline"} size="sm"
-                  onClick={() => setCreateType("focus")} className="text-xs"
-                >Focus Block</Button>
-                <Button
-                  variant={createType === "task" ? "default" : "outline"} size="sm"
-                  onClick={() => setCreateType("task")} className="text-xs"
-                >Task</Button>
+                <Button variant={createType === "focus" ? "default" : "outline"} size="sm" onClick={() => setCreateType("focus")} className="text-xs">Focus Block</Button>
+                <Button variant={createType === "task" ? "default" : "outline"} size="sm" onClick={() => setCreateType("task")} className="text-xs">Task</Button>
               </div>
             </div>
             <div>
               <Label>Title</Label>
-              <Input
-                value={newEvent.title}
-                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                placeholder={createType === "focus" ? "Focus Time" : "Task title"}
-              />
+              <Input value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} placeholder={createType === "focus" ? "Focus Time" : "Task title"} />
             </div>
             {createType === "task" && (
               <>
                 <div>
                   <Label>Description</Label>
-                  <Textarea
-                    value={newEvent.description}
-                    onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                    placeholder="Optional description"
-                    rows={2}
-                  />
+                  <Textarea value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} placeholder="Optional description" rows={2} />
                 </div>
                 <div>
                   <Label>Priority</Label>
@@ -673,10 +839,7 @@ const PersonalCalendar = () => {
               <div><Label>Start</Label><Input type="time" value={newEvent.start} onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })} /></div>
               <div><Label>End</Label><Input type="time" value={newEvent.end} onChange={(e) => setNewEvent({ ...newEvent, end: e.target.value })} /></div>
             </div>
-            <Button
-              className="w-full" disabled={!newEvent.start || !newEvent.end}
-              onClick={() => createType === "focus" ? createFocusBlock.mutate() : createTask.mutate()}
-            >
+            <Button className="w-full" disabled={!newEvent.start || !newEvent.end} onClick={() => createType === "focus" ? createFocusBlock.mutate() : createTask.mutate(undefined)}>
               {createType === "focus" ? "Add Focus Block" : "Create Task"}
             </Button>
           </div>
@@ -702,15 +865,9 @@ const PersonalCalendar = () => {
                 <span className="text-xs">({differenceInMinutes(selectedEvent.end, selectedEvent.start)} min)</span>
               </div>
               <Badge variant="outline" className="capitalize">{selectedEvent.type}</Badge>
-              {selectedEvent.priority && (
-                <Badge variant="outline" className="capitalize ml-1">{selectedEvent.priority} priority</Badge>
-              )}
-              {selectedEvent.status && (
-                <Badge variant="secondary" className="capitalize ml-1">{selectedEvent.status}</Badge>
-              )}
-              {selectedEvent.description && (
-                <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>
-              )}
+              {selectedEvent.priority && <Badge variant="outline" className="capitalize ml-1">{selectedEvent.priority} priority</Badge>}
+              {selectedEvent.status && <Badge variant="secondary" className="capitalize ml-1">{selectedEvent.status}</Badge>}
+              {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
               {selectedEvent.type === "focus" && (
                 <Button variant="destructive" size="sm" onClick={() => deleteFocusBlock.mutate(selectedEvent.id)}>
                   <Trash2 size={14} className="mr-1" /> Delete
