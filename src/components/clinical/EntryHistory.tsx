@@ -38,7 +38,7 @@ const EntryHistory = ({ clientId, toolType, renderEntry, refreshKey }: EntryHist
         .limit(50);
 
       if (data && data.length > 0) {
-        const fillerIds = [...new Set(data.map((e) => e.filled_by))];
+        const fillerIds = [...new Set(data.map((e: any) => e.filled_by))] as string[];
         const { data: profiles } = await supabase
           .from("profiles")
           .select("id, full_name")
