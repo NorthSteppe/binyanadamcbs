@@ -259,7 +259,7 @@ const CourseDetail = () => {
                     </div>
 
                     {purchased ? (
-                      <div className="flex items-center gap-2 text-green-400 mb-4">
+                      <div className="flex items-center gap-2 text-primary mb-4">
                         <Check size={18} />
                         <span className="font-medium">You own this course</span>
                       </div>
