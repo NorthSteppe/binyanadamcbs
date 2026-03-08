@@ -56,6 +56,11 @@ import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
 import TodoManager from "./pages/admin/TodoManager";
 import StaffTodoManager from "./pages/admin/StaffTodoManager";
 import WhatsAppButton from "./components/WhatsAppButton";
+// Courses
+import Courses from "./pages/Courses";
+import CourseDetail from "./pages/CourseDetail";
+import CourseManager from "./pages/admin/CourseManager";
+import CourseLessonManager from "./pages/admin/CourseLessonManager";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +101,8 @@ const App = () => (
                   <Route path="/team/adam-dayan" element={<TeamAdam />} />
                   <Route path="/team/brionny-pearson" element={<TeamBrionny />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/courses/:slug" element={<CourseDetail />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
 
@@ -125,6 +132,8 @@ const App = () => (
                   <Route path="/admin/staff-todos" element={<AdminRoute><StaffTodoManager /></AdminRoute>} />
                   <Route path="/admin/auth-settings" element={<AdminRoute><AuthSettings /></AdminRoute>} />
                   <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
+                  <Route path="/admin/courses" element={<AdminRoute><CourseManager /></AdminRoute>} />
+                  <Route path="/admin/courses/:courseId/lessons" element={<AdminRoute><CourseLessonManager /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
