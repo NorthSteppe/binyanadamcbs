@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { LogIn, UserPlus, CirclePlus, Shield, Users, LayoutDashboard } from "lucide-react";
+import { Shield, Users, LayoutDashboard, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroCarousel from "@/components/HeroCarousel";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -28,69 +29,89 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header hidelogo={showBigLogo} />
 
-      <section className="flex-1 flex items-center pt-20">
-        <div className="container py-16 md:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Text column */}
-            <div>
-              <div className="mb-6">
-                <img
-                  src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
-                  alt="Binyan Adam"
-                  className={`h-16 md:h-20 drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-opacity duration-300 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
-                />
-              </div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl text-foreground leading-tight mb-4">
-                {t.landing.title}
-              </h1>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg">
-                {t.landing.subtitle}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button size="lg" asChild className="rounded-full px-8">
-                  <Link to="/services" className="inline-flex items-center gap-2">
-                    {t.landing.exploreServices} <CirclePlus size={18} />
-                  </Link>
-                </Button>
-                {user ? (
-                  <Button size="lg" variant="outline" asChild className="rounded-full px-8">
-                    <Link to={isAdmin ? "/admin" : isTeamMember ? "/staff" : "/portal"} className="inline-flex items-center gap-2">
-                      {isAdmin ? <><Shield size={18} /> Admin Portal</> : isTeamMember ? <><Users size={18} /> Therapist Portal</> : <><LayoutDashboard size={18} /> My Portal</>}
-                    </Link>
-                  </Button>
-                ) : (
-                  <>
-                    <Button size="lg" variant="outline" asChild className="rounded-full px-8">
-                      <Link to="/login" className="inline-flex items-center gap-2">
-                        <LogIn size={18} /> {t.landing.logIn}
-                      </Link>
-                    </Button>
-                    <Button size="lg" variant="ghost" asChild className="rounded-full px-8">
-                      <Link to="/signup" className="inline-flex items-center gap-2">
-                        <UserPlus size={18} /> {t.landing.signUp}
-                      </Link>
-                    </Button>
-                  </>
-                )}
-              </div>
+      {/* Full-bleed hero section */}
+      <section className="relative min-h-screen flex items-end">
+        {/* Background carousel */}
+        <div className="absolute inset-0 z-0">
+          <HeroCarousel onQuoteChange={handleQuoteChange} />
+          {/* Dark overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
+        </div>
+
+        <div className="container relative z-10 pb-24 md:pb-32 pt-40">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-2xl"
+          >
+            {/* Logo */}
+            <div className="mb-8">
+              <img
+                src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
+                alt="Binyan Adam"
+                className={`h-14 md:h-16 transition-opacity duration-500 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
+              />
             </div>
 
-            {/* Image carousel column */}
-            <div className="hidden lg:block">
-              <div className="relative">
-                <HeroCarousel onQuoteChange={handleQuoteChange} />
-                {(quote.text || t.landing.quote) && (
-                  <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 bg-card rounded-2xl p-5 shadow-lg border border-border/50 max-w-xs">
-                    <blockquote className="text-sm text-foreground italic leading-relaxed mb-1">
-                      {quote.text || t.landing.quote}
-                    </blockquote>
-                    <p className="text-xs text-muted-foreground font-medium">{quote.author || t.landing.quoteAuthor}</p>
-                  </div>
-                )}
-              </div>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6 font-serif">
+              {t.landing.title}
+            </h1>
+
+            <p className="text-base md:text-lg text-foreground/60 leading-relaxed mb-10 max-w-lg font-light">
+              {t.landing.subtitle}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
+                <Link to="/services" className="inline-flex items-center gap-3">
+                  {t.landing.exploreServices} <ArrowRight size={16} />
+                </Link>
+              </Button>
+
+              {user ? (
+                <Button size="lg" variant="outline" asChild className="border-foreground/20 text-foreground hover:bg-foreground/10 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
+                  <Link to={isAdmin ? "/admin" : isTeamMember ? "/staff" : "/portal"} className="inline-flex items-center gap-3">
+                    {isAdmin ? <><Shield size={16} /> Admin Portal</> : isTeamMember ? <><Users size={16} /> Therapist Portal</> : <><LayoutDashboard size={16} /> My Portal</>}
+                  </Link>
+                </Button>
+              ) : (
+                <Button size="lg" variant="outline" asChild className="border-foreground/20 text-foreground hover:bg-foreground/10 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
+                  <Link to="/contact" className="inline-flex items-center gap-3">
+                    Get in Touch
+                  </Link>
+                </Button>
+              )}
             </div>
-          </div>
+          </motion.div>
+
+          {/* Quote overlay */}
+          {(quote.text || t.landing.quote) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="absolute bottom-24 right-8 hidden xl:block max-w-xs"
+            >
+              <blockquote className="text-sm text-foreground/50 italic leading-relaxed border-l border-primary/30 pl-4">
+                {quote.text || t.landing.quote}
+              </blockquote>
+              <p className="text-xs text-foreground/30 mt-2 pl-4">{quote.author || t.landing.quoteAuthor}</p>
+            </motion.div>
+          )}
         </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="absolute bottom-8 right-8 z-10 hidden md:flex flex-col items-center gap-2"
+        >
+          <span className="text-[10px] uppercase tracking-[0.3em] text-foreground/30 [writing-mode:vertical-lr]">Scroll</span>
+          <div className="w-px h-12 bg-gradient-to-b from-foreground/30 to-transparent" />
+        </motion.div>
       </section>
 
       <Footer />

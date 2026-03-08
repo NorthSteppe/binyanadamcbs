@@ -14,21 +14,26 @@ const Services = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <section className="pt-32 pb-24">
+      {/* Hero */}
+      <section className="pt-40 pb-24">
         <div className="container">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-3xl"
           >
-            <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">{t.services.tagline}</p>
-            <h2 className="text-4xl md:text-5xl mb-5">{t.services.title}</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-lg">{t.services.subtitle}</p>
+            <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{t.services.tagline}</p>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif leading-[1.05] mb-6">{t.services.title}</h1>
+            <p className="text-foreground/60 max-w-xl text-lg font-light">{t.services.subtitle}</p>
           </motion.div>
+        </div>
+      </section>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Cards */}
+      <section className="pb-24">
+        <div className="container">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <ServiceCard title={t.services.cards.education.title} description={t.services.cards.education.description} icon={School} path="/education" colorClass="bg-education text-education-foreground" />
             <ServiceCard title={t.services.cards.therapy.title} description={t.services.cards.therapy.description} icon={Heart} path="/therapy" colorClass="bg-therapy text-therapy-foreground" />
             <ServiceCard title={t.services.cards.family.title} description={t.services.cards.family.description} icon={Users} path="/families" colorClass="bg-family text-family-foreground" />
@@ -38,60 +43,64 @@ const Services = () => {
         </div>
       </section>
 
-      <section className="py-24 bg-card">
+      {/* Approach */}
+      <section className="py-24 border-t border-border">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-20 items-start">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">{t.services.approachTagline}</p>
-              <h2 className="text-3xl md:text-4xl mb-6">{t.services.approachTitle}</h2>
-              <p className="text-muted-foreground leading-relaxed mb-6 text-base">{t.services.approachText}</p>
+              <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{t.services.approachTagline}</p>
+              <h2 className="text-4xl md:text-5xl font-serif mb-8">{t.services.approachTitle}</h2>
+              <p className="text-foreground/60 leading-relaxed mb-8 font-light">{t.services.approachText}</p>
               <div className="space-y-4">
                 {t.services.approachPoints.map((point) => (
                   <div key={point} className="flex items-start gap-3">
-                    <CheckCircle2 className="text-primary mt-0.5 flex-shrink-0" size={20} />
-                    <p className="text-foreground">{point}</p>
+                    <CheckCircle2 className="text-primary mt-0.5 flex-shrink-0" size={18} />
+                    <p className="text-foreground/80 font-light">{point}</p>
                   </div>
                 ))}
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-background rounded-3xl p-10 border border-border/50"
+              className="bg-card border border-border p-10"
             >
-              <blockquote className="text-2xl leading-relaxed text-foreground mb-6 italic">
+              <blockquote className="text-2xl font-serif leading-relaxed text-foreground mb-6 italic">
                 {t.services.quoteText}
               </blockquote>
               <div>
-                <p className="font-sans font-semibold text-foreground">{t.services.quoteAuthor}</p>
-                <p className="text-sm text-muted-foreground">{t.services.quoteRole}</p>
+                <p className="text-sm font-medium text-foreground">{t.services.quoteAuthor}</p>
+                <p className="text-xs text-muted-foreground">{t.services.quoteRole}</p>
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      <section className="py-24">
-        <div className="container text-center">
-          <p className="text-sm font-sans font-semibold uppercase tracking-widest text-primary mb-3">{t.services.credentialsTagline}</p>
-          <h2 className="text-3xl md:text-4xl mb-12">{t.services.credentialsTitle}</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
+      {/* Credentials */}
+      <section className="py-24 border-t border-border">
+        <div className="container">
+          <div className="text-center mb-16">
+            <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{t.services.credentialsTagline}</p>
+            <h2 className="text-4xl md:text-5xl font-serif">{t.services.credentialsTitle}</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
             {t.services.credentials.map((cred, i) => (
               <motion.div
                 key={cred}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.4 }}
-                className="bg-card rounded-2xl px-6 py-5 text-sm font-medium text-foreground border border-border/50"
+                transition={{ delay: i * 0.06 }}
+                className="bg-card border border-border px-6 py-5 text-sm text-foreground/80 font-light"
               >
                 {cred}
               </motion.div>
@@ -100,19 +109,19 @@ const Services = () => {
         </div>
       </section>
 
+      {/* CTA */}
       <section className="py-24 bg-primary">
         <div className="container text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-4xl text-primary-foreground mb-4">{t.services.ctaTitle}</h2>
-            <p className="text-primary-foreground/70 mb-8 max-w-md mx-auto">{t.services.ctaText}</p>
-            <Button size="lg" variant="secondary" asChild className="rounded-full px-8">
-              <Link to="/contact" className="inline-flex items-center gap-2">
-                {t.services.ctaButton} <ArrowRight size={18} />
+            <h2 className="text-4xl md:text-5xl font-serif text-primary-foreground mb-4">{t.services.ctaTitle}</h2>
+            <p className="text-primary-foreground/60 mb-10 max-w-md mx-auto font-light">{t.services.ctaText}</p>
+            <Button size="lg" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
+              <Link to="/contact" className="inline-flex items-center gap-3">
+                {t.services.ctaButton} <ArrowRight size={16} />
               </Link>
             </Button>
           </motion.div>
