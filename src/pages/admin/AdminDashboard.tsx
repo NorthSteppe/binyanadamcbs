@@ -1,13 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
   ListTodo, BookOpen, Wrench, UserCog, LayoutDashboard, ArrowRight,
-  Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, ShieldAlert, KeyRound,
+  Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, ShieldAlert, KeyRound, Pencil,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
+import { useEditMode } from "@/hooks/useEditMode";
 
 interface ToolItem {
   label: string;
