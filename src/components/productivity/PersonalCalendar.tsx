@@ -140,13 +140,31 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
   const { data: sessions = [] } = useQuery({
     queryKey: ["my_sessions", rangeStart.toISOString(), rangeEnd.toISOString()],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const userId = session!.user.id;
+      // Fetch sessions where user is the client OR an attendee
+      const { data: clientSessions, error: e1 } = await supabase
         .from("sessions")
-        .select("id, title, session_date, status, duration_minutes, description")
+        .select("id, title, session_date, status, duration_minutes, description, meeting_url, meeting_platform, attendee_ids")
         .gte("session_date", rangeStart.toISOString())
         .lte("session_date", rangeEnd.toISOString());
-      if (error) throw error;
-      return data || [];
+      if (e1) throw e1;
+      
+      // Also fetch sessions where user is in attendee_ids (team sessions)
+      const { data: attendeeSessions, error: e2 } = await supabase
+        .from("sessions")
+        .select("id, title, session_date, status, duration_minutes, description, meeting_url, meeting_platform, attendee_ids")
+        .contains("attendee_ids", [userId])
+        .gte("session_date", rangeStart.toISOString())
+        .lte("session_date", rangeEnd.toISOString());
+      if (e2) throw e2;
+      
+      // Merge and deduplicate
+      const allSessions = [...(clientSessions || [])];
+      const existingIds = new Set(allSessions.map((s: any) => s.id));
+      (attendeeSessions || []).forEach((s: any) => {
+        if (!existingIds.has(s.id)) allSessions.push(s);
+      });
+      return allSessions;
     },
     enabled: !!session && showSessions,
   });
