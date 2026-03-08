@@ -4,6 +4,7 @@ import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
   ListTodo, BookOpen, Wrench, UserCog, LayoutDashboard, ArrowRight,
   Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, ShieldAlert, KeyRound, Pencil,
+  GraduationCap,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -45,6 +46,7 @@ const categories: ToolCategory[] = [
     tools: [
       { label: "Service Options", path: "/admin/service-options", icon: Settings, description: "Define session types, durations, and pricing" },
       { label: "Calendar", path: "/admin/calendar", icon: Calendar, description: "View and manage all scheduled sessions" },
+      { label: "Course Manager", path: "/admin/courses", icon: GraduationCap, description: "Create and manage online courses, lessons, and videos" },
     ],
   },
   {
