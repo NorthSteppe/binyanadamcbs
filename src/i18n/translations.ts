@@ -1602,8 +1602,8 @@ export const translations = {
       therapy: "טיפול",
       families: "משפחות",
       organisations: "ארגונים",
-      supervision: "הנחיה",
-      bookConsultation: "קביעת ייעוץ",
+      supervision: "סופרוויז׳ן",
+      bookConsultation: "לקביעת ייעוץ",
     },
 
     // Landing page
