@@ -56,6 +56,8 @@ const PersonalCalendar = () => {
   const [createType, setCreateType] = useState<"focus" | "task">("focus");
   const [newEvent, setNewEvent] = useState({ title: "", start: "09:00", end: "10:00", description: "", priority: "medium" });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   // Date range based on view
   const { rangeStart, rangeEnd } = useMemo(() => {
@@ -242,6 +244,94 @@ const PersonalCalendar = () => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["focus_blocks"] }); setDetailDialogOpen(false); toast.success("Deleted"); },
   });
 
+  const rescheduleEvent = useMutation({
+    mutationFn: async ({ event, newStart }: { event: CalendarEvent; newStart: Date }) => {
+      const duration = differenceInMinutes(event.end, event.start);
+      const newEnd = new Date(newStart.getTime() + duration * 60000);
+      if (event.type === "focus") {
+        const { error } = await supabase.from("focus_blocks").update({
+          start_time: newStart.toISOString(), end_time: newEnd.toISOString(),
+        }).eq("id", event.id);
+        if (error) throw error;
+      } else if (event.type === "task") {
+        const { error } = await supabase.from("user_tasks").update({
+          scheduled_start: newStart.toISOString(), scheduled_end: newEnd.toISOString(),
+          due_date: newStart.toISOString(),
+        }).eq("id", event.id);
+        if (error) throw error;
+      } else if (event.type === "session") {
+        const { error } = await supabase.from("sessions").update({
+          session_date: newStart.toISOString(),
+        }).eq("id", event.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["focus_blocks"] });
+      qc.invalidateQueries({ queryKey: ["scheduled_tasks"] });
+      qc.invalidateQueries({ queryKey: ["scheduled_tasks_time"] });
+      qc.invalidateQueries({ queryKey: ["my_sessions"] });
+      qc.invalidateQueries({ queryKey: ["user_tasks"] });
+      toast.success("Event rescheduled");
+    },
+    onError: () => toast.error("Failed to reschedule"),
+  });
+
+  const handleDragStart = (e: React.DragEvent, event: CalendarEvent) => {
+    e.stopPropagation();
+    setDraggedEvent(event);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", event.id);
+    // Make ghost semi-transparent
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "0.5";
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "1";
+    }
+    setDraggedEvent(null);
+    setDropTarget(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, cellKey: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDropTarget(cellKey);
+  };
+
+  const handleDragLeave = () => {
+    setDropTarget(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, day: Date, hour: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTarget(null);
+    if (!draggedEvent) return;
+    const newStart = new Date(day);
+    newStart.setHours(hour, 0, 0, 0);
+    // Don't reschedule if same time
+    if (draggedEvent.start.getTime() === newStart.getTime()) return;
+    rescheduleEvent.mutate({ event: draggedEvent, newStart });
+    setDraggedEvent(null);
+  };
+
+  const handleMonthDrop = (e: React.DragEvent, day: Date) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTarget(null);
+    if (!draggedEvent) return;
+    // Keep original time, change the date
+    const newStart = new Date(day);
+    newStart.setHours(draggedEvent.start.getHours(), draggedEvent.start.getMinutes(), 0, 0);
+    if (draggedEvent.start.getTime() === newStart.getTime()) return;
+    rescheduleEvent.mutate({ event: draggedEvent, newStart });
+    setDraggedEvent(null);
+  };
+
   const closeCreateDialog = () => {
     setCreateDialogOpen(false);
     setNewEvent({ title: "", start: "09:00", end: "10:00", description: "", priority: "medium" });
@@ -342,13 +432,18 @@ const PersonalCalendar = () => {
             const dayEvents = eventsByDay.get(key) || [];
             const isToday = isSameDay(day, today);
             const isCurrentMonth = isSameMonth(day, currentDate);
+            const isOver = dropTarget === `month-${key}`;
             return (
-              <motion.button
+              <motion.div
                 key={key} whileHover={{ scale: 1.02 }}
                 onClick={() => handleDayClick(day)}
-                className={`relative rounded-lg p-1 min-h-[80px] text-left border transition-colors
+                onDragOver={(e) => handleDragOver(e, `month-${key}`)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleMonthDrop(e, day)}
+                className={`relative rounded-lg p-1 min-h-[80px] text-left border transition-colors cursor-pointer
                   ${isToday ? "border-primary bg-primary/5" : "border-transparent hover:border-border"}
-                  ${!isCurrentMonth ? "opacity-40" : ""}`}
+                  ${!isCurrentMonth ? "opacity-40" : ""}
+                  ${isOver ? "bg-primary/10 border-primary" : ""}`}
               >
                 <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
                   {format(day, "d")}
@@ -357,8 +452,11 @@ const PersonalCalendar = () => {
                   {dayEvents.slice(0, 3).map((ev) => (
                     <div
                       key={ev.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, ev)}
+                      onDragEnd={handleDragEnd}
                       onClick={(e) => handleEventClick(e, ev)}
-                      className="text-[9px] px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 transition-opacity"
+                      className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
                       style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
                     >
                       {ev.type === "task" && ev.priority && (
@@ -371,7 +469,7 @@ const PersonalCalendar = () => {
                     <span className="text-[8px] text-muted-foreground">+{dayEvents.length - 3} more</span>
                   )}
                 </div>
-              </motion.button>
+              </motion.div>
             );
           })}
         </div>
@@ -406,10 +504,13 @@ const PersonalCalendar = () => {
                   {days.map((day) => {
                     const key = format(day, "yyyy-MM-dd");
                     const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+                    const cellKey = `week-${key}-${hour}`;
+                    const isOver = dropTarget === cellKey;
                     return (
                       <div
                         key={`${key}-${hour}`}
-                        className="h-16 border-b border-l border-border/30 relative cursor-pointer hover:bg-muted/20 transition-colors"
+                        className={`h-16 border-b border-l border-border/30 relative cursor-pointer transition-colors
+                          ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
                         onClick={() => {
                           const d = new Date(day);
                           d.setHours(hour, 0, 0, 0);
@@ -417,6 +518,9 @@ const PersonalCalendar = () => {
                           setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
                           setCreateDialogOpen(true);
                         }}
+                        onDragOver={(e) => handleDragOver(e, cellKey)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, day, hour)}
                       >
                         {hourEvents.map((ev) => {
                           const duration = differenceInMinutes(ev.end, ev.start);
@@ -425,8 +529,11 @@ const PersonalCalendar = () => {
                           return (
                             <div
                               key={ev.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, ev)}
+                              onDragEnd={handleDragEnd}
                               onClick={(e) => handleEventClick(e, ev)}
-                              className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-pointer hover:opacity-80 z-10"
+                              className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-grab active:cursor-grabbing hover:opacity-80 z-10"
                               style={{
                                 top: `${topPx}px`, height: `${heightPx}px`,
                                 backgroundColor: `${ev.color}25`, color: ev.color,
@@ -454,10 +561,13 @@ const PersonalCalendar = () => {
             {HOURS.map((hour) => {
               const key = format(currentDate, "yyyy-MM-dd");
               const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+              const cellKey = `day-${key}-${hour}`;
+              const isOver = dropTarget === cellKey;
               return (
                 <div
                   key={hour}
-                  className="flex border-b border-border/30 min-h-[64px] cursor-pointer hover:bg-muted/20 transition-colors"
+                  className={`flex border-b border-border/30 min-h-[64px] cursor-pointer transition-colors
+                    ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
                   onClick={() => {
                     const d = new Date(currentDate);
                     d.setHours(hour, 0, 0, 0);
@@ -465,6 +575,9 @@ const PersonalCalendar = () => {
                     setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
                     setCreateDialogOpen(true);
                   }}
+                  onDragOver={(e) => handleDragOver(e, cellKey)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, currentDate, hour)}
                 >
                   <div className="w-16 text-[11px] text-muted-foreground text-right pr-3 pt-1 flex-shrink-0">
                     {hour.toString().padStart(2, "0")}:00
@@ -475,8 +588,11 @@ const PersonalCalendar = () => {
                       return (
                         <div
                           key={ev.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, ev)}
+                          onDragEnd={handleDragEnd}
                           onClick={(e) => handleEventClick(e, ev)}
-                          className="rounded px-2 py-1 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity"
+                          className="rounded px-2 py-1 text-xs font-medium cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
                           style={{
                             backgroundColor: `${ev.color}20`, color: ev.color,
                             borderLeft: `3px solid ${ev.color}`,
