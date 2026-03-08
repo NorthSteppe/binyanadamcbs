@@ -565,39 +565,54 @@ export type Database = {
           avatar_url: string | null
           bio: string
           created_at: string
+          credentials: string
           display_order: number
           id: string
           initials: string
           is_active: boolean
           name: string
           role: string
+          signature_url: string | null
           slug: string | null
+          social_linkedin: string
+          social_twitter: string
+          social_website: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           bio?: string
           created_at?: string
+          credentials?: string
           display_order?: number
           id?: string
           initials?: string
           is_active?: boolean
           name: string
           role?: string
+          signature_url?: string | null
           slug?: string | null
+          social_linkedin?: string
+          social_twitter?: string
+          social_website?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           bio?: string
           created_at?: string
+          credentials?: string
           display_order?: number
           id?: string
           initials?: string
           is_active?: boolean
           name?: string
           role?: string
+          signature_url?: string | null
           slug?: string | null
+          social_linkedin?: string
+          social_twitter?: string
+          social_website?: string
           updated_at?: string
         }
         Relationships: []

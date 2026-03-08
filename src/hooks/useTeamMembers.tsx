@@ -11,6 +11,11 @@ export interface TeamMember {
   avatar_url: string | null;
   display_order: number;
   is_active: boolean;
+  credentials: string;
+  signature_url: string | null;
+  social_linkedin: string;
+  social_twitter: string;
+  social_website: string;
 }
 
 export const useTeamMembers = () =>
