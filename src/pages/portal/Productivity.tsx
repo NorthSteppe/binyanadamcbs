@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { LayoutDashboard, Calendar, ListTodo, Sparkles, FolderOpen } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { LayoutDashboard, Calendar, ListTodo, Sparkles, FolderOpen, Maximize2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,9 +11,31 @@ import DailyPlanner from "@/components/productivity/DailyPlanner";
 import ProjectManager from "@/components/productivity/ProjectManager";
 
 const Productivity = () => {
+  const [calendarFullscreen, setCalendarFullscreen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* Fullscreen Calendar Overlay */}
+      <AnimatePresence>
+        {calendarFullscreen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background overflow-auto"
+          >
+            <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+              <PersonalCalendar
+                isFullscreen={true}
+                onToggleFullscreen={() => setCalendarFullscreen(false)}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <section className="pt-28 pb-20">
         <div className="container max-w-6xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -54,7 +76,10 @@ const Productivity = () => {
 
                 <TabsContent value="calendar">
                   <div className="bg-card border border-border/50 rounded-2xl p-4 md:p-6">
-                    <PersonalCalendar />
+                    <PersonalCalendar
+                      isFullscreen={false}
+                      onToggleFullscreen={() => setCalendarFullscreen(true)}
+                    />
                   </div>
                 </TabsContent>
 
