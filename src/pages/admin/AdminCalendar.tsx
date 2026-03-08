@@ -336,6 +336,104 @@ const AdminCalendar = () => {
     else { toast.success("Session updated"); setEditOpen(false); qc.invalidateQueries({ queryKey: ["team_sessions"] }); }
   };
 
+  // AI Auto-Scheduler
+  const handleAiSchedule = async () => {
+    setAiScheduling(true);
+    try {
+      const targetDate = format(currentDate, "yyyy-MM-dd");
+      // Get sessions for the current day
+      const dayStart = startOfDay(currentDate).toISOString();
+      const dayEnd = endOfDay(currentDate).toISOString();
+
+      const { data: daySessions } = await supabase
+        .from("sessions")
+        .select("*")
+        .gte("session_date", dayStart)
+        .lte("session_date", dayEnd);
+
+      const existingSessions = (daySessions || [])
+        .filter((s: any) => s.status === "scheduled")
+        .map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          time: format(parseISO(s.session_date), "HH:mm"),
+          duration_minutes: s.duration_minutes,
+          client_id: s.client_id,
+          client_name: nameMap.get(s.client_id) || "Unknown",
+        }));
+
+      // Get unscheduled sessions (sessions without a specific time, or staff todos that need scheduling)
+      const { data: unscheduledTodos } = await supabase
+        .from("staff_todos")
+        .select("*")
+        .eq("is_completed", false)
+        .or(`due_date.is.null,due_date.eq.${targetDate}`);
+
+      const unscheduledSessions = (unscheduledTodos || []).map((t: any) => ({
+        session_id: t.id,
+        title: t.title,
+        duration_minutes: 30,
+        assigned_to: t.assigned_to,
+        assigned_name: nameMap.get(t.assigned_to) || "Unknown",
+      }));
+
+      if (unscheduledSessions.length === 0) {
+        toast.info("No unscheduled tasks to auto-schedule for this day");
+        setAiScheduling(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("ai-schedule", {
+        body: {
+          mode: "team",
+          date: targetDate,
+          unscheduled_sessions: unscheduledSessions,
+          existing_sessions: existingSessions,
+          clients: clients.map((c) => ({ id: c.id, name: c.full_name })),
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        setAiScheduling(false);
+        return;
+      }
+
+      setAiSuggestions(data.scheduled || []);
+      setAiSummary(data.summary || "Schedule optimized");
+      setAiDialogOpen(true);
+    } catch (err: any) {
+      console.error("AI schedule error:", err);
+      toast.error("Failed to generate schedule suggestions");
+    } finally {
+      setAiScheduling(false);
+    }
+  };
+
+  const applyAiSuggestion = async (suggestion: typeof aiSuggestions[0]) => {
+    const dateTime = `${format(currentDate, "yyyy-MM-dd")}T${suggestion.suggested_time}:00`;
+    // Update the staff todo's due_date
+    const { error } = await supabase
+      .from("staff_todos")
+      .update({ due_date: format(currentDate, "yyyy-MM-dd") })
+      .eq("id", suggestion.session_id);
+    if (error) {
+      toast.error("Failed to apply suggestion");
+    } else {
+      toast.success(`Scheduled "${suggestion.title}" at ${suggestion.suggested_time}`);
+      qc.invalidateQueries({ queryKey: ["team_todos"] });
+    }
+  };
+
+  const applyAllAiSuggestions = async () => {
+    for (const s of aiSuggestions) {
+      await applyAiSuggestion(s);
+    }
+    setAiDialogOpen(false);
+    toast.success("All suggestions applied!");
+  };
+
   // Click handlers
   const handleDayClick = (day: Date, hour?: number) => {
     setSelectedDate(day);
