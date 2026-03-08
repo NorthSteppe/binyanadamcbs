@@ -336,6 +336,29 @@ const AdminCalendar = () => {
     qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
+  const handleSaveNotes = async () => {
+    if (!selectedEvent || !pasteNotes.trim()) return;
+    setSavingNotes(true);
+    try {
+      const timestamp = new Date().toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" });
+      const existingNotes = selectedEvent.notes || "";
+      const newNotes = existingNotes
+        ? `${existingNotes}\n\n--- Manual Note (${timestamp}) ---\n${pasteNotes.trim()}`
+        : `--- Manual Note (${timestamp}) ---\n${pasteNotes.trim()}`;
+
+      const { error } = await supabase.from("sessions").update({ notes: newNotes }).eq("id", selectedEvent.id);
+      if (error) throw error;
+      setSelectedEvent({ ...selectedEvent, notes: newNotes });
+      setPasteNotes("");
+      toast.success("Notes saved to session");
+      qc.invalidateQueries({ queryKey: ["team_sessions"] });
+    } catch {
+      toast.error("Failed to save notes");
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
   const openEdit = (event: CalendarEvent) => {
     if (event.type !== "session") return;
     setEditSessionId(event.id);
