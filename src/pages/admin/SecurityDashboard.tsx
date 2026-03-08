@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ShieldAlert, ShieldCheck, AlertTriangle, XCircle, Info,
