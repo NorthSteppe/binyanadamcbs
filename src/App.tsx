@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/i18n/LanguageContext";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { EditModeProvider } from "@/hooks/useEditMode";
 import EditModeToggle from "@/components/editable/EditModeToggle";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -59,6 +59,18 @@ import WhatsAppButton from "./components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
+const AppLoader = ({ children }: { children: React.ReactNode }) => {
+  const { loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
@@ -68,63 +80,65 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <ScrollToTop />
-              <Routes>
-                {/* Public */}
-                <Route path="/" element={<Index />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/education" element={<Education />} />
-                <Route path="/therapy" element={<Therapy />} />
-                <Route path="/families" element={<Families />} />
-                <Route path="/organisations" element={<Organisations />} />
-                <Route path="/supervision" element={<Supervision />} />
-                <Route path="/:serviceArea/:offerSlug" element={<OfferDetail />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/team/adam-dayan" element={<TeamAdam />} />
-                <Route path="/team/brionny-pearson" element={<TeamBrionny />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
+              <AppLoader>
+                <ScrollToTop />
+                <Routes>
+                  {/* Public */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/education" element={<Education />} />
+                  <Route path="/therapy" element={<Therapy />} />
+                  <Route path="/families" element={<Families />} />
+                  <Route path="/organisations" element={<Organisations />} />
+                  <Route path="/supervision" element={<Supervision />} />
+                  <Route path="/:serviceArea/:offerSlug" element={<OfferDetail />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/team/adam-dayan" element={<TeamAdam />} />
+                  <Route path="/team/brionny-pearson" element={<TeamBrionny />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
 
-                {/* Client portal */}
-                <Route path="/portal" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/portal/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
-                <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-                <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
-                <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-                <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
-                <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
-                <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
-                <Route path="/portal/productivity" element={<ProtectedRoute><Productivity /></ProtectedRoute>} />
+                  {/* Client portal */}
+                  <Route path="/portal" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/portal/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+                  <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+                  <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
+                  <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+                  <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
+                  <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
+                  <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
+                  <Route path="/portal/productivity" element={<ProtectedRoute><Productivity /></ProtectedRoute>} />
 
-                {/* Admin portal */}
-                <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
-                <Route path="/admin/clients" element={<AdminRoute><ClientManagement /></AdminRoute>} />
-                <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
-                <Route path="/admin/team-requests" element={<AdminRoute><TeamRequests /></AdminRoute>} />
-                <Route path="/admin/hero-images" element={<AdminRoute><HeroImageManager /></AdminRoute>} />
-                <Route path="/admin/site-content" element={<AdminRoute><SiteContentManager /></AdminRoute>} />
-                <Route path="/admin/team-members" element={<AdminRoute><TeamMemberManager /></AdminRoute>} />
-                <Route path="/admin/service-options" element={<AdminRoute><ServiceOptionsManager /></AdminRoute>} />
-                <Route path="/admin/assignments" element={<AdminRoute><ClientAssignments /></AdminRoute>} />
-                <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-                <Route path="/admin/staff-todos" element={<AdminRoute><StaffTodoManager /></AdminRoute>} />
-                <Route path="/admin/auth-settings" element={<AdminRoute><AuthSettings /></AdminRoute>} />
-                <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
+                  {/* Admin portal */}
+                  <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                  <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
+                  <Route path="/admin/clients" element={<AdminRoute><ClientManagement /></AdminRoute>} />
+                  <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
+                  <Route path="/admin/team-requests" element={<AdminRoute><TeamRequests /></AdminRoute>} />
+                  <Route path="/admin/hero-images" element={<AdminRoute><HeroImageManager /></AdminRoute>} />
+                  <Route path="/admin/site-content" element={<AdminRoute><SiteContentManager /></AdminRoute>} />
+                  <Route path="/admin/team-members" element={<AdminRoute><TeamMemberManager /></AdminRoute>} />
+                  <Route path="/admin/service-options" element={<AdminRoute><ServiceOptionsManager /></AdminRoute>} />
+                  <Route path="/admin/assignments" element={<AdminRoute><ClientAssignments /></AdminRoute>} />
+                  <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+                  <Route path="/admin/staff-todos" element={<AdminRoute><StaffTodoManager /></AdminRoute>} />
+                  <Route path="/admin/auth-settings" element={<AdminRoute><AuthSettings /></AdminRoute>} />
+                  <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
 
-                {/* Staff/Therapist portal */}
-                <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
-                <Route path="/staff/calendar" element={<StaffRoute><AdminCalendar /></StaffRoute>} />
-                <Route path="/staff/todos" element={<StaffRoute><TodoManager /></StaffRoute>} />
-                <Route path="/staff/staff-todos" element={<StaffRoute><StaffTodoManager /></StaffRoute>} />
-                <Route path="/staff/resources" element={<StaffRoute><Resources /></StaffRoute>} />
-                <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
+                  {/* Staff/Therapist portal */}
+                  <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
+                  <Route path="/staff/calendar" element={<StaffRoute><AdminCalendar /></StaffRoute>} />
+                  <Route path="/staff/todos" element={<StaffRoute><TodoManager /></StaffRoute>} />
+                  <Route path="/staff/staff-todos" element={<StaffRoute><StaffTodoManager /></StaffRoute>} />
+                  <Route path="/staff/resources" element={<StaffRoute><Resources /></StaffRoute>} />
+                  <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <WhatsAppButton />
-              <EditModeToggle />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <WhatsAppButton />
+                <EditModeToggle />
+              </AppLoader>
             </BrowserRouter>
           </TooltipProvider>
         </EditModeProvider>
