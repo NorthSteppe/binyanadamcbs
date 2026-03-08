@@ -841,6 +841,46 @@ const AdminCalendar = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ===== AI SUGGESTIONS DIALOG ===== */}
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles size={18} className="text-primary" /> AI Schedule Suggestions
+            </DialogTitle>
+          </DialogHeader>
+          {aiSummary && (
+            <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{aiSummary}</p>
+          )}
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            {aiSuggestions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No suggestions generated</p>
+            ) : (
+              aiSuggestions.map((s, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-card border border-border/50 rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs font-mono">{s.suggested_time}</Badge>
+                      <span className="text-sm font-medium">{s.title}</span>
+                    </div>
+                    {s.client_name && <p className="text-xs text-muted-foreground mt-0.5">{s.client_name} · {s.duration_minutes}min</p>}
+                    {!s.client_name && <p className="text-xs text-muted-foreground mt-0.5">{s.duration_minutes}min</p>}
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => applyAiSuggestion(s)} className="h-7 gap-1 text-xs">
+                    <Check size={12} /> Apply
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+          {aiSuggestions.length > 0 && (
+            <Button className="w-full gap-2" onClick={applyAllAiSuggestions}>
+              <Check size={14} /> Apply All Suggestions
+            </Button>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
