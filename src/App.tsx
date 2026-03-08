@@ -105,6 +105,7 @@ const App = () => (
               <Route path="/admin/assignments" element={<AdminRoute><ClientAssignments /></AdminRoute>} />
               <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
               <Route path="/admin/staff-todos" element={<AdminRoute><StaffTodoManager /></AdminRoute>} />
+              <Route path="/admin/auth-settings" element={<AdminRoute><AuthSettings /></AdminRoute>} />
 
               {/* Staff/Therapist portal */}
               <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
