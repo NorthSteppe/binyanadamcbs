@@ -1,249 +1,607 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Plus, Shield, Eye, EyeOff } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ChevronLeft, ChevronRight, Plus, Shield, CalendarDays,
+  LayoutGrid, List, Clock, Trash2, Edit2, Eye, ListTodo
+} from "lucide-react";
+import {
+  format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
+  addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks,
+  addDays, subDays, eachHourOfInterval, startOfDay, endOfDay,
+  isToday as isDateToday, parseISO, differenceInMinutes, setHours, setMinutes
+} from "date-fns";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-type FocusBlock = {
+type CalendarEvent = {
   id: string;
   title: string;
-  start_time: string;
-  end_time: string;
+  start: Date;
+  end: Date;
+  type: "session" | "task" | "focus";
+  color: string;
+  priority?: string;
+  status?: string;
+  description?: string;
 };
 
-type ScheduledTask = {
-  id: string;
-  title: string;
-  scheduled_start: string;
-  scheduled_end: string;
-  priority: string;
-};
+type ViewMode = "month" | "week" | "day";
 
-type CalendarShare = {
-  id: string;
-  shared_with_id: string;
-  can_view_tasks: boolean;
-  can_view_focus: boolean;
-  can_view_sessions: boolean;
-  profiles?: { full_name: string } | null;
-};
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 const PersonalCalendar = () => {
   const { session } = useAuth();
   const qc = useQueryClient();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [focusDialogOpen, setFocusDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [newFocus, setNewFocus] = useState({ title: "Focus Time", start: "", end: "" });
-  const [shareEmail, setShareEmail] = useState("");
+  const [showTasks, setShowTasks] = useState(true);
+  const [showFocus, setShowFocus] = useState(true);
+  const [showSessions, setShowSessions] = useState(true);
+  const [createType, setCreateType] = useState<"focus" | "task">("focus");
+  const [newEvent, setNewEvent] = useState({ title: "", start: "09:00", end: "10:00", description: "", priority: "medium" });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  const days = eachDayOfInterval({ start: calStart, end: calEnd });
+  // Date range based on view
+  const { rangeStart, rangeEnd } = useMemo(() => {
+    if (viewMode === "month") {
+      const ms = startOfMonth(currentDate);
+      const me = endOfMonth(currentDate);
+      return { rangeStart: startOfWeek(ms, { weekStartsOn: 1 }), rangeEnd: endOfWeek(me, { weekStartsOn: 1 }) };
+    }
+    if (viewMode === "week") {
+      return { rangeStart: startOfWeek(currentDate, { weekStartsOn: 1 }), rangeEnd: endOfWeek(currentDate, { weekStartsOn: 1 }) };
+    }
+    return { rangeStart: startOfDay(currentDate), rangeEnd: endOfDay(currentDate) };
+  }, [currentDate, viewMode]);
 
+  const days = useMemo(() => eachDayOfInterval({ start: rangeStart, end: rangeEnd }), [rangeStart, rangeEnd]);
+
+  // Queries
   const { data: focusBlocks = [] } = useQuery({
-    queryKey: ["focus_blocks", format(currentMonth, "yyyy-MM")],
+    queryKey: ["focus_blocks", rangeStart.toISOString(), rangeEnd.toISOString()],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("focus_blocks")
-        .select("*")
-        .gte("start_time", calStart.toISOString())
-        .lte("start_time", calEnd.toISOString());
-      if (error) throw error;
-      return data as FocusBlock[];
-    },
-    enabled: !!session,
-  });
-
-  const { data: scheduledTasks = [] } = useQuery({
-    queryKey: ["scheduled_tasks", format(currentMonth, "yyyy-MM")],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_tasks")
-        .select("id, title, scheduled_start, scheduled_end, priority")
-        .not("scheduled_start", "is", null)
-        .gte("scheduled_start", calStart.toISOString())
-        .lte("scheduled_start", calEnd.toISOString());
-      if (error) throw error;
-      return data as ScheduledTask[];
-    },
-    enabled: !!session,
-  });
-
-  const { data: sessions = [] } = useQuery({
-    queryKey: ["my_sessions", format(currentMonth, "yyyy-MM")],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sessions")
-        .select("id, title, session_date, status, duration_minutes")
-        .gte("session_date", calStart.toISOString())
-        .lte("session_date", calEnd.toISOString());
+        .from("focus_blocks").select("*")
+        .gte("start_time", rangeStart.toISOString())
+        .lte("start_time", rangeEnd.toISOString());
       if (error) throw error;
       return data || [];
     },
     enabled: !!session,
   });
 
+  const { data: scheduledTasks = [] } = useQuery({
+    queryKey: ["scheduled_tasks", rangeStart.toISOString(), rangeEnd.toISOString()],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_tasks")
+        .select("id, title, description, scheduled_start, scheduled_end, priority, status, due_date, estimated_minutes, is_completed")
+        .gte("due_date", rangeStart.toISOString())
+        .lte("due_date", rangeEnd.toISOString());
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session && showTasks,
+  });
+
+  const { data: scheduledTasksWithTime = [] } = useQuery({
+    queryKey: ["scheduled_tasks_time", rangeStart.toISOString(), rangeEnd.toISOString()],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_tasks")
+        .select("id, title, description, scheduled_start, scheduled_end, priority, status, is_completed")
+        .not("scheduled_start", "is", null)
+        .gte("scheduled_start", rangeStart.toISOString())
+        .lte("scheduled_start", rangeEnd.toISOString());
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session && showTasks,
+  });
+
+  const { data: sessions = [] } = useQuery({
+    queryKey: ["my_sessions", rangeStart.toISOString(), rangeEnd.toISOString()],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sessions")
+        .select("id, title, session_date, status, duration_minutes, description")
+        .gte("session_date", rangeStart.toISOString())
+        .lte("session_date", rangeEnd.toISOString());
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session && showSessions,
+  });
+
   const { data: shares = [] } = useQuery({
     queryKey: ["calendar_shares"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("calendar_shares")
-        .select("*")
-        .eq("owner_id", session!.user.id);
+        .from("calendar_shares").select("*").eq("owner_id", session!.user.id);
       if (error) throw error;
-      return data as CalendarShare[];
+      return data || [];
     },
     enabled: !!session,
   });
 
+  // Build unified events
+  const events = useMemo(() => {
+    const result: CalendarEvent[] = [];
+    if (showSessions) {
+      sessions.forEach((s: any) => {
+        const start = parseISO(s.session_date);
+        result.push({
+          id: s.id, title: s.title, start,
+          end: new Date(start.getTime() + (s.duration_minutes || 60) * 60000),
+          type: "session", color: "hsl(var(--primary))", status: s.status, description: s.description,
+        });
+      });
+    }
+    if (showTasks) {
+      // Tasks with scheduled time
+      scheduledTasksWithTime.forEach((t: any) => {
+        const start = parseISO(t.scheduled_start);
+        const end = t.scheduled_end ? parseISO(t.scheduled_end) : new Date(start.getTime() + 30 * 60000);
+        result.push({
+          id: t.id, title: t.title, start, end,
+          type: "task", color: "#3b82f6", priority: t.priority, status: t.status, description: t.description,
+        });
+      });
+      // Tasks with due_date but no scheduled time (show as all-day in month view)
+      scheduledTasks.forEach((t: any) => {
+        if (t.scheduled_start) return; // already added above
+        if (!t.due_date) return;
+        const d = parseISO(t.due_date);
+        result.push({
+          id: t.id, title: t.title, start: d, end: d,
+          type: "task", color: "#3b82f6", priority: t.priority, status: t.status, description: t.description,
+        });
+      });
+    }
+    if (showFocus) {
+      focusBlocks.forEach((fb: any) => {
+        result.push({
+          id: fb.id, title: fb.title, start: parseISO(fb.start_time), end: parseISO(fb.end_time),
+          type: "focus", color: "#a855f7",
+        });
+      });
+    }
+    return result;
+  }, [sessions, scheduledTasks, scheduledTasksWithTime, focusBlocks, showSessions, showTasks, showFocus]);
+
+  // Events grouped by day key
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    events.forEach((e) => {
+      const key = format(e.start, "yyyy-MM-dd");
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(e);
+    });
+    return map;
+  }, [events]);
+
+  // Mutations
   const createFocusBlock = useMutation({
     mutationFn: async () => {
       if (!selectedDate) return;
-      const startDate = new Date(selectedDate);
-      const [sh, sm] = newFocus.start.split(":").map(Number);
-      startDate.setHours(sh, sm, 0, 0);
-      const endDate = new Date(selectedDate);
-      const [eh, em] = newFocus.end.split(":").map(Number);
-      endDate.setHours(eh, em, 0, 0);
+      const [sh, sm] = newEvent.start.split(":").map(Number);
+      const [eh, em] = newEvent.end.split(":").map(Number);
+      const s = new Date(selectedDate); s.setHours(sh, sm, 0, 0);
+      const e = new Date(selectedDate); e.setHours(eh, em, 0, 0);
       const { error } = await supabase.from("focus_blocks").insert({
-        user_id: session!.user.id,
-        title: newFocus.title,
-        start_time: startDate.toISOString(),
-        end_time: endDate.toISOString(),
+        user_id: session!.user.id, title: newEvent.title || "Focus Time",
+        start_time: s.toISOString(), end_time: e.toISOString(),
       });
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["focus_blocks"] });
-      setFocusDialogOpen(false);
-      setNewFocus({ title: "Focus Time", start: "", end: "" });
-      toast.success("Focus block added");
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["focus_blocks"] }); closeCreateDialog(); toast.success("Focus block added"); },
     onError: () => toast.error("Failed to add focus block"),
   });
 
-  const dayData = useMemo(() => {
-    const map = new Map<string, { focus: FocusBlock[]; tasks: ScheduledTask[]; sessions: any[] }>();
-    days.forEach((d) => {
-      const key = format(d, "yyyy-MM-dd");
-      map.set(key, { focus: [], tasks: [], sessions: [] });
-    });
-    focusBlocks.forEach((fb) => {
-      const key = format(new Date(fb.start_time), "yyyy-MM-dd");
-      map.get(key)?.focus.push(fb);
-    });
-    scheduledTasks.forEach((t) => {
-      const key = format(new Date(t.scheduled_start!), "yyyy-MM-dd");
-      map.get(key)?.tasks.push(t);
-    });
-    sessions.forEach((s: any) => {
-      const key = format(new Date(s.session_date), "yyyy-MM-dd");
-      map.get(key)?.sessions.push(s);
-    });
-    return map;
-  }, [days, focusBlocks, scheduledTasks, sessions]);
+  const createTask = useMutation({
+    mutationFn: async () => {
+      if (!selectedDate) return;
+      const [sh, sm] = newEvent.start.split(":").map(Number);
+      const [eh, em] = newEvent.end.split(":").map(Number);
+      const s = new Date(selectedDate); s.setHours(sh, sm, 0, 0);
+      const e = new Date(selectedDate); e.setHours(eh, em, 0, 0);
+      const { error } = await supabase.from("user_tasks").insert({
+        user_id: session!.user.id, title: newEvent.title || "New Task",
+        description: newEvent.description, priority: newEvent.priority,
+        scheduled_start: s.toISOString(), scheduled_end: e.toISOString(),
+        due_date: selectedDate.toISOString(),
+        estimated_minutes: differenceInMinutes(e, s),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["scheduled_tasks"] }); qc.invalidateQueries({ queryKey: ["user_tasks"] }); closeCreateDialog(); toast.success("Task created"); },
+    onError: () => toast.error("Failed to create task"),
+  });
+
+  const deleteFocusBlock = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("focus_blocks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["focus_blocks"] }); setDetailDialogOpen(false); toast.success("Deleted"); },
+  });
+
+  const closeCreateDialog = () => {
+    setCreateDialogOpen(false);
+    setNewEvent({ title: "", start: "09:00", end: "10:00", description: "", priority: "medium" });
+  };
+
+  const navigate = (dir: 1 | -1) => {
+    if (viewMode === "month") setCurrentDate(dir === 1 ? addMonths(currentDate, 1) : subMonths(currentDate, 1));
+    else if (viewMode === "week") setCurrentDate(dir === 1 ? addWeeks(currentDate, 1) : subWeeks(currentDate, 1));
+    else setCurrentDate(dir === 1 ? addDays(currentDate, 1) : subDays(currentDate, 1));
+  };
+
+  const headerLabel = () => {
+    if (viewMode === "month") return format(currentDate, "MMMM yyyy");
+    if (viewMode === "week") return `${format(rangeStart, "MMM d")} – ${format(rangeEnd, "MMM d, yyyy")}`;
+    return format(currentDate, "EEEE, MMMM d, yyyy");
+  };
 
   const handleDayClick = (day: Date) => {
     setSelectedDate(day);
-    setFocusDialogOpen(true);
-    setNewFocus({ title: "Focus Time", start: "09:00", end: "10:00" });
+    setCreateDialogOpen(true);
+    setCreateType("focus");
+    setNewEvent({ title: "", start: "09:00", end: "10:00", description: "", priority: "medium" });
   };
+
+  const handleEventClick = (e: React.MouseEvent, event: CalendarEvent) => {
+    e.stopPropagation();
+    setSelectedEvent(event);
+    setDetailDialogOpen(true);
+  };
+
+  // Scroll to current hour in week/day view
+  useEffect(() => {
+    if ((viewMode === "week" || viewMode === "day") && scrollRef.current) {
+      const now = new Date();
+      const offset = Math.max(0, (now.getHours() - 1) * 64);
+      scrollRef.current.scrollTop = offset;
+    }
+  }, [viewMode]);
 
   const today = new Date();
 
+  const priorityColor = (p?: string) => {
+    if (p === "urgent") return "bg-red-500";
+    if (p === "high") return "bg-orange-500";
+    if (p === "medium") return "bg-amber-400";
+    return "bg-slate-400";
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-foreground">Personal Calendar</h2>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}>
-            <Shield size={14} className="mr-1" /> Sharing
-          </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+            <TabsList className="h-8">
+              <TabsTrigger value="month" className="text-xs gap-1 px-2"><LayoutGrid size={12} /> Month</TabsTrigger>
+              <TabsTrigger value="week" className="text-xs gap-1 px-2"><CalendarDays size={12} /> Week</TabsTrigger>
+              <TabsTrigger value="day" className="text-xs gap-1 px-2"><List size={12} /> Day</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="text-xs">Today</Button>
+          <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}><Shield size={14} /></Button>
         </div>
       </div>
 
-      {/* Month Navigation */}
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4 text-xs">
+        <label className="flex items-center gap-1.5 cursor-pointer">
+          <Switch checked={showSessions} onCheckedChange={setShowSessions} className="scale-75" />
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary" />Sessions</span>
+        </label>
+        <label className="flex items-center gap-1.5 cursor-pointer">
+          <Switch checked={showTasks} onCheckedChange={setShowTasks} className="scale-75" />
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" />Tasks</span>
+        </label>
+        <label className="flex items-center gap-1.5 cursor-pointer">
+          <Switch checked={showFocus} onCheckedChange={setShowFocus} className="scale-75" />
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500" />Focus Blocks</span>
+        </label>
+      </div>
+
+      {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}><ChevronLeft size={18} /></Button>
-        <h3 className="text-sm font-semibold">{format(currentMonth, "MMMM yyyy")}</h3>
-        <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}><ChevronRight size={18} /></Button>
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ChevronLeft size={18} /></Button>
+        <h3 className="text-sm font-semibold">{headerLabel()}</h3>
+        <Button variant="ghost" size="icon" onClick={() => navigate(1)}><ChevronRight size={18} /></Button>
       </div>
 
-      {/* Day Headers */}
-      <div className="grid grid-cols-7 gap-1">
-        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-          <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-1">{d}</div>
-        ))}
-        {days.map((day) => {
-          const key = format(day, "yyyy-MM-dd");
-          const data = dayData.get(key);
-          const isToday = isSameDay(day, today);
-          const isCurrentMonth = isSameMonth(day, currentMonth);
-          return (
-            <motion.button
-              key={key}
-              whileHover={{ scale: 1.02 }}
-              onClick={() => handleDayClick(day)}
-              className={`relative rounded-lg p-1 min-h-[72px] text-left border transition-colors
-                ${isToday ? "border-primary bg-primary/5" : "border-transparent hover:border-border"}
-                ${!isCurrentMonth ? "opacity-40" : ""}`}
-            >
-              <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
-                {format(day, "d")}
-              </span>
-              <div className="space-y-0.5 mt-0.5">
-                {data?.sessions.slice(0, 1).map((s: any) => (
-                  <div key={s.id} className="text-[9px] px-1 py-0.5 rounded bg-primary/15 text-primary truncate">{s.title}</div>
-                ))}
-                {data?.tasks.slice(0, 1).map((t) => (
-                  <div key={t.id} className="text-[9px] px-1 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 truncate">{t.title}</div>
-                ))}
-                {data?.focus.slice(0, 1).map((f) => (
-                  <div key={f.id} className="text-[9px] px-1 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 truncate">{f.title}</div>
-                ))}
-                {((data?.sessions.length || 0) + (data?.tasks.length || 0) + (data?.focus.length || 0)) > 3 && (
-                  <span className="text-[8px] text-muted-foreground">+more</span>
-                )}
+      {/* Month View */}
+      {viewMode === "month" && (
+        <div className="grid grid-cols-7 gap-1">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+            <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-1">{d}</div>
+          ))}
+          {days.map((day) => {
+            const key = format(day, "yyyy-MM-dd");
+            const dayEvents = eventsByDay.get(key) || [];
+            const isToday = isSameDay(day, today);
+            const isCurrentMonth = isSameMonth(day, currentDate);
+            return (
+              <motion.button
+                key={key} whileHover={{ scale: 1.02 }}
+                onClick={() => handleDayClick(day)}
+                className={`relative rounded-lg p-1 min-h-[80px] text-left border transition-colors
+                  ${isToday ? "border-primary bg-primary/5" : "border-transparent hover:border-border"}
+                  ${!isCurrentMonth ? "opacity-40" : ""}`}
+              >
+                <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
+                  {format(day, "d")}
+                </span>
+                <div className="space-y-0.5 mt-0.5">
+                  {dayEvents.slice(0, 3).map((ev) => (
+                    <div
+                      key={ev.id}
+                      onClick={(e) => handleEventClick(e, ev)}
+                      className="text-[9px] px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 transition-opacity"
+                      style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
+                    >
+                      {ev.type === "task" && ev.priority && (
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full mr-0.5 ${priorityColor(ev.priority)}`} />
+                      )}
+                      {ev.title}
+                    </div>
+                  ))}
+                  {dayEvents.length > 3 && (
+                    <span className="text-[8px] text-muted-foreground">+{dayEvents.length - 3} more</span>
+                  )}
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Week View */}
+      {viewMode === "week" && (
+        <div className="border border-border rounded-lg overflow-hidden">
+          {/* Day headers */}
+          <div className="grid grid-cols-[50px_repeat(7,1fr)] border-b border-border bg-muted/30">
+            <div className="p-1" />
+            {days.map((day) => (
+              <div
+                key={day.toISOString()}
+                className={`text-center py-2 text-xs font-medium cursor-pointer hover:bg-muted/50 transition-colors
+                  ${isSameDay(day, today) ? "text-primary bg-primary/5" : "text-foreground"}`}
+                onClick={() => { setCurrentDate(day); setViewMode("day"); }}
+              >
+                <div>{format(day, "EEE")}</div>
+                <div className={`text-lg font-bold ${isSameDay(day, today) ? "text-primary" : ""}`}>{format(day, "d")}</div>
               </div>
-            </motion.button>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+          {/* Time grid */}
+          <div ref={scrollRef} className="max-h-[500px] overflow-y-auto">
+            <div className="grid grid-cols-[50px_repeat(7,1fr)] relative">
+              {HOURS.map((hour) => (
+                <div key={hour} className="contents">
+                  <div className="text-[10px] text-muted-foreground text-right pr-2 py-1 h-16 border-b border-border/30">
+                    {hour.toString().padStart(2, "0")}:00
+                  </div>
+                  {days.map((day) => {
+                    const key = format(day, "yyyy-MM-dd");
+                    const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+                    return (
+                      <div
+                        key={`${key}-${hour}`}
+                        className="h-16 border-b border-l border-border/30 relative cursor-pointer hover:bg-muted/20 transition-colors"
+                        onClick={() => {
+                          const d = new Date(day);
+                          d.setHours(hour, 0, 0, 0);
+                          setSelectedDate(d);
+                          setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
+                          setCreateDialogOpen(true);
+                        }}
+                      >
+                        {hourEvents.map((ev) => {
+                          const duration = differenceInMinutes(ev.end, ev.start);
+                          const heightPx = Math.max(16, (duration / 60) * 64);
+                          const topPx = (ev.start.getMinutes() / 60) * 64;
+                          return (
+                            <div
+                              key={ev.id}
+                              onClick={(e) => handleEventClick(e, ev)}
+                              className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-pointer hover:opacity-80 z-10"
+                              style={{
+                                top: `${topPx}px`, height: `${heightPx}px`,
+                                backgroundColor: `${ev.color}25`, color: ev.color,
+                                borderLeft: `2px solid ${ev.color}`,
+                              }}
+                            >
+                              {ev.title}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary" />Sessions</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" />Scheduled Tasks</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500" />Focus Blocks</span>
-      </div>
+      {/* Day View */}
+      {viewMode === "day" && (
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div ref={scrollRef} className="max-h-[500px] overflow-y-auto">
+            {HOURS.map((hour) => {
+              const key = format(currentDate, "yyyy-MM-dd");
+              const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+              return (
+                <div
+                  key={hour}
+                  className="flex border-b border-border/30 min-h-[64px] cursor-pointer hover:bg-muted/20 transition-colors"
+                  onClick={() => {
+                    const d = new Date(currentDate);
+                    d.setHours(hour, 0, 0, 0);
+                    setSelectedDate(d);
+                    setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
+                    setCreateDialogOpen(true);
+                  }}
+                >
+                  <div className="w-16 text-[11px] text-muted-foreground text-right pr-3 pt-1 flex-shrink-0">
+                    {hour.toString().padStart(2, "0")}:00
+                  </div>
+                  <div className="flex-1 relative py-0.5 space-y-0.5">
+                    {hourEvents.map((ev) => {
+                      const duration = differenceInMinutes(ev.end, ev.start);
+                      return (
+                        <div
+                          key={ev.id}
+                          onClick={(e) => handleEventClick(e, ev)}
+                          className="rounded px-2 py-1 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity"
+                          style={{
+                            backgroundColor: `${ev.color}20`, color: ev.color,
+                            borderLeft: `3px solid ${ev.color}`,
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{ev.title}</span>
+                            <span className="text-[10px] opacity-70">{duration}min</span>
+                          </div>
+                          {ev.description && <p className="text-[10px] opacity-60 mt-0.5 truncate">{ev.description}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-      {/* Focus Block Dialog */}
-      <Dialog open={focusDialogOpen} onOpenChange={setFocusDialogOpen}>
+      {/* Create Event Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Focus Block — {selectedDate && format(selectedDate, "MMM d, yyyy")}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus size={16} /> New Event — {selectedDate && format(selectedDate, "MMM d, yyyy")}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
-            <div><Label>Title</Label><Input value={newFocus.title} onChange={(e) => setNewFocus({ ...newFocus, title: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Start</Label><Input type="time" value={newFocus.start} onChange={(e) => setNewFocus({ ...newFocus, start: e.target.value })} /></div>
-              <div><Label>End</Label><Input type="time" value={newFocus.end} onChange={(e) => setNewFocus({ ...newFocus, end: e.target.value })} /></div>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs">Type</Label>
+              <div className="flex gap-2 mt-1">
+                <Button
+                  variant={createType === "focus" ? "default" : "outline"} size="sm"
+                  onClick={() => setCreateType("focus")} className="text-xs"
+                >Focus Block</Button>
+                <Button
+                  variant={createType === "task" ? "default" : "outline"} size="sm"
+                  onClick={() => setCreateType("task")} className="text-xs"
+                >Task</Button>
+              </div>
             </div>
-            <Button className="w-full" onClick={() => createFocusBlock.mutate()} disabled={!newFocus.start || !newFocus.end}>Add Focus Block</Button>
+            <div>
+              <Label>Title</Label>
+              <Input
+                value={newEvent.title}
+                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                placeholder={createType === "focus" ? "Focus Time" : "Task title"}
+              />
+            </div>
+            {createType === "task" && (
+              <>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea
+                    value={newEvent.description}
+                    onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                    placeholder="Optional description"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label>Priority</Label>
+                  <Select value={newEvent.priority} onValueChange={(v) => setNewEvent({ ...newEvent, priority: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Start</Label><Input type="time" value={newEvent.start} onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })} /></div>
+              <div><Label>End</Label><Input type="time" value={newEvent.end} onChange={(e) => setNewEvent({ ...newEvent, end: e.target.value })} /></div>
+            </div>
+            <Button
+              className="w-full" disabled={!newEvent.start || !newEvent.end}
+              onClick={() => createType === "focus" ? createFocusBlock.mutate() : createTask.mutate()}
+            >
+              {createType === "focus" ? "Add Focus Block" : "Create Task"}
+            </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Event Detail Dialog */}
+      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2" style={{ color: selectedEvent?.color }}>
+              {selectedEvent?.type === "session" && "📅"}
+              {selectedEvent?.type === "task" && "✅"}
+              {selectedEvent?.type === "focus" && "🎯"}
+              {selectedEvent?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedEvent && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock size={14} />
+                {format(selectedEvent.start, "HH:mm")} – {format(selectedEvent.end, "HH:mm")}
+                <span className="text-xs">({differenceInMinutes(selectedEvent.end, selectedEvent.start)} min)</span>
+              </div>
+              <Badge variant="outline" className="capitalize">{selectedEvent.type}</Badge>
+              {selectedEvent.priority && (
+                <Badge variant="outline" className="capitalize ml-1">{selectedEvent.priority} priority</Badge>
+              )}
+              {selectedEvent.status && (
+                <Badge variant="secondary" className="capitalize ml-1">{selectedEvent.status}</Badge>
+              )}
+              {selectedEvent.description && (
+                <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>
+              )}
+              {selectedEvent.type === "focus" && (
+                <Button variant="destructive" size="sm" onClick={() => deleteFocusBlock.mutate(selectedEvent.id)}>
+                  <Trash2 size={14} className="mr-1" /> Delete
+                </Button>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -251,12 +609,12 @@ const PersonalCalendar = () => {
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Calendar Sharing</DialogTitle></DialogHeader>
-          <p className="text-xs text-muted-foreground">Control who can see your calendar. Only shared items will be visible to others — your private tasks remain private by default.</p>
+          <p className="text-xs text-muted-foreground">Control who can see your calendar. Only shared items will be visible to others.</p>
           {shares.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">No one has access to your calendar yet.</p>
           ) : (
             <div className="space-y-2">
-              {shares.map((s) => (
+              {shares.map((s: any) => (
                 <div key={s.id} className="flex items-center justify-between p-2 rounded border border-border text-sm">
                   <span className="text-foreground">{s.shared_with_id.slice(0, 8)}…</span>
                   <div className="flex gap-1">
@@ -268,7 +626,6 @@ const PersonalCalendar = () => {
               ))}
             </div>
           )}
-          <p className="text-[10px] text-muted-foreground mt-2">Sharing options can be managed from your profile settings.</p>
         </DialogContent>
       </Dialog>
     </div>
