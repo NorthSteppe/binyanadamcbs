@@ -485,6 +485,16 @@ const AdminCalendar = () => {
                 </TabsList>
               </Tabs>
               <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="text-xs h-8">Today</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAiSchedule}
+                disabled={aiScheduling}
+                className="h-8 gap-1 text-xs border-primary/30 hover:bg-primary/10"
+              >
+                {aiScheduling ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                AI Schedule
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setIsFullscreen(!isFullscreen)} className="h-8">
                 {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
               </Button>
