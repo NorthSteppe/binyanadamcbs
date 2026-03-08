@@ -8,6 +8,8 @@ import { usePageContent } from "@/hooks/useSiteContent";
 import Header from "./Header";
 import Footer from "./Footer";
 import ScrollReveal from "./ScrollReveal";
+import EditableText from "./editable/EditableText";
+import EditableImage from "./editable/EditableImage";
 
 interface ServicePackage {
   name: string;
@@ -67,11 +69,19 @@ const ServicePageLayout = ({
       {/* Full-bleed hero */}
       <section className="relative min-h-[70vh] flex items-end overflow-hidden">
         {displayImage && (
-          <div className="absolute inset-0">
-            <img src={displayImage} alt={content?.alt_text || ""} className="w-full h-full object-cover" />
+          <EditableImage
+            contentKey={`${pageKey}.hero`}
+            defaultSrc={displayImage}
+            alt={content?.alt_text || ""}
+            className="absolute inset-0"
+            imgClassName="w-full h-full object-cover"
+          />
+        )}
+        {displayImage && (
+          <>
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent" />
-          </div>
+          </>
         )}
         {!displayImage && <div className={`absolute inset-0 ${bgColorClass} opacity-20`} />}
         <div className="container relative z-10 pb-16 md:pb-24 pt-40">
@@ -81,15 +91,9 @@ const ServicePageLayout = ({
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-3xl"
           >
-            <p className="text-[11px] font-sans uppercase tracking-[0.25em] mb-4 text-primary">
-              {subtitle}
-            </p>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 text-foreground font-serif">
-              {title}
-            </h1>
-            <p className="text-lg md:text-xl leading-relaxed text-foreground/60 max-w-2xl font-light">
-              {tagline}
-            </p>
+            <EditableText contentKey={`${pageKey}.subtitle`} defaultValue={subtitle} as="p" className="text-[11px] font-sans uppercase tracking-[0.25em] mb-4 text-primary" />
+            <EditableText contentKey={`${pageKey}.title`} defaultValue={title} as="h1" className="text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 text-foreground font-serif" />
+            <EditableText contentKey={`${pageKey}.tagline`} defaultValue={tagline} as="p" className="text-lg md:text-xl leading-relaxed text-foreground/60 max-w-2xl font-light" />
             {content?.quote_text && (
               <blockquote className="mt-8 border-l border-primary/30 pl-4 text-foreground/50 italic">
                 <p className="text-base">{content.quote_text}</p>
@@ -104,7 +108,7 @@ const ServicePageLayout = ({
       <section className="py-24">
         <div className="container">
           <ScrollReveal>
-            <h2 className="text-4xl md:text-5xl font-serif mb-16 text-foreground">{t.serviceLayout.whatWeOffer}</h2>
+            <EditableText contentKey={`${pageKey}.whatWeOffer`} defaultValue={t.serviceLayout.whatWeOffer} as="h2" className="text-4xl md:text-5xl font-serif mb-16 text-foreground" />
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {services.map((service, i) => (
@@ -131,8 +135,8 @@ const ServicePageLayout = ({
       <section className="py-24 bg-card border-t border-border">
         <div className="container">
           <ScrollReveal>
-            <h2 className="text-4xl md:text-5xl font-serif mb-4 text-foreground">{t.serviceLayout.packages}</h2>
-            <p className="text-muted-foreground mb-16 max-w-xl font-light">{t.serviceLayout.packagesSubtitle}</p>
+            <EditableText contentKey={`${pageKey}.packagesTitle`} defaultValue={t.serviceLayout.packages} as="h2" className="text-4xl md:text-5xl font-serif mb-4 text-foreground" />
+            <EditableText contentKey={`${pageKey}.packagesSubtitle`} defaultValue={t.serviceLayout.packagesSubtitle} as="p" className="text-muted-foreground mb-16 max-w-xl font-light" />
           </ScrollReveal>
           <div className="grid md:grid-cols-2 gap-6">
             {packages.map((pkg, i) => (
@@ -160,8 +164,8 @@ const ServicePageLayout = ({
       <section className="py-24 border-t border-border">
         <div className="container text-center">
           <ScrollReveal>
-            <h2 className="text-4xl md:text-5xl font-serif mb-4 text-foreground">{t.serviceLayout.readyTitle}</h2>
-            <p className="text-muted-foreground mb-10 max-w-md mx-auto font-light">{t.serviceLayout.readyText}</p>
+            <EditableText contentKey={`${pageKey}.readyTitle`} defaultValue={t.serviceLayout.readyTitle} as="h2" className="text-4xl md:text-5xl font-serif mb-4 text-foreground" />
+            <EditableText contentKey={`${pageKey}.readyText`} defaultValue={t.serviceLayout.readyText} as="p" className="text-muted-foreground mb-10 max-w-md mx-auto font-light" />
             <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
               <Link to="/contact">{ctaText}</Link>
             </Button>

@@ -203,6 +203,36 @@ export type Database = {
         }
         Relationships: []
       }
+      content_overrides: {
+        Row: {
+          content_key: string
+          content_type: string
+          content_value: string
+          created_at: string
+          id: string
+          image_url: string
+          updated_at: string
+        }
+        Insert: {
+          content_key: string
+          content_type?: string
+          content_value?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          updated_at?: string
+        }
+        Update: {
+          content_key?: string
+          content_type?: string
+          content_value?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_plans: {
         Row: {
           created_at: string
@@ -356,63 +386,6 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      page_elements: {
-        Row: {
-          content: string
-          created_at: string
-          display_order: number
-          element_type: string
-          height: number
-          id: string
-          image_url: string
-          is_visible: boolean
-          page_key: string
-          pos_x: number
-          pos_y: number
-          rotation: number
-          styles: Json
-          updated_at: string
-          width: number
-          z_index: number
-        }
-        Insert: {
-          content?: string
-          created_at?: string
-          display_order?: number
-          element_type?: string
-          height?: number
-          id?: string
-          image_url?: string
-          is_visible?: boolean
-          page_key: string
-          pos_x?: number
-          pos_y?: number
-          rotation?: number
-          styles?: Json
-          updated_at?: string
-          width?: number
-          z_index?: number
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          display_order?: number
-          element_type?: string
-          height?: number
-          id?: string
-          image_url?: string
-          is_visible?: boolean
-          page_key?: string
-          pos_x?: number
-          pos_y?: number
-          rotation?: number
-          styles?: Json
-          updated_at?: string
-          width?: number
-          z_index?: number
         }
         Relationships: []
       }

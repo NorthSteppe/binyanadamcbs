@@ -7,6 +7,8 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroCarousel from "@/components/HeroCarousel";
+import EditableText from "@/components/editable/EditableText";
+import EditableImage from "@/components/editable/EditableImage";
 import { motion } from "framer-motion";
 
 const Index = () => {
@@ -34,7 +36,6 @@ const Index = () => {
         {/* Background carousel */}
         <div className="absolute inset-0 z-0">
           <HeroCarousel onQuoteChange={handleQuoteChange} />
-          {/* Dark overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent" />
         </div>
@@ -55,13 +56,19 @@ const Index = () => {
               />
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6 font-serif">
-              {t.landing.title}
-            </h1>
+            <EditableText
+              contentKey="landing.title"
+              defaultValue={t.landing.title}
+              as="h1"
+              className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6 font-serif"
+            />
 
-            <p className="text-base md:text-lg text-foreground/60 leading-relaxed mb-10 max-w-lg font-light">
-              {t.landing.subtitle}
-            </p>
+            <EditableText
+              contentKey="landing.subtitle"
+              defaultValue={t.landing.subtitle}
+              as="p"
+              className="text-base md:text-lg text-foreground/60 leading-relaxed mb-10 max-w-lg font-light"
+            />
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">

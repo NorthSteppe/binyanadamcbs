@@ -34,7 +34,6 @@ const categories: ToolCategory[] = [
       { label: "Hero Images", path: "/admin/hero-images", icon: ImageIcon, description: "Manage the landing page slideshow images, quotes, and timing" },
       { label: "Site Content", path: "/admin/site-content", icon: FileEdit, description: "Edit page images, quotes, and text across all service pages" },
       { label: "Team Profiles", path: "/admin/team-members", icon: Users, description: "Add, edit, or remove staff bios shown on the About page" },
-      { label: "Web Designer", path: "/admin/designer", icon: Palette, description: "Visual drag-and-drop page editor — edit text, images, and layout like PowerPoint" },
     ],
   },
   {
