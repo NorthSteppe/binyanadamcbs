@@ -56,6 +56,8 @@ const PersonalCalendar = () => {
   const [createType, setCreateType] = useState<"focus" | "task">("focus");
   const [newEvent, setNewEvent] = useState({ title: "", start: "09:00", end: "10:00", description: "", priority: "medium" });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   // Date range based on view
   const { rangeStart, rangeEnd } = useMemo(() => {
