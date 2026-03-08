@@ -35,8 +35,8 @@ const Index = () => {
         <div className="absolute inset-0 z-0">
           <HeroCarousel onQuoteChange={handleQuoteChange} />
           {/* Dark overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent" />
         </div>
 
         <div className="container relative z-10 pb-24 md:pb-32 pt-40">

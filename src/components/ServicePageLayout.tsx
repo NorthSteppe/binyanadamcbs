@@ -68,8 +68,8 @@ const ServicePageLayout = ({
         {displayImage && (
           <div className="absolute inset-0">
             <img src={displayImage} alt={content?.alt_text || ""} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent" />
           </div>
         )}
         {!displayImage && <div className={`absolute inset-0 ${bgColorClass} opacity-20`} />}

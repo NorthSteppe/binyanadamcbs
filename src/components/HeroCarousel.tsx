@@ -32,7 +32,7 @@ const HeroCarousel = ({ onQuoteChange }: HeroCarouselProps) => {
   // Fallback when no images uploaded yet
   if (!images || images.length === 0) {
     return (
-      <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] bg-muted">
+      <div className="overflow-hidden bg-muted w-full h-full">
         <img
           alt="A professional guiding a child in a hands-on learning activity"
           className="w-full h-full object-cover"
@@ -43,7 +43,7 @@ const HeroCarousel = ({ onQuoteChange }: HeroCarouselProps) => {
   }
 
   return (
-    <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] relative bg-muted">
+    <div className="overflow-hidden relative bg-muted w-full h-full">
       {images.map((img, i) => (
         <img
           key={img.id}
