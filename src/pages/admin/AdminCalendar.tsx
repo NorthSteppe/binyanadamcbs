@@ -862,6 +862,27 @@ const AdminCalendar = () => {
                   </div>
                 </>
               )}
+              {selectedEvent.meetingPlatform && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Video size={14} className="text-muted-foreground" />
+                  <span className="capitalize">{selectedEvent.meetingPlatform.replace("-", " ")}</span>
+                  {selectedEvent.meetingUrl && (
+                    <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs">
+                      <ExternalLink size={10} /> Join
+                    </a>
+                  )}
+                </div>
+              )}
+              {selectedEvent.attendeeIds && selectedEvent.attendeeIds.length > 0 && (
+                <div className="text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1 mb-1"><UserPlus size={14} /> Attendees:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedEvent.attendeeIds.map((id) => (
+                      <Badge key={id} variant="secondary" className="text-xs">{nameMap.get(id) || "Unknown"}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
               {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
               <div className="flex gap-2 pt-2">
                 {selectedEvent.type === "session" && (
@@ -901,6 +922,48 @@ const AdminCalendar = () => {
                     <SelectItem value="no-show">No Show</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="flex items-center gap-1"><Video size={12} /> Platform</Label>
+                <Select value={editForm.meeting_platform} onValueChange={(v) => setEditForm({ ...editForm, meeting_platform: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                    <SelectItem value="teams">Microsoft Teams</SelectItem>
+                    <SelectItem value="google-meet">Google Meet</SelectItem>
+                    <SelectItem value="in-person">In Person</SelectItem>
+                    <SelectItem value="phone">Phone Call</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="flex items-center gap-1"><Link2 size={12} /> Meeting Link</Label>
+                <Input value={editForm.meeting_url} onChange={(e) => setEditForm({ ...editForm, meeting_url: e.target.value })} placeholder="https://..." />
+              </div>
+            </div>
+            <div>
+              <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Attendees</Label>
+              <div className="grid grid-cols-2 gap-1.5 max-h-[100px] overflow-y-auto border border-border/50 rounded-lg p-2">
+                {staffMembers.map((s) => (
+                  <label key={s.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                    <Checkbox
+                      checked={editForm.attendee_ids.includes(s.id)}
+                      onCheckedChange={(checked) => {
+                        setEditForm((prev) => ({
+                          ...prev,
+                          attendee_ids: checked
+                            ? [...prev.attendee_ids, s.id]
+                            : prev.attendee_ids.filter((id) => id !== s.id),
+                        }));
+                      }}
+                    />
+                    {s.full_name}
+                  </label>
+                ))}
               </div>
             </div>
             <div><Label>Notes</Label><Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={2} /></div>
