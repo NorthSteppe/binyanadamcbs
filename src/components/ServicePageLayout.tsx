@@ -7,6 +7,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { usePageContent } from "@/hooks/useSiteContent";
 import Header from "./Header";
 import Footer from "./Footer";
+import ScrollReveal from "./ScrollReveal";
 
 interface ServicePackage {
   name: string;
@@ -102,16 +103,12 @@ const ServicePageLayout = ({
       {/* Services grid */}
       <section className="py-24">
         <div className="container">
-          <h2 className="text-4xl md:text-5xl font-serif mb-16 text-foreground">{t.serviceLayout.whatWeOffer}</h2>
+          <ScrollReveal>
+            <h2 className="text-4xl md:text-5xl font-serif mb-16 text-foreground">{t.serviceLayout.whatWeOffer}</h2>
+          </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {services.map((service, i) => (
-              <motion.div
-                key={getServiceName(service)}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05, duration: 0.4 }}
-              >
+              <ScrollReveal key={getServiceName(service)} delay={i * 0.06} distance={16}>
                 <Link
                   to={getServiceLink(service)}
                   className="group block border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300"
@@ -124,7 +121,7 @@ const ServicePageLayout = ({
                     <ArrowRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </Link>
-              </motion.div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -133,30 +130,27 @@ const ServicePageLayout = ({
       {/* Packages */}
       <section className="py-24 bg-card border-t border-border">
         <div className="container">
-          <h2 className="text-4xl md:text-5xl font-serif mb-4 text-foreground">{t.serviceLayout.packages}</h2>
-          <p className="text-muted-foreground mb-16 max-w-xl font-light">{t.serviceLayout.packagesSubtitle}</p>
+          <ScrollReveal>
+            <h2 className="text-4xl md:text-5xl font-serif mb-4 text-foreground">{t.serviceLayout.packages}</h2>
+            <p className="text-muted-foreground mb-16 max-w-xl font-light">{t.serviceLayout.packagesSubtitle}</p>
+          </ScrollReveal>
           <div className="grid md:grid-cols-2 gap-6">
             {packages.map((pkg, i) => (
-              <motion.div
-                key={pkg.name}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
-                className="border border-border bg-background p-8"
-              >
-                <h3 className="text-2xl font-serif mb-2 text-foreground">{pkg.name}</h3>
-                <p className="text-sm text-muted-foreground mb-6 font-light">{pkg.description}</p>
-                <ul className="space-y-3 mb-6">
-                  {pkg.includes.map((item) => (
-                    <li key={item} className="text-sm text-foreground/80 flex items-start gap-3 font-light">
-                      <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${accentColorClass}`} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-muted-foreground italic">{t.serviceLayout.idealFor} {pkg.ideal}</p>
-              </motion.div>
+              <ScrollReveal key={pkg.name} delay={i * 0.1}>
+                <div className="border border-border bg-background p-8">
+                  <h3 className="text-2xl font-serif mb-2 text-foreground">{pkg.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-6 font-light">{pkg.description}</p>
+                  <ul className="space-y-3 mb-6">
+                    {pkg.includes.map((item) => (
+                      <li key={item} className="text-sm text-foreground/80 flex items-start gap-3 font-light">
+                        <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${accentColorClass}`} />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-muted-foreground italic">{t.serviceLayout.idealFor} {pkg.ideal}</p>
+                </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -165,11 +159,13 @@ const ServicePageLayout = ({
       {/* CTA */}
       <section className="py-24 border-t border-border">
         <div className="container text-center">
-          <h2 className="text-4xl md:text-5xl font-serif mb-4 text-foreground">{t.serviceLayout.readyTitle}</h2>
-          <p className="text-muted-foreground mb-10 max-w-md mx-auto font-light">{t.serviceLayout.readyText}</p>
-          <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
-            <Link to="/contact">{ctaText}</Link>
-          </Button>
+          <ScrollReveal>
+            <h2 className="text-4xl md:text-5xl font-serif mb-4 text-foreground">{t.serviceLayout.readyTitle}</h2>
+            <p className="text-muted-foreground mb-10 max-w-md mx-auto font-light">{t.serviceLayout.readyText}</p>
+            <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
+              <Link to="/contact">{ctaText}</Link>
+            </Button>
+          </ScrollReveal>
         </div>
       </section>
 
