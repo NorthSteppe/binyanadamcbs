@@ -5,7 +5,7 @@ import { Pencil, Check } from "lucide-react";
 interface EditableTextProps {
   contentKey: string;
   defaultValue: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: string;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -13,17 +13,18 @@ interface EditableTextProps {
 const EditableText = ({
   contentKey,
   defaultValue,
-  as: Tag = "span",
+  as = "span",
   className = "",
   style,
 }: EditableTextProps) => {
   const { editMode, getOverride, saveOverride } = useEditMode();
   const [editing, setEditing] = useState(false);
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   const displayValue = getOverride(contentKey) ?? defaultValue;
 
   if (!editMode) {
+    const Tag = as as any;
     return <Tag className={className} style={style}>{displayValue}</Tag>;
   }
 
@@ -47,10 +48,10 @@ const EditableText = ({
   };
 
   return (
-    <span className="relative inline-block group/editable">
-      <Tag
-        ref={ref as any}
-        className={`${className} ${editing ? "outline outline-2 outline-primary/50 outline-offset-2 rounded-sm" : "cursor-pointer"}`}
+    <span className="relative inline group/editable">
+      <div
+        ref={ref}
+        className={`${className} ${editing ? "outline outline-2 outline-primary/50 outline-offset-2 rounded-sm" : "cursor-pointer hover:outline hover:outline-1 hover:outline-primary/30 hover:outline-offset-2"}`}
         style={style}
         contentEditable={editing}
         suppressContentEditableWarning
@@ -59,7 +60,7 @@ const EditableText = ({
         onKeyDown={handleKeyDown}
       >
         {displayValue}
-      </Tag>
+      </div>
       {!editing && (
         <button
           onClick={() => setEditing(true)}
@@ -71,8 +72,8 @@ const EditableText = ({
       )}
       {editing && (
         <button
-          onClick={handleSave}
-          className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1 shadow-lg z-50"
+          onMouseDown={(e) => { e.preventDefault(); handleSave(); }}
+          className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full p-1 shadow-lg z-50"
           title="Save"
         >
           <Check size={12} />
