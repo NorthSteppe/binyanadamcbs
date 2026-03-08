@@ -700,6 +700,8 @@ export type Database = {
           id: string
           meeting_platform: string | null
           meeting_url: string | null
+          notes: string | null
+          plaud_recording_id: string | null
           session_date: string
           status: string
           title: string
@@ -713,6 +715,8 @@ export type Database = {
           id?: string
           meeting_platform?: string | null
           meeting_url?: string | null
+          notes?: string | null
+          plaud_recording_id?: string | null
           session_date: string
           status?: string
           title: string
@@ -726,6 +730,8 @@ export type Database = {
           id?: string
           meeting_platform?: string | null
           meeting_url?: string | null
+          notes?: string | null
+          plaud_recording_id?: string | null
           session_date?: string
           status?: string
           title?: string
