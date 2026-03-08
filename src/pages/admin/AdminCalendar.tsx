@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChevronLeft, ChevronRight, Plus, CalendarDays,
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
-  ListTodo, User, Edit, X,
+  ListTodo, User, Edit, X, Sparkles, Loader2, Check,
 } from "lucide-react";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
@@ -85,6 +85,12 @@ const AdminCalendar = () => {
   // Drag state
   const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+
+  // AI Scheduler
+  const [aiScheduling, setAiScheduling] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<Array<{ session_id: string; suggested_time: string; title: string; client_name?: string; duration_minutes: number }>>([]);
+  const [aiSummary, setAiSummary] = useState("");
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
