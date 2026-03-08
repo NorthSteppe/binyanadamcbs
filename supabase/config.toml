@@ -13,3 +13,5 @@ project_id = "wcqjmjceelcainyyqjmi"
     verify_jwt = false
   [functions.ai-suggest-tasks]
     verify_jwt = false
+  [functions.session-notes-webhook]
+    verify_jwt = false
