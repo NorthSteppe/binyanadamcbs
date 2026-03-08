@@ -168,22 +168,33 @@ const FindingCard = ({ finding }: { finding: Finding }) => {
 
 const SecurityDashboard = () => {
   const [scanning, setScanning] = useState(false);
-  const [scanData, setScanData] = useState<ScanResult | null>(null);
+  const [findings, setFindings] = useState<Finding[]>([]);
   const [lastScanTime, setLastScanTime] = useState<string | null>(null);
 
   const runScan = async () => {
     setScanning(true);
     try {
-      // Trigger scan via the Lovable security scanner
-      // Results are fetched from the security API
-      const res = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/security-scan`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      }).catch(() => null);
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/security-scan`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token}`,
+          },
+        }
+      ).catch(() => null);
 
-      // For now, display a message since the scan runs through Lovable's tooling
-      toast.info("Security scan initiated. Ask Lovable to run a security scan to see updated results.");
-      setLastScanTime(new Date().toISOString());
+      if (res?.ok) {
+        const data = await res.json();
+        setFindings(data.findings || []);
+        setLastScanTime(data.scanned_at);
+        toast.success(`Scan complete — ${data.count} finding(s)`);
+      } else {
+        toast.info("Security scan initiated. Ask Lovable to run a security scan to see updated results.");
+        setLastScanTime(new Date().toISOString());
+      }
     } catch {
       toast.error("Could not initiate scan");
     } finally {
@@ -191,8 +202,31 @@ const SecurityDashboard = () => {
     }
   };
 
-  // Use hardcoded initial results from the latest scan
-  const findings: Finding[] = scanData?.findings || [];
+  // Load initial results on mount
+  const loadInitialResults = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/security-scan`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token}`,
+          },
+        }
+      ).catch(() => null);
+      if (res?.ok) {
+        const data = await res.json();
+        setFindings(data.findings || []);
+        setLastScanTime(data.scanned_at);
+      }
+    } catch {
+      // silently fail on initial load
+    }
+  };
+
+  useState(() => { loadInitialResults(); });
   const errors = findings.filter((f) => f.level === "error");
   const warnings = findings.filter((f) => f.level === "warn");
   const infos = findings.filter((f) => f.level === "info");
