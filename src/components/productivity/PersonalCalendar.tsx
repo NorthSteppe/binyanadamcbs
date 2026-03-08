@@ -504,10 +504,13 @@ const PersonalCalendar = () => {
                   {days.map((day) => {
                     const key = format(day, "yyyy-MM-dd");
                     const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+                    const cellKey = `week-${key}-${hour}`;
+                    const isOver = dropTarget === cellKey;
                     return (
                       <div
                         key={`${key}-${hour}`}
-                        className="h-16 border-b border-l border-border/30 relative cursor-pointer hover:bg-muted/20 transition-colors"
+                        className={`h-16 border-b border-l border-border/30 relative cursor-pointer transition-colors
+                          ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
                         onClick={() => {
                           const d = new Date(day);
                           d.setHours(hour, 0, 0, 0);
@@ -515,6 +518,9 @@ const PersonalCalendar = () => {
                           setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
                           setCreateDialogOpen(true);
                         }}
+                        onDragOver={(e) => handleDragOver(e, cellKey)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, day, hour)}
                       >
                         {hourEvents.map((ev) => {
                           const duration = differenceInMinutes(ev.end, ev.start);
@@ -523,8 +529,11 @@ const PersonalCalendar = () => {
                           return (
                             <div
                               key={ev.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, ev)}
+                              onDragEnd={handleDragEnd}
                               onClick={(e) => handleEventClick(e, ev)}
-                              className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-pointer hover:opacity-80 z-10"
+                              className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-grab active:cursor-grabbing hover:opacity-80 z-10"
                               style={{
                                 top: `${topPx}px`, height: `${heightPx}px`,
                                 backgroundColor: `${ev.color}25`, color: ev.color,
