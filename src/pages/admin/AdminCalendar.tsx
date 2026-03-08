@@ -762,7 +762,7 @@ const AdminCalendar = () => {
                     <Select value={newSession.meeting_platform} onValueChange={(v) => setNewSession({ ...newSession, meeting_platform: v })}>
                       <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         <SelectItem value="zoom">Zoom</SelectItem>
                         <SelectItem value="teams">Microsoft Teams</SelectItem>
                         <SelectItem value="google-meet">Google Meet</SelectItem>
@@ -930,7 +930,7 @@ const AdminCalendar = () => {
                 <Select value={editForm.meeting_platform} onValueChange={(v) => setEditForm({ ...editForm, meeting_platform: v })}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="zoom">Zoom</SelectItem>
                     <SelectItem value="teams">Microsoft Teams</SelectItem>
                     <SelectItem value="google-meet">Google Meet</SelectItem>
