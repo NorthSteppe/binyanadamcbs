@@ -82,6 +82,13 @@ const portalLinks = [
 
 const AdminDashboard = () => {
   const { profile } = useAuth();
+  const { setEditMode } = useEditMode();
+  const navigate = useNavigate();
+
+  const handleEnterEditMode = () => {
+    setEditMode(true);
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,11 +97,20 @@ const AdminDashboard = () => {
         <div className="container max-w-5xl">
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-primary/10 text-primary rounded-xl p-2.5">
-                <Shield size={22} />
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 text-primary rounded-xl p-2.5">
+                  <Shield size={22} />
+                </div>
+                <h1 className="text-3xl md:text-4xl font-serif text-foreground">Admin Portal</h1>
               </div>
-              <h1 className="text-3xl md:text-4xl font-serif text-foreground">Admin Portal</h1>
+              <button
+                onClick={handleEnterEditMode}
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-full shadow-md hover:bg-primary/90 transition-colors text-sm font-medium"
+              >
+                <Pencil size={16} />
+                Edit Website
+              </button>
             </div>
             <p className="text-muted-foreground mb-12 ml-14 font-light">
               Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}. Manage your practice from here.
