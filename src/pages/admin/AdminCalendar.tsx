@@ -756,6 +756,48 @@ const AdminCalendar = () => {
                   <div><Label>Time</Label><Input type="time" value={newSession.time} onChange={(e) => setNewSession({ ...newSession, time: e.target.value })} /></div>
                   <div><Label>Duration (min)</Label><Input type="number" value={newSession.duration_minutes} onChange={(e) => setNewSession({ ...newSession, duration_minutes: parseInt(e.target.value) || 60 })} /></div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="flex items-center gap-1"><Video size={12} /> Meeting Platform</Label>
+                    <Select value={newSession.meeting_platform} onValueChange={(v) => setNewSession({ ...newSession, meeting_platform: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="zoom">Zoom</SelectItem>
+                        <SelectItem value="teams">Microsoft Teams</SelectItem>
+                        <SelectItem value="google-meet">Google Meet</SelectItem>
+                        <SelectItem value="in-person">In Person</SelectItem>
+                        <SelectItem value="phone">Phone Call</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="flex items-center gap-1"><Link2 size={12} /> Meeting Link</Label>
+                    <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." />
+                  </div>
+                </div>
+                <div>
+                  <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Invite Team Members</Label>
+                  <div className="grid grid-cols-2 gap-1.5 max-h-[120px] overflow-y-auto border border-border/50 rounded-lg p-2">
+                    {staffMembers.map((s) => (
+                      <label key={s.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                        <Checkbox
+                          checked={newSession.attendee_ids.includes(s.id)}
+                          onCheckedChange={(checked) => {
+                            setNewSession((prev) => ({
+                              ...prev,
+                              attendee_ids: checked
+                                ? [...prev.attendee_ids, s.id]
+                                : prev.attendee_ids.filter((id) => id !== s.id),
+                            }));
+                          }}
+                        />
+                        {s.full_name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <div><Label>Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} /></div>
                 <Button className="w-full" onClick={handleCreateSession}>Create Session</Button>
               </>
