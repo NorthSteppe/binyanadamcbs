@@ -19,13 +19,16 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navLinks = [
-    { label: t.nav.services, path: "/services" },
+  const serviceSubLinks = [
     { label: t.nav.education, path: "/education" },
     { label: t.nav.therapy, path: "/therapy" },
     { label: t.nav.families, path: "/families" },
     { label: t.nav.organisations, path: "/organisations" },
     { label: t.nav.supervision, path: "/supervision" },
+  ];
+
+  const navLinks = [
+    { label: t.nav.services, path: "/services", children: serviceSubLinks },
     { label: (t as any).about?.tagline || "About Us", path: "/about" },
   ];
 
