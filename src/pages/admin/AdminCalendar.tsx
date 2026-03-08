@@ -759,7 +759,7 @@ const AdminCalendar = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="flex items-center gap-1"><Video size={12} /> Meeting Platform</Label>
-                    <Select value={newSession.meeting_platform} onValueChange={(v) => setNewSession({ ...newSession, meeting_platform: v })}>
+                    <Select value={newSession.meeting_platform || "none"} onValueChange={(v) => setNewSession({ ...newSession, meeting_platform: v === "none" ? "" : v })}>
                       <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
@@ -927,7 +927,7 @@ const AdminCalendar = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="flex items-center gap-1"><Video size={12} /> Platform</Label>
-                <Select value={editForm.meeting_platform} onValueChange={(v) => setEditForm({ ...editForm, meeting_platform: v })}>
+                <Select value={editForm.meeting_platform || "none"} onValueChange={(v) => setEditForm({ ...editForm, meeting_platform: v === "none" ? "" : v })}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
