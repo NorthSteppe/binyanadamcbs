@@ -32,11 +32,22 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const portalT = (t as any).portal || {};
   const toggleLanguage = () => setLanguage(language === "en" ? "he" : "en");
 
-  const getPortalLink = () => {
-    if (isAdmin) return { path: "/admin", label: "Admin Portal", icon: Shield };
-    if (isTeamMember) return { path: "/staff", label: "Therapist Portal", icon: Users };
-    return { path: "/portal", label: portalT.portal || "Portal", icon: LayoutDashboard };
+  const getPortalLinks = () => {
+    if (isAdmin) return [
+      { path: "/admin", label: "Admin", icon: Shield },
+      { path: "/staff", label: "Therapist", icon: Users },
+      { path: "/portal", label: "Client View", icon: LayoutDashboard },
+    ];
+    if (isTeamMember) return [
+      { path: "/staff", label: "Therapist Portal", icon: Users },
+    ];
+    return [
+      { path: "/portal", label: portalT.portal || "Portal", icon: LayoutDashboard },
+    ];
   };
+
+  const portalLinks = getPortalLinks();
+  const currentPortal = portalLinks.find(p => location.pathname.startsWith(p.path)) || portalLinks[0];
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/40" : "bg-transparent"}`}>
