@@ -46,32 +46,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let initialDone = false;
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // onAuthStateChange fires INITIAL_SESSION first, then getSession resolves.
+    // We must NOT await inside the listener to avoid blocking Supabase internals.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchUserData(session.user.id);
-      }
-      if (mounted) setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchUserData(session.user.id);
+        // Fire-and-forget: fetch user data without blocking the callback
+        fetchUserData(session.user.id).then(() => {
+          if (mounted && !initialDone) {
+            initialDone = true;
+            setLoading(false);
+          }
+        });
       } else {
         setProfile(null);
         setRoles([]);
+        if (!initialDone) {
+          initialDone = true;
+          setLoading(false);
+        }
       }
-      if (mounted) setLoading(false);
     });
+
+    // Fallback: if onAuthStateChange never fires (edge case), resolve loading
+    const timeout = setTimeout(() => {
+      if (mounted && !initialDone) {
+        initialDone = true;
+        setLoading(false);
+      }
+    }, 3000);
 
     return () => {
       mounted = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
