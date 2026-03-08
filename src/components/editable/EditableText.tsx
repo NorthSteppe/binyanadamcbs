@@ -51,7 +51,7 @@ const EditableText = ({
     <span className="relative inline group/editable">
       <div
         ref={ref}
-        className={`${className} ${editing ? "outline outline-2 outline-primary/50 outline-offset-2 rounded-sm" : "cursor-pointer hover:outline hover:outline-1 hover:outline-primary/30 hover:outline-offset-2"}`}
+        className={`${className} ${editing ? "outline outline-2 outline-primary/50 outline-offset-2 rounded-sm" : "cursor-pointer ring-1 ring-primary/20 ring-offset-1 rounded-sm md:ring-0 md:hover:ring-1 md:hover:ring-primary/30"}`}
         style={style}
         contentEditable={editing}
         suppressContentEditableWarning
@@ -64,7 +64,7 @@ const EditableText = ({
       {!editing && (
         <button
           onClick={() => setEditing(true)}
-          className="absolute -top-2 -right-2 opacity-0 group-hover/editable:opacity-100 transition-opacity bg-primary text-primary-foreground rounded-full p-1 shadow-lg z-50"
+          className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg z-50 md:opacity-0 md:group-hover/editable:opacity-100 transition-opacity"
           title="Edit"
         >
           <Pencil size={12} />
@@ -73,7 +73,7 @@ const EditableText = ({
       {editing && (
         <button
           onMouseDown={(e) => { e.preventDefault(); handleSave(); }}
-          className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full p-1 shadow-lg z-50"
+          className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg z-50"
           title="Save"
         >
           <Check size={12} />
