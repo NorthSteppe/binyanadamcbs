@@ -6,6 +6,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ServiceCard from "@/components/ServiceCard";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const Services = () => {
   const { t } = useLanguage();
@@ -34,11 +35,17 @@ const Services = () => {
       <section className="pb-24">
         <div className="container">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-             <ServiceCard title={t.services.cards.education.title} description={t.services.cards.education.description} icon={BookOpen} path="/education" colorClass="" />
-            <ServiceCard title={t.services.cards.therapy.title} description={t.services.cards.therapy.description} icon={Leaf} path="/therapy" colorClass="" />
-            <ServiceCard title={t.services.cards.family.title} description={t.services.cards.family.description} icon={UsersRound} path="/families" colorClass="" />
-            <ServiceCard title={t.services.cards.organisations.title} description={t.services.cards.organisations.description} icon={Landmark} path="/organisations" colorClass="" />
-            <ServiceCard title={t.services.cards.supervision.title} description={t.services.cards.supervision.description} icon={Compass} path="/supervision" colorClass="" />
+            {[
+              { title: t.services.cards.education.title, desc: t.services.cards.education.description, icon: BookOpen, path: "/education" },
+              { title: t.services.cards.therapy.title, desc: t.services.cards.therapy.description, icon: Leaf, path: "/therapy" },
+              { title: t.services.cards.family.title, desc: t.services.cards.family.description, icon: UsersRound, path: "/families" },
+              { title: t.services.cards.organisations.title, desc: t.services.cards.organisations.description, icon: Landmark, path: "/organisations" },
+              { title: t.services.cards.supervision.title, desc: t.services.cards.supervision.description, icon: Compass, path: "/supervision" },
+            ].map((card, i) => (
+              <ScrollReveal key={card.path} delay={i * 0.08} direction="up">
+                <ServiceCard title={card.title} description={card.desc} icon={card.icon} path={card.path} colorClass="" />
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
@@ -47,40 +54,33 @@ const Services = () => {
       <section className="py-24 border-t border-border">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-20 items-start">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
+            <ScrollReveal direction="left">
               <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{t.services.approachTagline}</p>
               <h2 className="text-4xl md:text-5xl font-serif mb-8">{t.services.approachTitle}</h2>
               <p className="text-foreground/60 leading-relaxed mb-8 font-light">{t.services.approachText}</p>
               <div className="space-y-4">
-                {t.services.approachPoints.map((point) => (
-                  <div key={point} className="flex items-start gap-3">
-                    <Check className="text-primary mt-0.5 flex-shrink-0" size={16} strokeWidth={1.5} />
-                    <p className="text-foreground/80 font-light">{point}</p>
-                  </div>
+                {t.services.approachPoints.map((point, i) => (
+                  <ScrollReveal key={point} delay={i * 0.06} direction="left" distance={16}>
+                    <div className="flex items-start gap-3">
+                      <Check className="text-primary mt-0.5 flex-shrink-0" size={16} strokeWidth={1.5} />
+                      <p className="text-foreground/80 font-light">{point}</p>
+                    </div>
+                  </ScrollReveal>
                 ))}
               </div>
-            </motion.div>
+            </ScrollReveal>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-card border border-border p-10"
-            >
-              <blockquote className="text-2xl font-serif leading-relaxed text-foreground mb-6 italic">
-                {t.services.quoteText}
-              </blockquote>
-              <div>
-                <p className="text-sm font-medium text-foreground">{t.services.quoteAuthor}</p>
-                <p className="text-xs text-muted-foreground">{t.services.quoteRole}</p>
+            <ScrollReveal direction="right" delay={0.15}>
+              <div className="bg-card border border-border p-10">
+                <blockquote className="text-2xl font-serif leading-relaxed text-foreground mb-6 italic">
+                  {t.services.quoteText}
+                </blockquote>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{t.services.quoteAuthor}</p>
+                  <p className="text-xs text-muted-foreground">{t.services.quoteRole}</p>
+                </div>
               </div>
-            </motion.div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -88,22 +88,17 @@ const Services = () => {
       {/* Credentials */}
       <section className="py-24 border-t border-border">
         <div className="container">
-          <div className="text-center mb-16">
+          <ScrollReveal className="text-center mb-16">
             <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{t.services.credentialsTagline}</p>
             <h2 className="text-4xl md:text-5xl font-serif">{t.services.credentialsTitle}</h2>
-          </div>
+          </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
             {t.services.credentials.map((cred, i) => (
-              <motion.div
-                key={cred}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-                className="bg-card border border-border px-6 py-5 text-sm text-foreground/80 font-light"
-              >
-                {cred}
-              </motion.div>
+              <ScrollReveal key={cred} delay={i * 0.05} distance={12}>
+                <div className="bg-card border border-border px-6 py-5 text-sm text-foreground/80 font-light">
+                  {cred}
+                </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -112,11 +107,7 @@ const Services = () => {
       {/* CTA */}
       <section className="py-24 bg-primary">
         <div className="container text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <ScrollReveal>
             <h2 className="text-4xl md:text-5xl font-serif text-primary-foreground mb-4">{t.services.ctaTitle}</h2>
             <p className="text-primary-foreground/60 mb-10 max-w-md mx-auto font-light">{t.services.ctaText}</p>
             <Button size="lg" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
@@ -124,7 +115,7 @@ const Services = () => {
                 {t.services.ctaButton} <ArrowRight size={16} />
               </Link>
             </Button>
-          </motion.div>
+          </ScrollReveal>
         </div>
       </section>
 
