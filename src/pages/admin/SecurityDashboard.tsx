@@ -168,7 +168,14 @@ const FindingCard = ({ finding }: { finding: Finding }) => {
 
 const SecurityDashboard = () => {
   const [scanning, setScanning] = useState(false);
-  const [findings, setFindings] = useState<Finding[]>([]);
+  const INITIAL_FINDINGS: Finding[] = [
+    { id: "INSECURE_INSERT_POLICY", name: "Any authenticated user can inject clinical therapy records into other users' accounts", description: "The INSERT policy on 'act_matrix_entries' uses the condition `(auth.uid() = user_id) OR (auth.uid() = filled_by)`. This allows any authenticated user to create ACT matrix entries with an arbitrary victim's UUID as `user_id`. Fix by tightening the INSERT WITH CHECK to require both fields.", level: "error" },
+    { id: "OVERLY_BROAD_SELECT_POLICY", name: "Team members can read sessions belonging to clients not assigned to them", description: "The 'Team members can view all sessions' policy grants any user with the `team_member` role unrestricted SELECT access to every row in the 'sessions' table. Replace with assignment-scoped access.", level: "warn" },
+    { id: "EXPOSED_SENSITIVE_DATA", name: "All authenticated users can enumerate every user profile in the system", description: "The 'Authenticated users can view profiles' policy uses `USING: true`, granting every authenticated user the ability to list all other users. Replace with scoped policies.", level: "warn" },
+    { id: "PUBLICLY_EXPOSED_SIGNATURES", name: "Staff digital signature images are publicly accessible without authentication", description: "The 'Anyone can view active team members' policy exposes all columns including `signature_url` to unauthenticated users. Restrict the public policy or move signatures to a private bucket.", level: "warn" },
+  ];
+
+  const [findings, setFindings] = useState<Finding[]>(INITIAL_FINDINGS);
   const [lastScanTime, setLastScanTime] = useState<string | null>(null);
 
   const runScan = async () => {
