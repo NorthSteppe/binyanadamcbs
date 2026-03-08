@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
   ListTodo, BookOpen, Wrench, UserCog, LayoutDashboard, ArrowRight,
-  Palette, Globe, Type, Megaphone, CreditCard, ClipboardList,
+  Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, ShieldAlert, KeyRound,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -53,7 +53,8 @@ const categories: ToolCategory[] = [
     iconBgClass: "bg-muted text-muted-foreground",
     tools: [
       { label: "User Management", path: "/admin/users", icon: UserCog, description: "Search users, assign or revoke roles" },
-      { label: "Auth Settings", path: "/admin/auth-settings", icon: Settings, description: "Configure sign-up, sign-in methods, and security" },
+      { label: "Auth Settings", path: "/admin/auth-settings", icon: KeyRound, description: "Configure sign-up, sign-in methods, and security" },
+      { label: "Security Dashboard", path: "/admin/security", icon: ShieldAlert, description: "Run security scans and review vulnerabilities" },
       { label: "Client Management", path: "/admin/clients", icon: Users, description: "View client profiles, notes, and documents" },
       { label: "Client Assignments", path: "/admin/assignments", icon: UserPlus, description: "Assign therapists to clients" },
       { label: "Team Requests", path: "/admin/team-requests", icon: UserPlus, description: "Review pending staff access requests" },
