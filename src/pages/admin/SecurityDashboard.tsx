@@ -226,7 +226,7 @@ const SecurityDashboard = () => {
     }
   };
 
-  useState(() => { loadInitialResults(); });
+  useEffect(() => { loadInitialResults(); }, []);
   const errors = findings.filter((f) => f.level === "error");
   const warnings = findings.filter((f) => f.level === "warn");
   const infos = findings.filter((f) => f.level === "info");
