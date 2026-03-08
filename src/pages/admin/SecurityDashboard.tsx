@@ -17,13 +17,8 @@ interface Finding {
   name: string;
   description: string;
   level: "error" | "warn" | "info";
-}
-
-interface ScanResult {
-  count: number;
-  findings: Finding[];
-  scanned_at: string;
-  metadata: Record<string, { items_found: number; status: string }>;
+  details?: string;
+  remediation_difficulty?: string;
 }
 
 const LEVEL_CONFIG = {
