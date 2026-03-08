@@ -924,6 +924,27 @@ const AdminCalendar = () => {
                   )}
                 </div>
               )}
+              {selectedEvent.type === "session" && (
+                <div className="mt-2 border-t border-border pt-3">
+                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📋 Add Notes (paste Plaud summary or type)</Label>
+                  <Textarea
+                    value={pasteNotes}
+                    onChange={(e) => setPasteNotes(e.target.value)}
+                    placeholder="Paste session notes or Plaud.ai summary here..."
+                    rows={3}
+                    className="text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    className="mt-2 gap-1"
+                    onClick={handleSaveNotes}
+                    disabled={!pasteNotes.trim() || savingNotes}
+                  >
+                    {savingNotes ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                    Save Notes
+                  </Button>
+                </div>
+              )}
               <div className="flex gap-2 pt-2">
                 {selectedEvent.type === "session" && (
                   <Button variant="outline" size="sm" className="gap-1" onClick={() => openEdit(selectedEvent)}>
