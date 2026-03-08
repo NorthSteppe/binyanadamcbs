@@ -88,6 +88,8 @@ const AdminCalendar = () => {
   // Edit session form
   const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
   const [editSessionId, setEditSessionId] = useState("");
+  const [pasteNotes, setPasteNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
 
   // Drag state
   const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null);
