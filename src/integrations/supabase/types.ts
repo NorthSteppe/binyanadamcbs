@@ -50,6 +50,36 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_shares: {
+        Row: {
+          can_view_focus: boolean
+          can_view_sessions: boolean
+          can_view_tasks: boolean
+          created_at: string
+          id: string
+          owner_id: string
+          shared_with_id: string
+        }
+        Insert: {
+          can_view_focus?: boolean
+          can_view_sessions?: boolean
+          can_view_tasks?: boolean
+          created_at?: string
+          id?: string
+          owner_id: string
+          shared_with_id: string
+        }
+        Update: {
+          can_view_focus?: boolean
+          can_view_sessions?: boolean
+          can_view_tasks?: boolean
+          created_at?: string
+          id?: string
+          owner_id?: string
+          shared_with_id?: string
+        }
+        Relationships: []
+      }
       client_assignments: {
         Row: {
           assignee_id: string
@@ -170,6 +200,63 @@ export type Database = {
           is_completed?: boolean
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      daily_plans: {
+        Row: {
+          created_at: string
+          id: string
+          plan_data: Json
+          plan_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan_data?: Json
+          plan_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan_data?: Json
+          plan_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      focus_blocks: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_recurring: boolean
+          recurrence_rule: string | null
+          start_time: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_recurring?: boolean
+          recurrence_rule?: string | null
+          start_time: string
+          title?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_recurring?: boolean
+          recurrence_rule?: string | null
+          start_time?: string
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -542,6 +629,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_projects: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_archived: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -559,6 +676,74 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string
+          due_date: string | null
+          estimated_minutes: number
+          id: string
+          is_completed: boolean
+          labels: string[]
+          priority: string
+          project_id: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          estimated_minutes?: number
+          id?: string
+          is_completed?: boolean
+          labels?: string[]
+          priority?: string
+          project_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          estimated_minutes?: number
+          id?: string
+          is_completed?: boolean
+          labels?: string[]
+          priority?: string
+          project_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
