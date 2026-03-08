@@ -32,11 +32,22 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const portalT = (t as any).portal || {};
   const toggleLanguage = () => setLanguage(language === "en" ? "he" : "en");
 
-  const getPortalLink = () => {
-    if (isAdmin) return { path: "/admin", label: "Admin Portal", icon: Shield };
-    if (isTeamMember) return { path: "/staff", label: "Therapist Portal", icon: Users };
-    return { path: "/portal", label: portalT.portal || "Portal", icon: LayoutDashboard };
+  const getPortalLinks = () => {
+    if (isAdmin) return [
+      { path: "/admin", label: "Admin", icon: Shield },
+      { path: "/staff", label: "Therapist", icon: Users },
+      { path: "/portal", label: "Client View", icon: LayoutDashboard },
+    ];
+    if (isTeamMember) return [
+      { path: "/staff", label: "Therapist Portal", icon: Users },
+    ];
+    return [
+      { path: "/portal", label: portalT.portal || "Portal", icon: LayoutDashboard },
+    ];
   };
+
+  const portalLinks = getPortalLinks();
+  const currentPortal = portalLinks.find(p => location.pathname.startsWith(p.path)) || portalLinks[0];
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/40" : "bg-transparent"}`}>
@@ -81,14 +92,32 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
           {user ? (
             <>
               <NotificationBell />
-              {(() => {
-                const portal = getPortalLink();
-                return (
+              {portalLinks.length > 1 ? (
+                <div className="relative group">
                   <Button variant="ghost" size="sm" asChild className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent">
-                    <Link to={portal.path}>{portal.label}</Link>
+                    <Link to={currentPortal.path}>{currentPortal.label} ▾</Link>
                   </Button>
-                );
-              })()}
+                  <div className="absolute right-0 top-full pt-1 hidden group-hover:block">
+                    <div className="bg-card border border-border/50 backdrop-blur-xl py-1 min-w-[160px]">
+                      {portalLinks.map((p) => (
+                        <Link
+                          key={p.path}
+                          to={p.path}
+                          className={`flex items-center gap-2 px-4 py-2 text-[12px] font-light tracking-wide uppercase transition-colors
+                            ${location.pathname.startsWith(p.path) ? "text-primary" : "text-foreground/60 hover:text-foreground hover:bg-muted/50"}`}
+                        >
+                          <p.icon size={14} />
+                          {p.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Button variant="ghost" size="sm" asChild className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent">
+                  <Link to={portalLinks[0].path}>{portalLinks[0].label}</Link>
+                </Button>
+              )}
               <Button
                 size="sm"
                 onClick={signOut}
@@ -143,15 +172,14 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
             <div className="pt-4 border-t border-border mt-4 flex flex-col gap-2">
               {user ? (
                 <>
-                  {(() => {
-                    const portal = getPortalLink();
-                    return (
-                      <Link to={portal.path} onClick={() => setMobileOpen(false)}
-                        className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-primary">
-                        {portal.label}
-                      </Link>
-                    );
-                  })()}
+                  {portalLinks.map((p) => (
+                    <Link key={p.path} to={p.path} onClick={() => setMobileOpen(false)}
+                      className={`px-4 py-3 text-[13px] font-light tracking-wide uppercase flex items-center gap-2
+                        ${location.pathname.startsWith(p.path) ? "text-primary" : "text-foreground/60"}`}>
+                      <p.icon size={14} />
+                      {p.label}
+                    </Link>
+                  ))}
                   <button onClick={() => { signOut(); setMobileOpen(false); }}
                     className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-foreground/60 text-left">
                     {portalT.logOut || "Log Out"}
