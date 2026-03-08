@@ -120,7 +120,7 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Quick links row */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <Link to="/portal/messages" className="relative bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
                 <div className="bg-accent text-accent-foreground rounded-xl p-3"><MessageSquare size={20} /></div>
