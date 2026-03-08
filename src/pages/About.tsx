@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, GraduationCap, Heart, Building2, Users, BookOpen } from "lucide-react";
+import { ArrowRight, CheckCircle2, GraduationCap, Heart, Building2, Users, BookOpen, Linkedin, Twitter, Globe, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { usePageContent } from "@/hooks/useSiteContent";
@@ -122,6 +122,9 @@ const About = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {(teamMembers || []).map((member, i) => {
+              const credentials = member.credentials ? member.credentials.split("\n").filter(Boolean) : [];
+              const hasSocial = member.social_linkedin || member.social_twitter || member.social_website;
+
               const cardContent = (
                 <motion.div key={member.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
                   className="group text-center p-8 bg-card border border-border hover:border-primary/20 transition-colors duration-500 cursor-pointer">
@@ -134,7 +137,43 @@ const About = () => {
                   )}
                   <h3 className="text-xl font-serif text-foreground mb-1">{member.name}</h3>
                   <p className="text-sm text-primary mb-3">{member.role}</p>
+
+                  {credentials.length > 0 && (
+                    <div className="flex flex-wrap justify-center gap-1.5 mb-3">
+                      {credentials.slice(0, 3).map((c, ci) => (
+                        <span key={ci} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted px-2 py-0.5">
+                          <Award size={10} className="text-primary shrink-0" />
+                          {c.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   <p className="text-sm text-foreground/50 leading-relaxed font-light">{member.bio}</p>
+
+                  {member.signature_url && (
+                    <img src={member.signature_url} alt={`${member.name}'s signature`} className="h-8 object-contain mx-auto mt-4 opacity-40" />
+                  )}
+
+                  {hasSocial && (
+                    <div className="flex justify-center gap-3 mt-4">
+                      {member.social_linkedin && (
+                        <a href={member.social_linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                          <Linkedin size={16} />
+                        </a>
+                      )}
+                      {member.social_twitter && (
+                        <a href={member.social_twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                          <Twitter size={16} />
+                        </a>
+                      )}
+                      {member.social_website && (
+                        <a href={member.social_website} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                          <Globe size={16} />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               );
 
