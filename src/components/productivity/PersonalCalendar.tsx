@@ -432,13 +432,18 @@ const PersonalCalendar = () => {
             const dayEvents = eventsByDay.get(key) || [];
             const isToday = isSameDay(day, today);
             const isCurrentMonth = isSameMonth(day, currentDate);
+            const isOver = dropTarget === `month-${key}`;
             return (
-              <motion.button
+              <motion.div
                 key={key} whileHover={{ scale: 1.02 }}
                 onClick={() => handleDayClick(day)}
-                className={`relative rounded-lg p-1 min-h-[80px] text-left border transition-colors
+                onDragOver={(e) => handleDragOver(e, `month-${key}`)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleMonthDrop(e, day)}
+                className={`relative rounded-lg p-1 min-h-[80px] text-left border transition-colors cursor-pointer
                   ${isToday ? "border-primary bg-primary/5" : "border-transparent hover:border-border"}
-                  ${!isCurrentMonth ? "opacity-40" : ""}`}
+                  ${!isCurrentMonth ? "opacity-40" : ""}
+                  ${isOver ? "bg-primary/10 border-primary" : ""}`}
               >
                 <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
                   {format(day, "d")}
@@ -447,8 +452,11 @@ const PersonalCalendar = () => {
                   {dayEvents.slice(0, 3).map((ev) => (
                     <div
                       key={ev.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, ev)}
+                      onDragEnd={handleDragEnd}
                       onClick={(e) => handleEventClick(e, ev)}
-                      className="text-[9px] px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 transition-opacity"
+                      className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
                       style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
                     >
                       {ev.type === "task" && ev.priority && (
@@ -461,7 +469,7 @@ const PersonalCalendar = () => {
                     <span className="text-[8px] text-muted-foreground">+{dayEvents.length - 3} more</span>
                   )}
                 </div>
-              </motion.button>
+              </motion.div>
             );
           })}
         </div>
