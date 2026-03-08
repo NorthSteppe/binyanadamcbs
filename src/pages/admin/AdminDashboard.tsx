@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit, ListTodo, BookOpen, Wrench, UserCog } from "lucide-react";
+import { Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit, ListTodo, BookOpen, Wrench, UserCog, LayoutDashboard, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
@@ -76,6 +76,35 @@ const AdminDashboard = () => {
                 </Link>
               </motion.div>
             ))}
+          </div>
+
+
+          <h2 className="text-lg font-semibold text-foreground mb-4 mt-10">Switch Portal</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <Link to="/portal" className="bg-card border border-border/50 rounded-2xl p-5 flex items-start gap-4 hover:border-primary/30 hover:shadow-sm transition-all block h-full">
+                <div className="bg-primary/10 text-primary rounded-xl p-3 shrink-0">
+                  <LayoutDashboard size={20} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-card-foreground">Client Portal</p>
+                  <p className="text-xs text-muted-foreground mt-1">View as a client — dashboard, booking, toolkit</p>
+                </div>
+                <ArrowRight size={16} className="text-muted-foreground mt-1" />
+              </Link>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+              <Link to="/staff" className="bg-card border border-border/50 rounded-2xl p-5 flex items-start gap-4 hover:border-primary/30 hover:shadow-sm transition-all block h-full">
+                <div className="bg-accent text-accent-foreground rounded-xl p-3 shrink-0">
+                  <Users size={20} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-card-foreground">Therapist Portal</p>
+                  <p className="text-xs text-muted-foreground mt-1">View as a therapist — clients, calendar, tools</p>
+                </div>
+                <ArrowRight size={16} className="text-muted-foreground mt-1" />
+              </Link>
+            </motion.div>
           </div>
         </div>
       </section>
