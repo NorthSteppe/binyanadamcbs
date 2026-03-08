@@ -212,10 +212,13 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
     if (showSessions) {
       sessions.forEach((s: any) => {
         const start = parseISO(s.session_date);
+        const meetingInfo = s.meeting_platform ? `${s.meeting_platform.replace("-", " ")}` : "";
+        const desc = [s.description, meetingInfo].filter(Boolean).join(" · ");
         result.push({
           id: s.id, title: s.title, start,
           end: new Date(start.getTime() + (s.duration_minutes || 60) * 60000),
-          type: "session", color: "hsl(var(--primary))", status: s.status, description: s.description,
+          type: "session", color: "hsl(var(--primary))", status: s.status,
+          description: desc || undefined,
         });
       });
     }
