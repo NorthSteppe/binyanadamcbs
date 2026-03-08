@@ -88,6 +88,8 @@ const AdminCalendar = () => {
   // Edit session form
   const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
   const [editSessionId, setEditSessionId] = useState("");
+  const [pasteNotes, setPasteNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
 
   // Drag state
   const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null);
@@ -334,6 +336,29 @@ const AdminCalendar = () => {
     qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
+  const handleSaveNotes = async () => {
+    if (!selectedEvent || !pasteNotes.trim()) return;
+    setSavingNotes(true);
+    try {
+      const timestamp = new Date().toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" });
+      const existingNotes = selectedEvent.notes || "";
+      const newNotes = existingNotes
+        ? `${existingNotes}\n\n--- Manual Note (${timestamp}) ---\n${pasteNotes.trim()}`
+        : `--- Manual Note (${timestamp}) ---\n${pasteNotes.trim()}`;
+
+      const { error } = await supabase.from("sessions").update({ notes: newNotes }).eq("id", selectedEvent.id);
+      if (error) throw error;
+      setSelectedEvent({ ...selectedEvent, notes: newNotes });
+      setPasteNotes("");
+      toast.success("Notes saved to session");
+      qc.invalidateQueries({ queryKey: ["team_sessions"] });
+    } catch {
+      toast.error("Failed to save notes");
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
   const openEdit = (event: CalendarEvent) => {
     if (event.type !== "session") return;
     setEditSessionId(event.id);
@@ -476,6 +501,7 @@ const AdminCalendar = () => {
   const handleEventClick = (e: React.MouseEvent, event: CalendarEvent) => {
     e.stopPropagation();
     setSelectedEvent(event);
+    setPasteNotes("");
     setDetailOpen(true);
   };
 
@@ -897,6 +923,27 @@ const AdminCalendar = () => {
                   {selectedEvent.plaudRecordingId && (
                     <p className="text-[10px] text-muted-foreground mt-1">Plaud Recording: {selectedEvent.plaudRecordingId}</p>
                   )}
+                </div>
+              )}
+              {selectedEvent.type === "session" && (
+                <div className="mt-2 border-t border-border pt-3">
+                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📋 Add Notes (paste Plaud summary or type)</Label>
+                  <Textarea
+                    value={pasteNotes}
+                    onChange={(e) => setPasteNotes(e.target.value)}
+                    placeholder="Paste session notes or Plaud.ai summary here..."
+                    rows={3}
+                    className="text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    className="mt-2 gap-1"
+                    onClick={handleSaveNotes}
+                    disabled={!pasteNotes.trim() || savingNotes}
+                  >
+                    {savingNotes ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                    Save Notes
+                  </Button>
                 </div>
               )}
               <div className="flex gap-2 pt-2">
