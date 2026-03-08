@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 const EditModeToggle = () => {
   const { canEdit, editMode, setEditMode, saving } = useEditMode();
 
-  // Only show when edit mode is already active — admins activate it from the portal
   if (!canEdit || !editMode) return null;
 
   return (
@@ -14,12 +13,12 @@ const EditModeToggle = () => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 20, opacity: 0 }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100]"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] max-w-[calc(100vw-2rem)]"
       >
         <div className="flex items-center gap-2">
           <button
             onClick={() => setEditMode(false)}
-            className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full shadow-xl hover:bg-primary/90 transition-colors text-sm font-medium"
+            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-3 md:px-5 md:py-2.5 rounded-full shadow-xl hover:bg-primary/90 transition-colors text-sm font-medium"
           >
             <X size={16} />
             Exit Edit Mode
