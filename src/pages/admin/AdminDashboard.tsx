@@ -71,6 +71,7 @@ const categories: ToolCategory[] = [
     tools: [
       { label: "Staff To-Dos", path: "/admin/staff-todos", icon: ListTodo, description: "Manage and assign tasks to staff" },
       { label: "Client To-Dos", path: "/staff/todos", icon: ClipboardList, description: "Manage task lists for clients" },
+      { label: "Clinical Tools", path: "/staff/clinical-tools", icon: ClipboardList, description: "CBS data collection: ABC, functional assessment, hexaflex & more" },
       { label: "Resources", path: "/staff/resources", icon: BookOpen, description: "Upload and manage the resource library" },
       { label: "ACT Matrix", path: "/staff/toolkit/act-matrix", icon: Wrench, description: "Fill in ACT Matrix for clients" },
     ],

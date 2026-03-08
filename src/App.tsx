@@ -56,6 +56,14 @@ import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
 import TodoManager from "./pages/admin/TodoManager";
 import StaffTodoManager from "./pages/admin/StaffTodoManager";
 import WhatsAppButton from "./components/WhatsAppButton";
+// Clinical tools
+import ClinicalTools from "./pages/staff/ClinicalTools";
+import ABCDataSheet from "./pages/staff/ABCDataSheet";
+import FunctionalAssessment from "./pages/staff/FunctionalAssessment";
+import ValuesBullsEye from "./pages/staff/ValuesBullsEye";
+import HexaflexTracker from "./pages/staff/HexaflexTracker";
+import BehaviourLog from "./pages/staff/BehaviourLog";
+import CaseFormulation from "./pages/staff/CaseFormulation";
 // Courses
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
@@ -142,6 +150,13 @@ const App = () => (
                   <Route path="/staff/staff-todos" element={<StaffRoute><StaffTodoManager /></StaffRoute>} />
                   <Route path="/staff/resources" element={<StaffRoute><Resources /></StaffRoute>} />
                   <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
+                  <Route path="/staff/clinical-tools" element={<StaffRoute><ClinicalTools /></StaffRoute>} />
+                  <Route path="/staff/clinical/abc" element={<StaffRoute><ABCDataSheet /></StaffRoute>} />
+                  <Route path="/staff/clinical/functional-assessment" element={<StaffRoute><FunctionalAssessment /></StaffRoute>} />
+                  <Route path="/staff/clinical/values-bullseye" element={<StaffRoute><ValuesBullsEye /></StaffRoute>} />
+                  <Route path="/staff/clinical/hexaflex" element={<StaffRoute><HexaflexTracker /></StaffRoute>} />
+                  <Route path="/staff/clinical/behaviour-log" element={<StaffRoute><BehaviourLog /></StaffRoute>} />
+                  <Route path="/staff/clinical/case-formulation" element={<StaffRoute><CaseFormulation /></StaffRoute>} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

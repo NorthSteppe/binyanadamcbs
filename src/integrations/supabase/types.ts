@@ -203,6 +203,39 @@ export type Database = {
         }
         Relationships: []
       }
+      clinical_entries: {
+        Row: {
+          client_id: string
+          created_at: string
+          entry_data: Json
+          entry_date: string
+          filled_by: string
+          id: string
+          notes: string
+          tool_type: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          entry_data?: Json
+          entry_date?: string
+          filled_by: string
+          id?: string
+          notes?: string
+          tool_type: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          entry_data?: Json
+          entry_date?: string
+          filled_by?: string
+          id?: string
+          notes?: string
+          tool_type?: string
+        }
+        Relationships: []
+      }
       content_overrides: {
         Row: {
           content_key: string
