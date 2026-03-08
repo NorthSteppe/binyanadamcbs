@@ -16,7 +16,9 @@ import {
   ChevronLeft, ChevronRight, Plus, CalendarDays,
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
   ListTodo, User, Edit, X, Sparkles, Loader2, Check,
+  Video, Link2, UserPlus, ExternalLink,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
   addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks,
@@ -40,6 +42,9 @@ type CalendarEvent = {
   clientName?: string;
   assignedName?: string;
   clientId?: string;
+  meetingUrl?: string;
+  meetingPlatform?: string;
+  attendeeIds?: string[];
 };
 
 type ViewMode = "month" | "week" | "day";
@@ -75,11 +80,11 @@ const AdminCalendar = () => {
   const [editOpen, setEditOpen] = useState(false);
 
   // New session form
-  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "" });
+  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
   // New task form
   const [newTask, setNewTask] = useState({ title: "", assigned_to: "", description: "" });
   // Edit session form
-  const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled" });
+  const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
   const [editSessionId, setEditSessionId] = useState("");
 
   // Drag state
@@ -172,6 +177,9 @@ const AdminCalendar = () => {
           status: s.status, description: s.description,
           clientName: nameMap.get(s.client_id) || "Unknown",
           clientId: s.client_id,
+          meetingUrl: s.meeting_url || "",
+          meetingPlatform: s.meeting_platform || "",
+          attendeeIds: s.attendee_ids || [],
         });
       });
     }
@@ -272,12 +280,23 @@ const AdminCalendar = () => {
     const { error } = await supabase.from("sessions").insert({
       title: newSession.title, client_id: newSession.client_id, session_date: dateTime,
       duration_minutes: newSession.duration_minutes, description: newSession.description || null,
-    });
+      meeting_platform: newSession.meeting_platform || null,
+      meeting_url: newSession.meeting_url || null,
+      attendee_ids: newSession.attendee_ids,
+    } as any);
     if (error) toast.error("Failed to create session");
     else {
+      // Send invite notifications to attendees
+      for (const aid of newSession.attendee_ids) {
+        await supabase.rpc("create_notification", {
+          _user_id: aid, _type: "session", _title: "Session Invite",
+          _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}`,
+          _link: "/admin/calendar",
+        });
+      }
       toast.success("Session created");
       setCreateOpen(false);
-      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "" });
+      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] });
       qc.invalidateQueries({ queryKey: ["team_sessions"] });
     }
   };
@@ -321,6 +340,9 @@ const AdminCalendar = () => {
       duration_minutes: differenceInMinutes(event.end, event.start),
       description: event.description || "",
       status: event.status || "scheduled",
+      meeting_platform: event.meetingPlatform || "",
+      meeting_url: event.meetingUrl || "",
+      attendee_ids: event.attendeeIds || [],
     });
     setEditOpen(true);
     setDetailOpen(false);
@@ -331,7 +353,10 @@ const AdminCalendar = () => {
     const { error } = await supabase.from("sessions").update({
       title: editForm.title, session_date: dateTime, duration_minutes: editForm.duration_minutes,
       description: editForm.description || null, status: editForm.status,
-    }).eq("id", editSessionId);
+      meeting_platform: editForm.meeting_platform || null,
+      meeting_url: editForm.meeting_url || null,
+      attendee_ids: editForm.attendee_ids,
+    } as any).eq("id", editSessionId);
     if (error) toast.error("Failed to update");
     else { toast.success("Session updated"); setEditOpen(false); qc.invalidateQueries({ queryKey: ["team_sessions"] }); }
   };
@@ -731,6 +756,48 @@ const AdminCalendar = () => {
                   <div><Label>Time</Label><Input type="time" value={newSession.time} onChange={(e) => setNewSession({ ...newSession, time: e.target.value })} /></div>
                   <div><Label>Duration (min)</Label><Input type="number" value={newSession.duration_minutes} onChange={(e) => setNewSession({ ...newSession, duration_minutes: parseInt(e.target.value) || 60 })} /></div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="flex items-center gap-1"><Video size={12} /> Meeting Platform</Label>
+                    <Select value={newSession.meeting_platform} onValueChange={(v) => setNewSession({ ...newSession, meeting_platform: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="zoom">Zoom</SelectItem>
+                        <SelectItem value="teams">Microsoft Teams</SelectItem>
+                        <SelectItem value="google-meet">Google Meet</SelectItem>
+                        <SelectItem value="in-person">In Person</SelectItem>
+                        <SelectItem value="phone">Phone Call</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="flex items-center gap-1"><Link2 size={12} /> Meeting Link</Label>
+                    <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." />
+                  </div>
+                </div>
+                <div>
+                  <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Invite Team Members</Label>
+                  <div className="grid grid-cols-2 gap-1.5 max-h-[120px] overflow-y-auto border border-border/50 rounded-lg p-2">
+                    {staffMembers.map((s) => (
+                      <label key={s.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                        <Checkbox
+                          checked={newSession.attendee_ids.includes(s.id)}
+                          onCheckedChange={(checked) => {
+                            setNewSession((prev) => ({
+                              ...prev,
+                              attendee_ids: checked
+                                ? [...prev.attendee_ids, s.id]
+                                : prev.attendee_ids.filter((id) => id !== s.id),
+                            }));
+                          }}
+                        />
+                        {s.full_name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <div><Label>Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} /></div>
                 <Button className="w-full" onClick={handleCreateSession}>Create Session</Button>
               </>
@@ -795,6 +862,27 @@ const AdminCalendar = () => {
                   </div>
                 </>
               )}
+              {selectedEvent.meetingPlatform && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Video size={14} className="text-muted-foreground" />
+                  <span className="capitalize">{selectedEvent.meetingPlatform.replace("-", " ")}</span>
+                  {selectedEvent.meetingUrl && (
+                    <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs">
+                      <ExternalLink size={10} /> Join
+                    </a>
+                  )}
+                </div>
+              )}
+              {selectedEvent.attendeeIds && selectedEvent.attendeeIds.length > 0 && (
+                <div className="text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1 mb-1"><UserPlus size={14} /> Attendees:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedEvent.attendeeIds.map((id) => (
+                      <Badge key={id} variant="secondary" className="text-xs">{nameMap.get(id) || "Unknown"}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
               {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
               <div className="flex gap-2 pt-2">
                 {selectedEvent.type === "session" && (
@@ -834,6 +922,48 @@ const AdminCalendar = () => {
                     <SelectItem value="no-show">No Show</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="flex items-center gap-1"><Video size={12} /> Platform</Label>
+                <Select value={editForm.meeting_platform} onValueChange={(v) => setEditForm({ ...editForm, meeting_platform: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                    <SelectItem value="teams">Microsoft Teams</SelectItem>
+                    <SelectItem value="google-meet">Google Meet</SelectItem>
+                    <SelectItem value="in-person">In Person</SelectItem>
+                    <SelectItem value="phone">Phone Call</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="flex items-center gap-1"><Link2 size={12} /> Meeting Link</Label>
+                <Input value={editForm.meeting_url} onChange={(e) => setEditForm({ ...editForm, meeting_url: e.target.value })} placeholder="https://..." />
+              </div>
+            </div>
+            <div>
+              <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Attendees</Label>
+              <div className="grid grid-cols-2 gap-1.5 max-h-[100px] overflow-y-auto border border-border/50 rounded-lg p-2">
+                {staffMembers.map((s) => (
+                  <label key={s.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                    <Checkbox
+                      checked={editForm.attendee_ids.includes(s.id)}
+                      onCheckedChange={(checked) => {
+                        setEditForm((prev) => ({
+                          ...prev,
+                          attendee_ids: checked
+                            ? [...prev.attendee_ids, s.id]
+                            : prev.attendee_ids.filter((id) => id !== s.id),
+                        }));
+                      }}
+                    />
+                    {s.full_name}
+                  </label>
+                ))}
               </div>
             </div>
             <div><Label>Notes</Label><Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={2} /></div>

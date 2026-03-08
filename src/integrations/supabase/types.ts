@@ -692,31 +692,40 @@ export type Database = {
       }
       sessions: {
         Row: {
+          attendee_ids: string[] | null
           client_id: string
           created_at: string
           description: string | null
           duration_minutes: number
           id: string
+          meeting_platform: string | null
+          meeting_url: string | null
           session_date: string
           status: string
           title: string
         }
         Insert: {
+          attendee_ids?: string[] | null
           client_id: string
           created_at?: string
           description?: string | null
           duration_minutes?: number
           id?: string
+          meeting_platform?: string | null
+          meeting_url?: string | null
           session_date: string
           status?: string
           title: string
         }
         Update: {
+          attendee_ids?: string[] | null
           client_id?: string
           created_at?: string
           description?: string | null
           duration_minutes?: number
           id?: string
+          meeting_platform?: string | null
+          meeting_url?: string | null
           session_date?: string
           status?: string
           title?: string
