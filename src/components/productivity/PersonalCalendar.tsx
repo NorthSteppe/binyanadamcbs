@@ -839,7 +839,7 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
               <div><Label>Start</Label><Input type="time" value={newEvent.start} onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })} /></div>
               <div><Label>End</Label><Input type="time" value={newEvent.end} onChange={(e) => setNewEvent({ ...newEvent, end: e.target.value })} /></div>
             </div>
-            <Button className="w-full" disabled={!newEvent.start || !newEvent.end} onClick={() => createType === "focus" ? createFocusBlock.mutate() : createTask.mutate()}>
+            <Button className="w-full" disabled={!newEvent.start || !newEvent.end} onClick={() => createType === "focus" ? createFocusBlock.mutate() : createTask.mutate(undefined)}>
               {createType === "focus" ? "Add Focus Block" : "Create Task"}
             </Button>
           </div>
