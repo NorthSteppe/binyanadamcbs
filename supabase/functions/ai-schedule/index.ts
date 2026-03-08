@@ -10,7 +10,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Authenticate the caller
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -34,11 +33,52 @@ serve(async (req) => {
       });
     }
 
-    const { tasks, sessions, focus_blocks, date } = await req.json();
+    const body = await req.json();
+    const { mode } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are an AI scheduling assistant. Given a user's tasks, existing sessions, and focus blocks for the day, create an optimal daily schedule.
+    let systemPrompt: string;
+    let userPrompt: string;
+
+    if (mode === "team") {
+      // Team calendar auto-scheduler
+      const { unscheduled_sessions, existing_sessions, date, clients } = body;
+
+      systemPrompt = `You are an AI scheduling assistant for a clinical practice. Given unscheduled client sessions and existing booked sessions for the day, optimally slot the unscheduled sessions into available time gaps.
+
+Rules:
+- Work hours are 8:00-18:00
+- Never overlap with existing sessions
+- Leave at least 15 minutes between sessions for notes and transition
+- Include a lunch break around 12:30-13:15
+- Spread sessions evenly throughout the day
+- Prioritize earlier slots for earlier requests
+- Return suggested times for each unscheduled session
+
+Return a JSON object with:
+- "scheduled": array of { session_id: string, suggested_time: "HH:MM", title: string, client_name: string, duration_minutes: number }
+- "summary": a brief sentence describing the schedule
+
+Today's date is ${date}.`;
+
+      userPrompt = `Schedule these sessions for today:
+
+UNSCHEDULED SESSIONS (need times):
+${JSON.stringify(unscheduled_sessions, null, 2)}
+
+EXISTING SESSIONS (fixed, cannot move):
+${JSON.stringify(existing_sessions, null, 2)}
+
+CLIENT INFO:
+${JSON.stringify(clients, null, 2)}
+
+Find optimal time slots for the unscheduled sessions around the fixed ones.`;
+    } else {
+      // Personal task scheduler (existing behavior)
+      const { tasks, sessions, focus_blocks, date } = body;
+
+      systemPrompt = `You are an AI scheduling assistant. Given a user's tasks, existing sessions, and focus blocks for the day, create an optimal daily schedule.
 
 Rules:
 - Work hours are typically 8:00-18:00 unless existing sessions suggest otherwise
@@ -55,7 +95,7 @@ Return a JSON object with two keys:
 
 Today's date is ${date}. Use ISO timestamps for scheduled_tasks based on this date.`;
 
-    const userPrompt = `Schedule these items for today:
+      userPrompt = `Schedule these items for today:
 
 TASKS (unscheduled):
 ${JSON.stringify(tasks, null, 2)}
@@ -67,6 +107,68 @@ EXISTING FOCUS BLOCKS (fixed, cannot move):
 ${JSON.stringify(focus_blocks, null, 2)}
 
 Create an optimal schedule fitting tasks around the fixed commitments.`;
+    }
+
+    const toolDef = mode === "team" ? {
+      name: "create_team_schedule",
+      description: "Create an optimized team schedule for the day",
+      parameters: {
+        type: "object",
+        properties: {
+          scheduled: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                session_id: { type: "string" },
+                suggested_time: { type: "string", description: "HH:MM format" },
+                title: { type: "string" },
+                client_name: { type: "string" },
+                duration_minutes: { type: "number" },
+              },
+              required: ["session_id", "suggested_time", "title", "duration_minutes"],
+            },
+          },
+          summary: { type: "string" },
+        },
+        required: ["scheduled", "summary"],
+      },
+    } : {
+      name: "create_schedule",
+      description: "Create an optimized daily schedule",
+      parameters: {
+        type: "object",
+        properties: {
+          plan: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                time: { type: "string", description: "HH:MM format" },
+                title: { type: "string" },
+                type: { type: "string", enum: ["task", "focus", "session", "break"] },
+                duration_minutes: { type: "number" },
+                task_id: { type: "string" },
+              },
+              required: ["time", "title", "type", "duration_minutes"],
+            },
+          },
+          scheduled_tasks: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                task_id: { type: "string" },
+                scheduled_start: { type: "string" },
+                scheduled_end: { type: "string" },
+              },
+              required: ["task_id", "scheduled_start", "scheduled_end"],
+            },
+          },
+        },
+        required: ["plan", "scheduled_tasks"],
+      },
+    };
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -80,66 +182,26 @@ Create an optimal schedule fitting tasks around the fixed commitments.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "create_schedule",
-              description: "Create an optimized daily schedule",
-              parameters: {
-                type: "object",
-                properties: {
-                  plan: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        time: { type: "string", description: "HH:MM format" },
-                        title: { type: "string" },
-                        type: { type: "string", enum: ["task", "focus", "session", "break"] },
-                        duration_minutes: { type: "number" },
-                        task_id: { type: "string" },
-                      },
-                      required: ["time", "title", "type", "duration_minutes"],
-                    },
-                  },
-                  scheduled_tasks: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        task_id: { type: "string" },
-                        scheduled_start: { type: "string" },
-                        scheduled_end: { type: "string" },
-                      },
-                      required: ["task_id", "scheduled_start", "scheduled_end"],
-                    },
-                  },
-                },
-                required: ["plan", "scheduled_tasks"],
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "create_schedule" } },
+        tools: [{ type: "function", function: toolDef }],
+        tool_choice: { type: "function", function: { name: toolDef.name } },
       }),
     });
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "Rate limited, please try again later." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "Payment required, please add credits." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       const text = await response.text();
       console.error("AI error:", response.status, text);
-      return new Response(JSON.stringify({ error: "AI error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "AI scheduling error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const result = await response.json();
     const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
-    let schedule = { plan: [], scheduled_tasks: [] };
+    let schedule: any = mode === "team" ? { scheduled: [], summary: "" } : { plan: [], scheduled_tasks: [] };
     if (toolCall?.function?.arguments) {
       schedule = JSON.parse(toolCall.function.arguments);
     }

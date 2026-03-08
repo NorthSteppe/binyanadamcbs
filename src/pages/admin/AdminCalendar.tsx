@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChevronLeft, ChevronRight, Plus, CalendarDays,
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
-  ListTodo, User, Edit, X,
+  ListTodo, User, Edit, X, Sparkles, Loader2, Check,
 } from "lucide-react";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
@@ -85,6 +85,12 @@ const AdminCalendar = () => {
   // Drag state
   const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+
+  // AI Scheduler
+  const [aiScheduling, setAiScheduling] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<Array<{ session_id: string; suggested_time: string; title: string; client_name?: string; duration_minutes: number }>>([]);
+  const [aiSummary, setAiSummary] = useState("");
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -330,6 +336,104 @@ const AdminCalendar = () => {
     else { toast.success("Session updated"); setEditOpen(false); qc.invalidateQueries({ queryKey: ["team_sessions"] }); }
   };
 
+  // AI Auto-Scheduler
+  const handleAiSchedule = async () => {
+    setAiScheduling(true);
+    try {
+      const targetDate = format(currentDate, "yyyy-MM-dd");
+      // Get sessions for the current day
+      const dayStart = startOfDay(currentDate).toISOString();
+      const dayEnd = endOfDay(currentDate).toISOString();
+
+      const { data: daySessions } = await supabase
+        .from("sessions")
+        .select("*")
+        .gte("session_date", dayStart)
+        .lte("session_date", dayEnd);
+
+      const existingSessions = (daySessions || [])
+        .filter((s: any) => s.status === "scheduled")
+        .map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          time: format(parseISO(s.session_date), "HH:mm"),
+          duration_minutes: s.duration_minutes,
+          client_id: s.client_id,
+          client_name: nameMap.get(s.client_id) || "Unknown",
+        }));
+
+      // Get unscheduled sessions (sessions without a specific time, or staff todos that need scheduling)
+      const { data: unscheduledTodos } = await supabase
+        .from("staff_todos")
+        .select("*")
+        .eq("is_completed", false)
+        .or(`due_date.is.null,due_date.eq.${targetDate}`);
+
+      const unscheduledSessions = (unscheduledTodos || []).map((t: any) => ({
+        session_id: t.id,
+        title: t.title,
+        duration_minutes: 30,
+        assigned_to: t.assigned_to,
+        assigned_name: nameMap.get(t.assigned_to) || "Unknown",
+      }));
+
+      if (unscheduledSessions.length === 0) {
+        toast.info("No unscheduled tasks to auto-schedule for this day");
+        setAiScheduling(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("ai-schedule", {
+        body: {
+          mode: "team",
+          date: targetDate,
+          unscheduled_sessions: unscheduledSessions,
+          existing_sessions: existingSessions,
+          clients: clients.map((c) => ({ id: c.id, name: c.full_name })),
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        setAiScheduling(false);
+        return;
+      }
+
+      setAiSuggestions(data.scheduled || []);
+      setAiSummary(data.summary || "Schedule optimized");
+      setAiDialogOpen(true);
+    } catch (err: any) {
+      console.error("AI schedule error:", err);
+      toast.error("Failed to generate schedule suggestions");
+    } finally {
+      setAiScheduling(false);
+    }
+  };
+
+  const applyAiSuggestion = async (suggestion: typeof aiSuggestions[0]) => {
+    const dateTime = `${format(currentDate, "yyyy-MM-dd")}T${suggestion.suggested_time}:00`;
+    // Update the staff todo's due_date
+    const { error } = await supabase
+      .from("staff_todos")
+      .update({ due_date: format(currentDate, "yyyy-MM-dd") })
+      .eq("id", suggestion.session_id);
+    if (error) {
+      toast.error("Failed to apply suggestion");
+    } else {
+      toast.success(`Scheduled "${suggestion.title}" at ${suggestion.suggested_time}`);
+      qc.invalidateQueries({ queryKey: ["team_todos"] });
+    }
+  };
+
+  const applyAllAiSuggestions = async () => {
+    for (const s of aiSuggestions) {
+      await applyAiSuggestion(s);
+    }
+    setAiDialogOpen(false);
+    toast.success("All suggestions applied!");
+  };
+
   // Click handlers
   const handleDayClick = (day: Date, hour?: number) => {
     setSelectedDate(day);
@@ -381,6 +485,16 @@ const AdminCalendar = () => {
                 </TabsList>
               </Tabs>
               <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="text-xs h-8">Today</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAiSchedule}
+                disabled={aiScheduling}
+                className="h-8 gap-1 text-xs border-primary/30 hover:bg-primary/10"
+              >
+                {aiScheduling ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                AI Schedule
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setIsFullscreen(!isFullscreen)} className="h-8">
                 {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
               </Button>
@@ -725,6 +839,46 @@ const AdminCalendar = () => {
             <div><Label>Notes</Label><Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={2} /></div>
             <Button className="w-full" onClick={handleUpdate}>Save Changes</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== AI SUGGESTIONS DIALOG ===== */}
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles size={18} className="text-primary" /> AI Schedule Suggestions
+            </DialogTitle>
+          </DialogHeader>
+          {aiSummary && (
+            <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{aiSummary}</p>
+          )}
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            {aiSuggestions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No suggestions generated</p>
+            ) : (
+              aiSuggestions.map((s, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-card border border-border/50 rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs font-mono">{s.suggested_time}</Badge>
+                      <span className="text-sm font-medium">{s.title}</span>
+                    </div>
+                    {s.client_name && <p className="text-xs text-muted-foreground mt-0.5">{s.client_name} · {s.duration_minutes}min</p>}
+                    {!s.client_name && <p className="text-xs text-muted-foreground mt-0.5">{s.duration_minutes}min</p>}
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => applyAiSuggestion(s)} className="h-7 gap-1 text-xs">
+                    <Check size={12} /> Apply
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+          {aiSuggestions.length > 0 && (
+            <Button className="w-full gap-2" onClick={applyAllAiSuggestions}>
+              <Check size={14} /> Apply All Suggestions
+            </Button>
+          )}
         </DialogContent>
       </Dialog>
     </div>
