@@ -30,8 +30,7 @@ const EntryHistory = ({ clientId, toolType, renderEntry, refreshKey }: EntryHist
   useEffect(() => {
     if (!clientId) return;
     const fetch = async () => {
-      const { data } = await supabase
-        .from("clinical_entries")
+      const { data } = await (supabase.from("clinical_entries") as any)
         .select("*")
         .eq("client_id", clientId)
         .eq("tool_type", toolType)
@@ -60,7 +59,7 @@ const EntryHistory = ({ clientId, toolType, renderEntry, refreshKey }: EntryHist
   }, [clientId, toolType, refreshKey]);
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("clinical_entries").delete().eq("id", id);
+    const { error } = await (supabase.from("clinical_entries") as any).delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete entry");
     } else {
