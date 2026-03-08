@@ -12,6 +12,14 @@ import EditableText from "@/components/editable/EditableText";
 const Services = () => {
   const { t } = useLanguage();
 
+  const cards = [
+    { title: t.services.cards.education.title, desc: t.services.cards.education.description, icon: BookOpen, path: "/education", key: "education" },
+    { title: t.services.cards.therapy.title, desc: t.services.cards.therapy.description, icon: Leaf, path: "/therapy", key: "therapy" },
+    { title: t.services.cards.family.title, desc: t.services.cards.family.description, icon: UsersRound, path: "/families", key: "family" },
+    { title: t.services.cards.organisations.title, desc: t.services.cards.organisations.description, icon: Landmark, path: "/organisations", key: "organisations" },
+    { title: t.services.cards.supervision.title, desc: t.services.cards.supervision.description, icon: Compass, path: "/supervision", key: "supervision" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -36,15 +44,16 @@ const Services = () => {
       <section className="pb-24">
         <div className="container">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { title: t.services.cards.education.title, desc: t.services.cards.education.description, icon: BookOpen, path: "/education" },
-              { title: t.services.cards.therapy.title, desc: t.services.cards.therapy.description, icon: Leaf, path: "/therapy" },
-              { title: t.services.cards.family.title, desc: t.services.cards.family.description, icon: UsersRound, path: "/families" },
-              { title: t.services.cards.organisations.title, desc: t.services.cards.organisations.description, icon: Landmark, path: "/organisations" },
-              { title: t.services.cards.supervision.title, desc: t.services.cards.supervision.description, icon: Compass, path: "/supervision" },
-            ].map((card, i) => (
+            {cards.map((card, i) => (
               <ScrollReveal key={card.path} delay={i * 0.08} direction="up">
-                <ServiceCard title={card.title} description={card.desc} icon={card.icon} path={card.path} colorClass="" />
+                <ServiceCard
+                  title={card.title}
+                  description={card.desc}
+                  icon={card.icon}
+                  path={card.path}
+                  colorClass=""
+                  contentKeyPrefix={`services.card.${card.key}`}
+                />
               </ScrollReveal>
             ))}
           </div>
@@ -111,7 +120,7 @@ const Services = () => {
             <EditableText contentKey="services.ctaText" defaultValue={t.services.ctaText} as="p" className="text-primary-foreground/60 mb-10 max-w-md mx-auto font-light" />
             <Button size="lg" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
               <Link to="/contact" className="inline-flex items-center gap-3">
-                {t.services.ctaButton} <ArrowRight size={16} />
+                <EditableText contentKey="services.ctaButton" defaultValue={t.services.ctaButton} as="span" /> <ArrowRight size={16} />
               </Link>
             </Button>
           </ScrollReveal>

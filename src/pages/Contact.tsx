@@ -49,7 +49,7 @@ const Contact = () => {
                   <div className="flex items-center gap-3 text-sm">
                     <Mail size={16} className="text-primary" />
                     <a href="mailto:adamdayan@bacbs.com" className="text-foreground/50 hover:text-primary transition-colors duration-300 font-light">
-                      adamdayan@bacbs.com
+                      <EditableText contentKey="contact.email" defaultValue="adamdayan@bacbs.com" as="span" />
                     </a>
                   </div>
                 </ScrollReveal>
@@ -63,16 +63,16 @@ const Contact = () => {
               >
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.nameLabel}</label>
+                    <EditableText contentKey="contact.nameLabel" defaultValue={t.contact.nameLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
                     <Input required placeholder={t.contact.namePlaceholder} className="rounded-none bg-background border-border h-11" />
                   </div>
                   <div>
-                    <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.emailLabel}</label>
+                    <EditableText contentKey="contact.emailLabel" defaultValue={t.contact.emailLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
                     <Input required type="email" placeholder={t.contact.emailPlaceholder} className="rounded-none bg-background border-border h-11" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.interestedLabel}</label>
+                  <EditableText contentKey="contact.interestedLabel" defaultValue={t.contact.interestedLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
                   <select
                     className="w-full border border-border bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     defaultValue=""
@@ -84,7 +84,7 @@ const Contact = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.messageLabel}</label>
+                  <EditableText contentKey="contact.messageLabel" defaultValue={t.contact.messageLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
                   <Textarea required rows={5} placeholder={t.contact.messagePlaceholder} className="rounded-none bg-background border-border" />
                 </div>
                 <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={submitting}>
