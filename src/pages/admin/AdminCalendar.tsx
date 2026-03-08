@@ -42,6 +42,9 @@ type CalendarEvent = {
   clientName?: string;
   assignedName?: string;
   clientId?: string;
+  meetingUrl?: string;
+  meetingPlatform?: string;
+  attendeeIds?: string[];
 };
 
 type ViewMode = "month" | "week" | "day";
