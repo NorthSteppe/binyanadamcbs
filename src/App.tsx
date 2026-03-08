@@ -48,6 +48,7 @@ import ClientAssignments from "./pages/admin/ClientAssignments";
 import UserManagement from "./pages/admin/UserManagement";
 import AuthSettings from "./pages/admin/AuthSettings";
 import SecurityDashboard from "./pages/admin/SecurityDashboard";
+import WebDesigner from "./pages/admin/WebDesigner";
 // Staff portal
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
@@ -109,6 +110,7 @@ const App = () => (
               <Route path="/admin/staff-todos" element={<AdminRoute><StaffTodoManager /></AdminRoute>} />
               <Route path="/admin/auth-settings" element={<AdminRoute><AuthSettings /></AdminRoute>} />
               <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
+              <Route path="/admin/designer" element={<AdminRoute><WebDesigner /></AdminRoute>} />
 
               {/* Staff/Therapist portal */}
               <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
