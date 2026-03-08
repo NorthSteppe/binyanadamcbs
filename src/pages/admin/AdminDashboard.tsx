@@ -53,6 +53,7 @@ const categories: ToolCategory[] = [
     iconBgClass: "bg-muted text-muted-foreground",
     tools: [
       { label: "User Management", path: "/admin/users", icon: UserCog, description: "Search users, assign or revoke roles" },
+      { label: "Auth Settings", path: "/admin/auth-settings", icon: Settings, description: "Configure sign-up, sign-in methods, and security" },
       { label: "Client Management", path: "/admin/clients", icon: Users, description: "View client profiles, notes, and documents" },
       { label: "Client Assignments", path: "/admin/assignments", icon: UserPlus, description: "Assign therapists to clients" },
       { label: "Team Requests", path: "/admin/team-requests", icon: UserPlus, description: "Review pending staff access requests" },
