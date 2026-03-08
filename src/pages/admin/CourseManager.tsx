@@ -201,7 +201,7 @@ const CourseManager = () => {
                           <p className="font-medium text-card-foreground truncate">{course.title}</p>
                           {course.is_featured && <Star size={14} className="text-primary fill-primary" />}
                           {course.is_active ? (
-                            <span className="text-[10px] uppercase tracking-wider bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full">Active</span>
+                            <span className="text-[10px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full">Active</span>
                           ) : (
                             <span className="text-[10px] uppercase tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-full">Draft</span>
                           )}

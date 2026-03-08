@@ -210,7 +210,7 @@ const CourseDetail = () => {
                                 src={lesson.video_url}
                                 controls
                                 controlsList="nodownload"
-                                className="w-full rounded-lg bg-black"
+                                className="w-full rounded-lg bg-background"
                                 style={{ maxHeight: "400px" }}
                               />
                             ) : !canAccess ? (
