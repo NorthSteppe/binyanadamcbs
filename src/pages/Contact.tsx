@@ -8,6 +8,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import EditableText from "@/components/editable/EditableText";
 import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
@@ -33,15 +34,15 @@ const Contact = () => {
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-20">
             <ScrollReveal direction="left">
-              <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{t.contact.tagline}</p>
-              <h1 className="text-5xl md:text-6xl font-serif mb-6">{t.contact.title}</h1>
-              <p className="text-foreground/60 leading-relaxed mb-12 max-w-md font-light">{t.contact.subtitle}</p>
+              <EditableText contentKey="contact.tagline" defaultValue={t.contact.tagline} as="p" className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4" />
+              <EditableText contentKey="contact.title" defaultValue={t.contact.title} as="h1" className="text-5xl md:text-6xl font-serif mb-6" />
+              <EditableText contentKey="contact.subtitle" defaultValue={t.contact.subtitle} as="p" className="text-foreground/60 leading-relaxed mb-12 max-w-md font-light" />
 
               <div className="space-y-4">
                 <ScrollReveal delay={0.1} distance={12}>
                   <div className="flex items-center gap-3 text-sm">
                     <MapPin size={16} className="text-primary" />
-                    <span className="text-foreground/50 font-light">{t.contact.location}</span>
+                    <EditableText contentKey="contact.location" defaultValue={t.contact.location} as="span" className="text-foreground/50 font-light" />
                   </div>
                 </ScrollReveal>
                 <ScrollReveal delay={0.15} distance={12}>

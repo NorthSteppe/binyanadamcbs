@@ -7,6 +7,8 @@ import { usePageContent } from "@/hooks/useSiteContent";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import EditableText from "@/components/editable/EditableText";
+import EditableImage from "@/components/editable/EditableImage";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -39,20 +41,20 @@ const About = () => {
 
       {/* Hero */}
       <section className="relative min-h-[60vh] flex items-end overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={content?.image_url || "/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"}
-            alt={content?.alt_text || "Binyan Adam"}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/30" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent" />
-        </div>
+        <EditableImage
+          contentKey="about.hero"
+          defaultSrc={content?.image_url || "/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"}
+          alt={content?.alt_text || "Binyan Adam"}
+          className="absolute inset-0"
+          imgClassName="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent" />
         <div className="container relative z-10 pb-16 md:pb-24 pt-40">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="max-w-3xl">
-            <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{about.tagline}</p>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif leading-[1.05] mb-6 text-foreground">{about.title}</h1>
-            <p className="text-lg md:text-xl text-foreground/60 leading-relaxed max-w-lg font-light">{about.subtitle}</p>
+            <EditableText contentKey="about.tagline" defaultValue={about.tagline} as="p" className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4" />
+            <EditableText contentKey="about.title" defaultValue={about.title} as="h1" className="text-5xl md:text-6xl lg:text-7xl font-serif leading-[1.05] mb-6 text-foreground" />
+            <EditableText contentKey="about.subtitle" defaultValue={about.subtitle} as="p" className="text-lg md:text-xl text-foreground/60 leading-relaxed max-w-lg font-light" />
           </motion.div>
         </div>
       </section>
@@ -62,8 +64,8 @@ const About = () => {
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-              <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-8">{about.missionTitle}</h2>
-              <p className="text-lg text-foreground/60 leading-relaxed font-light">{about.missionText}</p>
+              <EditableText contentKey="about.missionTitle" defaultValue={about.missionTitle} as="h2" className="text-4xl md:text-5xl font-serif text-foreground mb-8" />
+              <EditableText contentKey="about.missionText" defaultValue={about.missionText} as="p" className="text-lg text-foreground/60 leading-relaxed font-light" />
             </motion.div>
           </div>
         </div>
@@ -73,8 +75,8 @@ const About = () => {
       <section className="py-24 border-t border-border">
         <div className="container">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4">{about.specialisationsTitle}</h2>
-            <p className="text-foreground/50 max-w-2xl mx-auto font-light">{about.specialisationsSubtitle}</p>
+            <EditableText contentKey="about.specialisationsTitle" defaultValue={about.specialisationsTitle} as="h2" className="text-4xl md:text-5xl font-serif text-foreground mb-4" />
+            <EditableText contentKey="about.specialisationsSubtitle" defaultValue={about.specialisationsSubtitle} as="p" className="text-foreground/50 max-w-2xl mx-auto font-light" />
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
@@ -84,7 +86,7 @@ const About = () => {
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-primary/10">
                   <item.icon size={18} className="text-primary" />
                 </div>
-                <span className="text-sm text-foreground/80 font-light">{item.label}</span>
+                <EditableText contentKey={`about.spec.${i}`} defaultValue={item.label} as="span" className="text-sm text-foreground/80 font-light" />
               </motion.div>
             ))}
           </div>
@@ -95,7 +97,7 @@ const About = () => {
       <section className="py-24 bg-card border-t border-border">
         <div className="container">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif text-foreground">{about.valuesTitle}</h2>
+            <EditableText contentKey="about.valuesTitle" defaultValue={about.valuesTitle} as="h2" className="text-4xl md:text-5xl font-serif text-foreground" />
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
@@ -104,8 +106,8 @@ const About = () => {
                 <div className="w-10 h-10 flex items-center justify-center mx-auto mb-4 bg-primary/10">
                   <CheckCircle2 size={18} className="text-primary" />
                 </div>
-                <h3 className="text-xl font-serif text-foreground mb-2">{value.title}</h3>
-                <p className="text-sm text-foreground/50 leading-relaxed font-light">{value.description}</p>
+                <EditableText contentKey={`about.value.${i}.title`} defaultValue={value.title} as="h3" className="text-xl font-serif text-foreground mb-2" />
+                <EditableText contentKey={`about.value.${i}.desc`} defaultValue={value.description} as="p" className="text-sm text-foreground/50 leading-relaxed font-light" />
               </motion.div>
             ))}
           </div>
@@ -116,8 +118,8 @@ const About = () => {
       <section className="py-24 border-t border-border">
         <div className="container">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4">{about.teamTitle}</h2>
-            <p className="text-foreground/50 max-w-2xl mx-auto font-light">{about.teamSubtitle}</p>
+            <EditableText contentKey="about.teamTitle" defaultValue={about.teamTitle} as="h2" className="text-4xl md:text-5xl font-serif text-foreground mb-4" />
+            <EditableText contentKey="about.teamSubtitle" defaultValue={about.teamSubtitle} as="p" className="text-foreground/50 max-w-2xl mx-auto font-light" />
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -191,8 +193,8 @@ const About = () => {
       <section className="py-24 bg-primary">
         <div className="container">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0} className="max-w-2xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-serif text-primary-foreground mb-4">{about.ctaTitle}</h2>
-            <p className="text-primary-foreground/60 mb-10 font-light">{about.ctaText}</p>
+            <EditableText contentKey="about.ctaTitle" defaultValue={about.ctaTitle} as="h2" className="text-4xl md:text-5xl font-serif text-primary-foreground mb-4" />
+            <EditableText contentKey="about.ctaText" defaultValue={about.ctaText} as="p" className="text-primary-foreground/60 mb-10 font-light" />
             <Button size="lg" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
               <Link to="/contact" className="inline-flex items-center gap-3">
                 {about.ctaButton} <ArrowRight size={16} />
