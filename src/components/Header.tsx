@@ -65,19 +65,52 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-0">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`px-4 py-2 text-[13px] font-sans font-light tracking-wide uppercase transition-colors duration-300
-                ${location.pathname === link.path
-                  ? "text-primary"
-                  : "text-foreground/60 hover:text-foreground"
-                }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.children ? (
+              <div key={link.path} className="relative group">
+                <Link
+                  to={link.path}
+                  className={`px-4 py-2 text-[13px] font-sans font-light tracking-wide uppercase transition-colors duration-300 inline-flex items-center gap-1
+                    ${[link.path, ...link.children.map(c => c.path)].includes(location.pathname)
+                      ? "text-primary"
+                      : "text-foreground/60 hover:text-foreground"
+                    }`}
+                >
+                  {link.label}
+                  <svg className="w-3 h-3 opacity-50 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                </Link>
+                <div className="absolute left-0 top-full pt-1 opacity-0 translate-x-[-8px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+                  <div className="bg-card/95 backdrop-blur-xl border border-border/40 py-2 min-w-[180px]">
+                    {link.children.map((sub) => (
+                      <Link
+                        key={sub.path}
+                        to={sub.path}
+                        className={`block px-5 py-2.5 text-[12px] font-light tracking-wide uppercase transition-all duration-200
+                          ${location.pathname === sub.path
+                            ? "text-primary bg-primary/5"
+                            : "text-foreground/60 hover:text-foreground hover:bg-muted/50 hover:translate-x-1"
+                          }`}
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`px-4 py-2 text-[13px] font-sans font-light tracking-wide uppercase transition-colors duration-300
+                  ${location.pathname === link.path
+                    ? "text-primary"
+                    : "text-foreground/60 hover:text-foreground"
+                  }`}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
