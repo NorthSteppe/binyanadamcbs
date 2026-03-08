@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Calendar, MessageSquare, BookOpen, Clock, Upload, FileText, CheckCircle2, Circle, Phone, Mail, ListTodo, Timer } from "lucide-react";
+import { Calendar, MessageSquare, BookOpen, Clock, Upload, FileText, CheckCircle2, Circle, Phone, Mail, ListTodo, Timer, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -120,7 +120,7 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Quick links row */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <Link to="/portal/messages" className="relative bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
                 <div className="bg-accent text-accent-foreground rounded-xl p-3"><MessageSquare size={20} /></div>
@@ -140,6 +140,12 @@ const Dashboard = () => {
               <Link to="/portal/toolkit" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
                 <div className="bg-primary/10 text-primary rounded-xl p-3"><Timer size={20} /></div>
                 <p className="text-sm font-semibold text-card-foreground">Toolkit</p>
+              </Link>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
+              <Link to="/portal/productivity" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
+                <div className="bg-primary/10 text-primary rounded-xl p-3"><LayoutDashboard size={20} /></div>
+                <p className="text-sm font-semibold text-card-foreground">Productivity</p>
               </Link>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>

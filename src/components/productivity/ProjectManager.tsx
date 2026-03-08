@@ -1,0 +1,127 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { FolderPlus, Trash2, Palette } from "lucide-react";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+const COLORS = ["#6366f1", "#ec4899", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#06b6d4"];
+
+const ProjectManager = () => {
+  const { session } = useAuth();
+  const qc = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [color, setColor] = useState(COLORS[0]);
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ["user_projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_projects").select("*").eq("is_archived", false).order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session,
+  });
+
+  const { data: taskCounts = {} } = useQuery({
+    queryKey: ["project_task_counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_tasks").select("project_id, is_completed");
+      if (error) throw error;
+      const counts: Record<string, { total: number; done: number }> = {};
+      data.forEach((t: any) => {
+        if (!t.project_id) return;
+        if (!counts[t.project_id]) counts[t.project_id] = { total: 0, done: 0 };
+        counts[t.project_id].total++;
+        if (t.is_completed) counts[t.project_id].done++;
+      });
+      return counts;
+    },
+    enabled: !!session,
+  });
+
+  const createProject = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("user_projects").insert({ user_id: session!.user.id, name, color });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user_projects"] });
+      setDialogOpen(false);
+      setName("");
+      toast.success("Project created");
+    },
+    onError: () => toast.error("Failed to create project"),
+  });
+
+  const deleteProject = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("user_projects").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["user_projects"] }); toast.success("Project deleted"); },
+  });
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">Projects</h3>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-7"><FolderPlus size={14} className="mr-1" /> New</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>New Project</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Project name" /></div>
+              <div>
+                <Label>Color</Label>
+                <div className="flex gap-2 mt-1">
+                  {COLORS.map((c) => (
+                    <button key={c} className={`w-7 h-7 rounded-full border-2 transition-transform ${color === c ? "border-foreground scale-110" : "border-transparent"}`}
+                      style={{ backgroundColor: c }} onClick={() => setColor(c)} />
+                  ))}
+                </div>
+              </div>
+              <Button className="w-full" onClick={() => createProject.mutate()} disabled={!name.trim()}>Create</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <AnimatePresence>
+        {projects.map((p: any) => {
+          const counts = taskCounts[p.id] || { total: 0, done: 0 };
+          const pct = counts.total ? Math.round((counts.done / counts.total) * 100) : 0;
+          return (
+            <motion.div key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 group">
+              <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">{counts.done}/{counts.total}</span>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                onClick={() => deleteProject.mutate(p.id)}>
+                <Trash2 size={12} className="text-destructive" />
+              </Button>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+      {projects.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No projects yet</p>}
+    </div>
+  );
+};
+
+export default ProjectManager;

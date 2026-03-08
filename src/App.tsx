@@ -33,6 +33,7 @@ import Chat from "./pages/portal/Chat";
 import Toolkit from "./pages/portal/Toolkit";
 import ToolkitACTMatrix from "./pages/portal/ToolkitACTMatrix";
 import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
+import Productivity from "./pages/portal/Productivity";
 // Admin portal
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCalendar from "./pages/admin/AdminCalendar";
@@ -88,6 +89,7 @@ const App = () => (
               <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
               <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
               <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
+              <Route path="/portal/productivity" element={<ProtectedRoute><Productivity /></ProtectedRoute>} />
 
               {/* Admin portal */}
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
