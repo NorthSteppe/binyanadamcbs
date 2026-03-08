@@ -561,10 +561,13 @@ const PersonalCalendar = () => {
             {HOURS.map((hour) => {
               const key = format(currentDate, "yyyy-MM-dd");
               const hourEvents = (eventsByDay.get(key) || []).filter((ev) => ev.start.getHours() === hour);
+              const cellKey = `day-${key}-${hour}`;
+              const isOver = dropTarget === cellKey;
               return (
                 <div
                   key={hour}
-                  className="flex border-b border-border/30 min-h-[64px] cursor-pointer hover:bg-muted/20 transition-colors"
+                  className={`flex border-b border-border/30 min-h-[64px] cursor-pointer transition-colors
+                    ${isOver ? "bg-primary/10" : "hover:bg-muted/20"}`}
                   onClick={() => {
                     const d = new Date(currentDate);
                     d.setHours(hour, 0, 0, 0);
@@ -572,6 +575,9 @@ const PersonalCalendar = () => {
                     setNewEvent({ ...newEvent, start: `${hour.toString().padStart(2, "0")}:00`, end: `${(hour + 1).toString().padStart(2, "0")}:00` });
                     setCreateDialogOpen(true);
                   }}
+                  onDragOver={(e) => handleDragOver(e, cellKey)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, currentDate, hour)}
                 >
                   <div className="w-16 text-[11px] text-muted-foreground text-right pr-3 pt-1 flex-shrink-0">
                     {hour.toString().padStart(2, "0")}:00
@@ -582,8 +588,11 @@ const PersonalCalendar = () => {
                       return (
                         <div
                           key={ev.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, ev)}
+                          onDragEnd={handleDragEnd}
                           onClick={(e) => handleEventClick(e, ev)}
-                          className="rounded px-2 py-1 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity"
+                          className="rounded px-2 py-1 text-xs font-medium cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
                           style={{
                             backgroundColor: `${ev.color}20`, color: ev.color,
                             borderLeft: `3px solid ${ev.color}`,
