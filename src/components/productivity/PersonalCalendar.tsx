@@ -244,6 +244,94 @@ const PersonalCalendar = () => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["focus_blocks"] }); setDetailDialogOpen(false); toast.success("Deleted"); },
   });
 
+  const rescheduleEvent = useMutation({
+    mutationFn: async ({ event, newStart }: { event: CalendarEvent; newStart: Date }) => {
+      const duration = differenceInMinutes(event.end, event.start);
+      const newEnd = new Date(newStart.getTime() + duration * 60000);
+      if (event.type === "focus") {
+        const { error } = await supabase.from("focus_blocks").update({
+          start_time: newStart.toISOString(), end_time: newEnd.toISOString(),
+        }).eq("id", event.id);
+        if (error) throw error;
+      } else if (event.type === "task") {
+        const { error } = await supabase.from("user_tasks").update({
+          scheduled_start: newStart.toISOString(), scheduled_end: newEnd.toISOString(),
+          due_date: newStart.toISOString(),
+        }).eq("id", event.id);
+        if (error) throw error;
+      } else if (event.type === "session") {
+        const { error } = await supabase.from("sessions").update({
+          session_date: newStart.toISOString(),
+        }).eq("id", event.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["focus_blocks"] });
+      qc.invalidateQueries({ queryKey: ["scheduled_tasks"] });
+      qc.invalidateQueries({ queryKey: ["scheduled_tasks_time"] });
+      qc.invalidateQueries({ queryKey: ["my_sessions"] });
+      qc.invalidateQueries({ queryKey: ["user_tasks"] });
+      toast.success("Event rescheduled");
+    },
+    onError: () => toast.error("Failed to reschedule"),
+  });
+
+  const handleDragStart = (e: React.DragEvent, event: CalendarEvent) => {
+    e.stopPropagation();
+    setDraggedEvent(event);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", event.id);
+    // Make ghost semi-transparent
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "0.5";
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "1";
+    }
+    setDraggedEvent(null);
+    setDropTarget(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, cellKey: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDropTarget(cellKey);
+  };
+
+  const handleDragLeave = () => {
+    setDropTarget(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, day: Date, hour: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTarget(null);
+    if (!draggedEvent) return;
+    const newStart = new Date(day);
+    newStart.setHours(hour, 0, 0, 0);
+    // Don't reschedule if same time
+    if (draggedEvent.start.getTime() === newStart.getTime()) return;
+    rescheduleEvent.mutate({ event: draggedEvent, newStart });
+    setDraggedEvent(null);
+  };
+
+  const handleMonthDrop = (e: React.DragEvent, day: Date) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTarget(null);
+    if (!draggedEvent) return;
+    // Keep original time, change the date
+    const newStart = new Date(day);
+    newStart.setHours(draggedEvent.start.getHours(), draggedEvent.start.getMinutes(), 0, 0);
+    if (draggedEvent.start.getTime() === newStart.getTime()) return;
+    rescheduleEvent.mutate({ event: draggedEvent, newStart });
+    setDraggedEvent(null);
+  };
+
   const closeCreateDialog = () => {
     setCreateDialogOpen(false);
     setNewEvent({ title: "", start: "09:00", end: "10:00", description: "", priority: "medium" });
