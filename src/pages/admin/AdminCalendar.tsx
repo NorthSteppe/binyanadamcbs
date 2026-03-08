@@ -16,7 +16,9 @@ import {
   ChevronLeft, ChevronRight, Plus, CalendarDays,
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
   ListTodo, User, Edit, X, Sparkles, Loader2, Check,
+  Video, Link2, UserPlus, ExternalLink,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
   addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks,
