@@ -177,6 +177,9 @@ const AdminCalendar = () => {
           status: s.status, description: s.description,
           clientName: nameMap.get(s.client_id) || "Unknown",
           clientId: s.client_id,
+          meetingUrl: s.meeting_url || "",
+          meetingPlatform: s.meeting_platform || "",
+          attendeeIds: s.attendee_ids || [],
         });
       });
     }
@@ -277,12 +280,23 @@ const AdminCalendar = () => {
     const { error } = await supabase.from("sessions").insert({
       title: newSession.title, client_id: newSession.client_id, session_date: dateTime,
       duration_minutes: newSession.duration_minutes, description: newSession.description || null,
-    });
+      meeting_platform: newSession.meeting_platform || null,
+      meeting_url: newSession.meeting_url || null,
+      attendee_ids: newSession.attendee_ids,
+    } as any);
     if (error) toast.error("Failed to create session");
     else {
+      // Send invite notifications to attendees
+      for (const aid of newSession.attendee_ids) {
+        await supabase.rpc("create_notification", {
+          _user_id: aid, _type: "session", _title: "Session Invite",
+          _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}`,
+          _link: "/admin/calendar",
+        });
+      }
       toast.success("Session created");
       setCreateOpen(false);
-      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "" });
+      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] });
       qc.invalidateQueries({ queryKey: ["team_sessions"] });
     }
   };
@@ -326,6 +340,9 @@ const AdminCalendar = () => {
       duration_minutes: differenceInMinutes(event.end, event.start),
       description: event.description || "",
       status: event.status || "scheduled",
+      meeting_platform: event.meetingPlatform || "",
+      meeting_url: event.meetingUrl || "",
+      attendee_ids: event.attendeeIds || [],
     });
     setEditOpen(true);
     setDetailOpen(false);
@@ -336,7 +353,10 @@ const AdminCalendar = () => {
     const { error } = await supabase.from("sessions").update({
       title: editForm.title, session_date: dateTime, duration_minutes: editForm.duration_minutes,
       description: editForm.description || null, status: editForm.status,
-    }).eq("id", editSessionId);
+      meeting_platform: editForm.meeting_platform || null,
+      meeting_url: editForm.meeting_url || null,
+      attendee_ids: editForm.attendee_ids,
+    } as any).eq("id", editSessionId);
     if (error) toast.error("Failed to update");
     else { toast.success("Session updated"); setEditOpen(false); qc.invalidateQueries({ queryKey: ["team_sessions"] }); }
   };
