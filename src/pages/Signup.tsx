@@ -27,8 +27,6 @@ const Signup = () => {
   const { t } = useLanguage();
   const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
 
-  // After Google OAuth, check if user just signed up (no roles yet except default client)
-  // and if they selected team, submit a team request
   useEffect(() => {
     if (!authLoading && user) {
       const pendingRole = sessionStorage.getItem("pending_google_role");
@@ -43,7 +41,6 @@ const Signup = () => {
     }
   }, [user, authLoading]);
 
-  // Redirect if already signed in — role-based
   if (!authLoading && user) {
     if (isAdmin) return <Navigate to="/admin" replace />;
     if (isTeamMember) return <Navigate to="/staff" replace />;
@@ -74,13 +71,11 @@ const Signup = () => {
   };
 
   const handleGoogleSignup = async () => {
-    // Show role selection dialog first
     setShowRoleDialog(true);
   };
 
   const confirmGoogleSignup = async () => {
     setShowRoleDialog(false);
-    // Store choice so we can act on it after redirect
     if (googleRoleChoice === "team") {
       sessionStorage.setItem("pending_google_role", "team");
     }
@@ -93,55 +88,53 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      {/* Google role selection dialog */}
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
-        <DialogContent>
+        <DialogContent className="bg-card border-border rounded-none">
           <DialogHeader>
-            <DialogTitle>What type of account do you need?</DialogTitle>
+            <DialogTitle className="font-serif text-2xl">What type of account do you need?</DialogTitle>
           </DialogHeader>
           <RadioGroup value={googleRoleChoice} onValueChange={(v) => setGoogleRoleChoice(v as any)} className="space-y-3 pt-2">
-            <div className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 cursor-pointer">
+            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
               <RadioGroupItem value="client" id="g-client" />
               <Label htmlFor="g-client" className="cursor-pointer flex-1">
-                <span className="font-medium">Client</span>
-                <p className="text-xs text-muted-foreground">Access the client portal, book sessions, and use tools.</p>
+                <span className="font-medium text-foreground">Client</span>
+                <p className="text-xs text-muted-foreground font-light">Access the client portal, book sessions, and use tools.</p>
               </Label>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 cursor-pointer">
+            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
               <RadioGroupItem value="team" id="g-team" />
               <Label htmlFor="g-team" className="cursor-pointer flex-1">
-                <span className="font-medium">Therapist / Staff</span>
-                <p className="text-xs text-muted-foreground">Request team access (requires admin approval).</p>
+                <span className="font-medium text-foreground">Therapist / Staff</span>
+                <p className="text-xs text-muted-foreground font-light">Request team access (requires admin approval).</p>
               </Label>
             </div>
           </RadioGroup>
-          <Button className="w-full rounded-full mt-2" onClick={confirmGoogleSignup}>
+          <Button className="w-full rounded-none mt-2 bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" onClick={confirmGoogleSignup}>
             Continue with Google
           </Button>
         </DialogContent>
       </Dialog>
 
-      <section className="pt-32 pb-24 flex items-center justify-center">
+      <section className="flex-1 flex items-center justify-center py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="w-full max-w-md mx-auto px-6"
         >
-          <div className="bg-card rounded-3xl p-10 border border-border/50">
-            {/* Binyan Adam Logo */}
-            <div className="flex justify-center mb-6">
-              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-16" />
+          <div className="bg-card border border-border p-10">
+            <div className="flex justify-center mb-8">
+              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-14" />
             </div>
-            <h1 className="text-3xl md:text-4xl mb-2 text-center">{t.signup.title}</h1>
-            <p className="text-muted-foreground text-center mb-8">{t.signup.subtitle}</p>
+            <h1 className="text-3xl font-serif mb-2 text-center">{t.signup.title}</h1>
+            <p className="text-muted-foreground text-center mb-8 text-sm font-light">{t.signup.subtitle}</p>
 
             <Button
               variant="outline"
-              className="w-full rounded-full mb-6 gap-3"
+              className="w-full rounded-none mb-6 gap-3 border-border hover:bg-muted h-11"
               size="lg"
               onClick={handleGoogleSignup}
             >
@@ -156,46 +149,46 @@ const Signup = () => {
 
             <div className="flex items-center gap-3 mb-6">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground">{(t as any).login?.or || "or"}</span>
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wider">or</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
             <form onSubmit={handleSignup} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="fullName">{(t as any).signup?.nameLabel || "Full Name"}</Label>
-                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-xl" />
+                <Label htmlFor="fullName" className="text-[12px] uppercase tracking-wider text-muted-foreground">{(t as any).signup?.nameLabel || "Full Name"}</Label>
+                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-none bg-background border-border h-11" />
               </div>
               <div className="space-y-3">
-                <Label>I am signing up as</Label>
-                <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team")} className="flex gap-4">
+                <Label className="text-[12px] uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
+                <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team")} className="flex gap-6">
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="client" id="role-client" />
-                    <Label htmlFor="role-client" className="cursor-pointer font-normal">Client</Label>
+                    <Label htmlFor="role-client" className="cursor-pointer font-light text-foreground/80">Client</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="team" id="role-team" />
-                    <Label htmlFor="role-team" className="cursor-pointer font-normal">Team Member</Label>
+                    <Label htmlFor="role-team" className="cursor-pointer font-light text-foreground/80">Team Member</Label>
                   </div>
                 </RadioGroup>
                 {accountType === "team" && (
-                  <p className="text-xs text-muted-foreground">Team access requires admin approval after signup.</p>
+                  <p className="text-xs text-muted-foreground font-light">Team access requires admin approval after signup.</p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">{t.signup.emailLabel}</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-xl" />
+                <Label htmlFor="email" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.signup.emailLabel}</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none bg-background border-border h-11" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">{t.signup.passwordLabel}</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="rounded-xl" />
+                <Label htmlFor="password" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.signup.passwordLabel}</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="rounded-none bg-background border-border h-11" />
               </div>
-              <Button type="submit" className="w-full rounded-full" size="lg" disabled={loading}>
+              <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={loading}>
                 {loading ? t.signup.loading : t.signup.button}
               </Button>
             </form>
-            <p className="text-sm text-muted-foreground text-center mt-6">
+            <p className="text-sm text-muted-foreground text-center mt-8 font-light">
               {t.signup.hasAccount}{" "}
-              <Link to="/login" className="text-primary font-medium hover:underline">{t.signup.logInLink}</Link>
+              <Link to="/login" className="text-primary hover:underline">{t.signup.logInLink}</Link>
             </p>
           </div>
         </motion.div>

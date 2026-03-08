@@ -21,7 +21,6 @@ const Login = () => {
   const { t } = useLanguage();
   const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
 
-  // Redirect if already signed in — role-based
   if (!authLoading && user) {
     if (isAdmin) return <Navigate to="/admin" replace />;
     if (isTeamMember) return <Navigate to="/staff" replace />;
@@ -60,26 +59,25 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <section className="pt-32 pb-24 flex items-center justify-center">
+      <section className="flex-1 flex items-center justify-center py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="w-full max-w-md mx-auto px-6"
         >
-          <div className="bg-card rounded-3xl p-10 border border-border/50">
-            {/* Binyan Adam Logo */}
-            <div className="flex justify-center mb-6">
-              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-16" />
+          <div className="bg-card border border-border p-10">
+            <div className="flex justify-center mb-8">
+              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-14" />
             </div>
-            <h1 className="text-3xl md:text-4xl mb-2 text-center">{t.login.title}</h1>
-            <p className="text-muted-foreground text-center mb-8">{t.login.subtitle}</p>
+            <h1 className="text-3xl font-serif mb-2 text-center">{t.login.title}</h1>
+            <p className="text-muted-foreground text-center mb-8 text-sm font-light">{t.login.subtitle}</p>
 
             <Button
               variant="outline"
-              className="w-full rounded-full mb-6 gap-3"
+              className="w-full rounded-none mb-6 gap-3 border-border hover:bg-muted h-11"
               size="lg"
               onClick={handleGoogleLogin}
             >
@@ -94,26 +92,26 @@ const Login = () => {
 
             <div className="flex items-center gap-3 mb-6">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground">{(t as any).login?.or || "or"}</span>
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wider">or</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email">{t.login.emailLabel}</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-xl" />
+                <Label htmlFor="email" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.login.emailLabel}</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none bg-background border-border h-11" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">{t.login.passwordLabel}</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-xl" />
+                <Label htmlFor="password" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.login.passwordLabel}</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-none bg-background border-border h-11" />
               </div>
-              <Button type="submit" className="w-full rounded-full" size="lg" disabled={loading}>
+              <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={loading}>
                 {loading ? t.login.loading : t.login.button}
               </Button>
             </form>
-            <p className="text-sm text-muted-foreground text-center mt-6">
+            <p className="text-sm text-muted-foreground text-center mt-8 font-light">
               {t.login.noAccount}{" "}
-              <Link to="/signup" className="text-primary font-medium hover:underline">{t.login.signUpLink}</Link>
+              <Link to="/signup" className="text-primary hover:underline">{t.login.signUpLink}</Link>
             </p>
           </div>
         </motion.div>
