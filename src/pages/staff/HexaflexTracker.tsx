@@ -38,11 +38,11 @@ const HexaflexTracker = () => {
   const handleSubmit = async () => {
     if (!clientId || !user) return toast.error("Select a client first");
     setSaving(true);
-    const { error } = await supabase.from("clinical_entries").insert({
+    const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
       filled_by: user.id,
       tool_type: "hexaflex",
-      entry_data: ratings as unknown as Record<string, unknown>,
+      entry_data: ratings,
       notes,
     });
     setSaving(false);

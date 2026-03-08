@@ -43,11 +43,11 @@ const FunctionalAssessment = () => {
     if (!clientId || !user) return toast.error("Select a client first");
     if (!form.target_behaviour) return toast.error("Enter target behaviour");
     setSaving(true);
-    const { error } = await supabase.from("clinical_entries").insert({
+    const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
       filled_by: user.id,
       tool_type: "functional_assessment",
-      entry_data: form as unknown as Record<string, unknown>,
+      entry_data: form,
       notes,
     });
     setSaving(false);

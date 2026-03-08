@@ -30,11 +30,11 @@ const ABCDataSheet = () => {
     if (!clientId || !user) return toast.error("Select a client first");
     if (!form.antecedent || !form.behaviour || !form.consequence) return toast.error("Fill in A, B, and C fields");
     setSaving(true);
-    const { error } = await supabase.from("clinical_entries").insert({
+    const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
       filled_by: user.id,
       tool_type: "abc",
-      entry_data: form as unknown as Record<string, unknown>,
+      entry_data: form,
       notes: form.function_hypothesis,
       entry_date: form.date_time ? new Date(form.date_time).toISOString() : new Date().toISOString(),
     });

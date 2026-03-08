@@ -38,11 +38,11 @@ const BehaviourLog = () => {
     if (!clientId || !user) return toast.error("Select a client first");
     if (!form.behaviour) return toast.error("Enter target behaviour");
     setSaving(true);
-    const { error } = await supabase.from("clinical_entries").insert({
+    const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
       filled_by: user.id,
       tool_type: "behaviour_log",
-      entry_data: form as unknown as Record<string, unknown>,
+      entry_data: form,
       notes,
       entry_date: form.date ? new Date(form.date).toISOString() : new Date().toISOString(),
     });

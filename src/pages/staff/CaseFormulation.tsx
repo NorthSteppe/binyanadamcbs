@@ -39,11 +39,11 @@ const CaseFormulation = () => {
     const hasContent = Object.values(form).some((v) => v.trim());
     if (!hasContent) return toast.error("Fill in at least one section");
     setSaving(true);
-    const { error } = await supabase.from("clinical_entries").insert({
+    const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
       filled_by: user.id,
       tool_type: "case_formulation",
-      entry_data: form as unknown as Record<string, unknown>,
+      entry_data: form,
       notes,
     });
     setSaving(false);
