@@ -195,15 +195,31 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
         <div className="lg:hidden bg-background/95 backdrop-blur-xl border-b border-border">
           <nav className="container py-6 flex flex-col gap-1">
             {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 text-[13px] font-light tracking-wide uppercase transition-colors
-                  ${location.pathname === link.path ? "text-primary" : "text-foreground/60 hover:text-foreground"}`}
-              >
-                {link.label}
-              </Link>
+              <div key={link.path}>
+                <Link
+                  to={link.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={`px-4 py-3 text-[13px] font-light tracking-wide uppercase transition-colors block
+                    ${location.pathname === link.path ? "text-primary" : "text-foreground/60 hover:text-foreground"}`}
+                >
+                  {link.label}
+                </Link>
+                {link.children && (
+                  <div className="ml-4 flex flex-col">
+                    {link.children.map((sub) => (
+                      <Link
+                        key={sub.path}
+                        to={sub.path}
+                        onClick={() => setMobileOpen(false)}
+                        className={`px-4 py-2 text-[12px] font-light tracking-wide uppercase transition-colors
+                          ${location.pathname === sub.path ? "text-primary" : "text-foreground/40 hover:text-foreground/70"}`}
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
             <div className="pt-4 border-t border-border mt-4 flex flex-col gap-2">
               {user ? (
