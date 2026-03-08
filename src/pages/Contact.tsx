@@ -25,31 +25,29 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <section className="pt-32 pb-24">
+      <section className="pt-40 pb-24">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid lg:grid-cols-2 gap-20">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <p className="text-sm font-sans font-semibold uppercase tracking-widest text-accent mb-3">{t.contact.tagline}</p>
-              <h1 className="text-4xl md:text-5xl mb-6">{t.contact.title}</h1>
-              <p className="text-muted-foreground leading-relaxed mb-10 max-w-md">
-                {t.contact.subtitle}
-              </p>
+              <p className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4">{t.contact.tagline}</p>
+              <h1 className="text-5xl md:text-6xl font-serif mb-6">{t.contact.title}</h1>
+              <p className="text-foreground/60 leading-relaxed mb-12 max-w-md font-light">{t.contact.subtitle}</p>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-sm">
-                  <MapPin size={18} className="text-accent" />
-                  <span className="text-muted-foreground">{t.contact.location}</span>
+                  <MapPin size={16} className="text-primary" />
+                  <span className="text-foreground/50 font-light">{t.contact.location}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <Mail size={18} className="text-accent" />
-                  <a href="mailto:adamdayan@bacbs.com" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Mail size={16} className="text-primary" />
+                  <a href="mailto:adamdayan@bacbs.com" className="text-foreground/50 hover:text-primary transition-colors duration-300 font-light">
                     adamdayan@bacbs.com
                   </a>
                 </div>
@@ -57,26 +55,26 @@ const Contact = () => {
             </motion.div>
 
             <motion.form
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               onSubmit={handleSubmit}
-              className="bg-card rounded-2xl p-8 border border-border space-y-5"
+              className="bg-card border border-border p-8 space-y-5"
             >
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-card-foreground mb-1.5 block">{t.contact.nameLabel}</label>
-                  <Input required placeholder={t.contact.namePlaceholder} />
+                  <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.nameLabel}</label>
+                  <Input required placeholder={t.contact.namePlaceholder} className="rounded-none bg-background border-border h-11" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-card-foreground mb-1.5 block">{t.contact.emailLabel}</label>
-                  <Input required type="email" placeholder={t.contact.emailPlaceholder} />
+                  <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.emailLabel}</label>
+                  <Input required type="email" placeholder={t.contact.emailPlaceholder} className="rounded-none bg-background border-border h-11" />
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-card-foreground mb-1.5 block">{t.contact.interestedLabel}</label>
+                <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.interestedLabel}</label>
                 <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full border border-border bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   defaultValue=""
                 >
                   <option value="" disabled>{t.contact.selectService}</option>
@@ -86,10 +84,10 @@ const Contact = () => {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium text-card-foreground mb-1.5 block">{t.contact.messageLabel}</label>
-                <Textarea required rows={5} placeholder={t.contact.messagePlaceholder} />
+                <label className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block">{t.contact.messageLabel}</label>
+                <Textarea required rows={5} placeholder={t.contact.messagePlaceholder} className="rounded-none bg-background border-border" />
               </div>
-              <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+              <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={submitting}>
                 {submitting ? t.contact.sending : t.contact.sendButton}
               </Button>
             </motion.form>

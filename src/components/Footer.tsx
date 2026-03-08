@@ -5,50 +5,54 @@ const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-foreground text-background">
-      <div className="container py-16">
-        <div className="grid md:grid-cols-4 gap-10">
+    <footer className="bg-card border-t border-border">
+      <div className="container py-20">
+        <div className="grid md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
-            <h3 className="text-2xl mb-4">Binyan Adam CBS</h3>
-            <p className="text-background/60 max-w-md text-sm leading-relaxed font-bold">
+            <h3 className="text-3xl font-serif mb-4 text-foreground">Binyan Adam</h3>
+            <p className="text-muted-foreground max-w-md text-sm leading-relaxed">
               {t.footer.description}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3 text-xs text-background/40">
+            <div className="mt-8 flex flex-wrap gap-4 text-xs text-muted-foreground/60 uppercase tracking-widest">
               <span>UKBA (Cert)</span>
-              <span>•</span>
+              <span className="text-border">·</span>
               <span>UK-SBA Member</span>
-              <span>•</span>
+              <span className="text-border">·</span>
               <span>ACBS Member</span>
             </div>
           </div>
 
           <div>
-            <h4 className="text-sm font-sans uppercase tracking-wider mb-4 text-background/50 font-bold">{t.footer.servicesTitle}</h4>
-            <nav className="flex flex-col gap-2 text-sm">
-              <Link to="/education" className="text-background/60 hover:text-background transition-colors">{t.footer.links.education}</Link>
-              <Link to="/therapy" className="text-background/60 hover:text-background transition-colors">{t.footer.links.therapy}</Link>
-              <Link to="/families" className="text-background/60 hover:text-background transition-colors">{t.footer.links.families}</Link>
-              <Link to="/organisations" className="text-background/60 hover:text-background transition-colors">{t.footer.links.organisations}</Link>
-              <Link to="/supervision" className="text-background/60 hover:text-background transition-colors">{t.footer.links.supervision}</Link>
+            <h4 className="text-[11px] font-sans uppercase tracking-[0.2em] mb-6 text-muted-foreground">
+              {t.footer.servicesTitle}
+            </h4>
+            <nav className="flex flex-col gap-3 text-sm">
+              <Link to="/education" className="text-foreground/50 hover:text-primary transition-colors duration-300">{t.footer.links.education}</Link>
+              <Link to="/therapy" className="text-foreground/50 hover:text-primary transition-colors duration-300">{t.footer.links.therapy}</Link>
+              <Link to="/families" className="text-foreground/50 hover:text-primary transition-colors duration-300">{t.footer.links.families}</Link>
+              <Link to="/organisations" className="text-foreground/50 hover:text-primary transition-colors duration-300">{t.footer.links.organisations}</Link>
+              <Link to="/supervision" className="text-foreground/50 hover:text-primary transition-colors duration-300">{t.footer.links.supervision}</Link>
             </nav>
           </div>
 
           <div>
-            <h4 className="text-sm font-sans uppercase tracking-wider mb-4 text-background/50 font-bold">{t.footer.contactTitle}</h4>
-            <div className="flex flex-col gap-2 text-sm text-background/60">
+            <h4 className="text-[11px] font-sans uppercase tracking-[0.2em] mb-6 text-muted-foreground">
+              {t.footer.contactTitle}
+            </h4>
+            <div className="flex flex-col gap-3 text-sm text-foreground/50">
               <span>{t.contact.location}</span>
-              <a className="hover:text-background transition-colors" href="mailto:adamdayan@bacbs.com">adamdayan@bacbs.com</a>
-              <Link to="/contact" className="hover:text-background transition-colors">{t.footer.links.bookConsultation}</Link>
+              <a className="hover:text-primary transition-colors duration-300" href="mailto:adamdayan@bacbs.com">adamdayan@bacbs.com</a>
+              <Link to="/contact" className="hover:text-primary transition-colors duration-300">{t.footer.links.bookConsultation}</Link>
             </div>
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-background/10 text-xs text-background/30 text-center">
+        <div className="mt-16 pt-8 border-t border-border text-[11px] text-muted-foreground/40 text-center uppercase tracking-[0.15em]">
           © {new Date().getFullYear()} {t.footer.copyright}
         </div>
       </div>
-    </footer>);
-
+    </footer>
+  );
 };
 
 export default Footer;

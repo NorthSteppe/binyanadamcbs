@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, Waves, LogIn, UserPlus2 } from "lucide-react";
+import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, X, LogIn, UserPlus2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,26 +39,44 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 border-b border-border/30 transition-all duration-300 ${scrolled ? "bg-background/70 backdrop-blur-xl backdrop-saturate-150 shadow-sm" : "bg-background/40 backdrop-blur-md"}`}>
-      <div className={`container flex items-center justify-between transition-all duration-300 ${scrolled ? "h-14 md:h-16" : "h-20 md:h-24"}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/40" : "bg-transparent"}`}>
+      <div className={`container flex items-center justify-between transition-all duration-500 ${scrolled ? "h-16" : "h-20 md:h-24"}`}>
         <Link to="/" className="flex items-center gap-3">
-          <img alt="Binyan Adam Clinical Behaviour Services" className={`transition-all duration-300 ${hidelogo ? "opacity-0 scale-75" : "opacity-100 scale-100"} ${scrolled ? "h-9 md:h-10" : "h-14 md:h-16"}`} src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" />
+          <img
+            alt="Binyan Adam"
+            className={`transition-all duration-500 ${hidelogo ? "opacity-0 scale-75" : "opacity-100 scale-100"} ${scrolled ? "h-8 md:h-9" : "h-10 md:h-12"}`}
+            src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
+          />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-0">
           {navLinks.map((link) => (
-            <Link key={link.path} to={link.path} className={`px-4 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10 ${location.pathname === link.path ? "text-primary font-semibold bg-primary/10" : "text-muted-foreground"}`}>
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`px-4 py-2 text-[13px] font-sans font-light tracking-wide uppercase transition-colors duration-300
+                ${location.pathname === link.path
+                  ? "text-primary"
+                  : "text-foreground/60 hover:text-foreground"
+                }`}
+            >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={toggleLanguage} className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
-            <Globe size={16} />
-            {language === "en" ? "עברית" : "English"}
+        <div className="hidden lg:flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleLanguage}
+            className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent"
+          >
+            {language === "en" ? "HE" : "EN"}
           </Button>
+
+          <span className="text-border mx-1">|</span>
 
           {user ? (
             <>
@@ -66,68 +84,88 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
               {(() => {
                 const portal = getPortalLink();
                 return (
-                  <Button variant="default" size="sm" asChild className="rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Link to={portal.path}><portal.icon size={14} /> {portal.label}</Link>
+                  <Button variant="ghost" size="sm" asChild className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent">
+                    <Link to={portal.path}>{portal.label}</Link>
                   </Button>
                 );
               })()}
-              <Button variant="ghost" size="sm" onClick={signOut} className="rounded-full gap-2 text-muted-foreground hover:text-foreground">
-                <LogOut size={14} /> {portalT.logOut || "Log Out"}
+              <Button
+                size="sm"
+                onClick={signOut}
+                className="border border-foreground/20 bg-transparent text-foreground/80 hover:bg-foreground/10 text-[13px] font-light tracking-wide rounded-none px-5"
+              >
+                {portalT.logOut || "Log Out"}
               </Button>
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild className="rounded-full gap-2">
-                <Link to="/login"><LogIn size={14} /> Log In</Link>
+              <Button variant="ghost" size="sm" asChild className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent">
+                <Link to="/login">Log In</Link>
               </Button>
-              <Button variant="outline" size="sm" asChild className="rounded-full gap-2">
-                <Link to="/signup"><UserPlus2 size={14} /> Sign Up</Link>
+              <Button
+                size="sm"
+                asChild
+                className="border border-foreground/20 bg-transparent text-foreground/80 hover:bg-foreground/10 text-[13px] font-light tracking-wide rounded-none px-5"
+              >
+                <Link to="/signup">Get Started</Link>
               </Button>
             </>
           )}
         </div>
 
-        {/* Mobile menu button */}
+        {/* Mobile */}
         <div className="lg:hidden flex items-center gap-2">
           {user && <NotificationBell />}
-          <Button variant="ghost" size="icon" onClick={toggleLanguage} className="rounded-full text-muted-foreground"><Globe size={18} /></Button>
+          <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-foreground/60">
+            <Globe size={18} />
+          </Button>
           <button className="p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
-            {mobileOpen ? <Waves size={24} /> : <Menu size={24} />}
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="lg:hidden bg-background border-b border-border">
-          <nav className="container py-4 flex flex-col gap-2">
+        <div className="lg:hidden bg-background/95 backdrop-blur-xl border-b border-border">
+          <nav className="container py-6 flex flex-col gap-1">
             {navLinks.map((link) => (
-              <Link key={link.path} to={link.path} onClick={() => setMobileOpen(false)} className={`px-4 py-3 text-sm font-medium rounded-xl transition-colors ${location.pathname === link.path ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-primary/5"}`}>
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setMobileOpen(false)}
+                className={`px-4 py-3 text-[13px] font-light tracking-wide uppercase transition-colors
+                  ${location.pathname === link.path ? "text-primary" : "text-foreground/60 hover:text-foreground"}`}
+              >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-2 border-t border-border mt-2 flex flex-col gap-2">
+            <div className="pt-4 border-t border-border mt-4 flex flex-col gap-2">
               {user ? (
                 <>
                   {(() => {
                     const portal = getPortalLink();
                     return (
-                      <Link to={portal.path} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-primary bg-primary/10">
-                        <portal.icon size={14} /> {portal.label}
+                      <Link to={portal.path} onClick={() => setMobileOpen(false)}
+                        className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-primary">
+                        {portal.label}
                       </Link>
                     );
                   })()}
-                  <Button variant="ghost" size="sm" onClick={() => { signOut(); setMobileOpen(false); }} className="rounded-full gap-2">
-                    <LogOut size={14} /> {portalT.logOut || "Log Out"}
-                  </Button>
+                  <button onClick={() => { signOut(); setMobileOpen(false); }}
+                    className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-foreground/60 text-left">
+                    {portalT.logOut || "Log Out"}
+                  </button>
                 </>
               ) : (
                 <>
-                  <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
-                    <LogIn size={14} /> Log In
+                  <Link to="/login" onClick={() => setMobileOpen(false)}
+                    className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-foreground/60">
+                    Log In
                   </Link>
-                  <Link to="/signup" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-muted-foreground hover:bg-primary/5">
-                    <UserPlus2 size={14} /> Sign Up
+                  <Link to="/signup" onClick={() => setMobileOpen(false)}
+                    className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-primary">
+                    Get Started
                   </Link>
                 </>
               )}
