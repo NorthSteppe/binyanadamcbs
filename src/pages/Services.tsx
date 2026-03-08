@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { School, Heart, Users, Building2, GraduationCap, CheckCircle2, ArrowRight } from "lucide-react";
+import { BookOpen, Leaf, UsersRound, Landmark, Compass, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
@@ -34,11 +34,11 @@ const Services = () => {
       <section className="pb-24">
         <div className="container">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ServiceCard title={t.services.cards.education.title} description={t.services.cards.education.description} icon={School} path="/education" colorClass="bg-education text-education-foreground" />
-            <ServiceCard title={t.services.cards.therapy.title} description={t.services.cards.therapy.description} icon={Heart} path="/therapy" colorClass="bg-therapy text-therapy-foreground" />
-            <ServiceCard title={t.services.cards.family.title} description={t.services.cards.family.description} icon={Users} path="/families" colorClass="bg-family text-family-foreground" />
-            <ServiceCard title={t.services.cards.organisations.title} description={t.services.cards.organisations.description} icon={Building2} path="/organisations" colorClass="bg-business text-business-foreground" />
-            <ServiceCard title={t.services.cards.supervision.title} description={t.services.cards.supervision.description} icon={GraduationCap} path="/supervision" colorClass="bg-supervision text-supervision-foreground" />
+             <ServiceCard title={t.services.cards.education.title} description={t.services.cards.education.description} icon={BookOpen} path="/education" colorClass="" />
+            <ServiceCard title={t.services.cards.therapy.title} description={t.services.cards.therapy.description} icon={Leaf} path="/therapy" colorClass="" />
+            <ServiceCard title={t.services.cards.family.title} description={t.services.cards.family.description} icon={UsersRound} path="/families" colorClass="" />
+            <ServiceCard title={t.services.cards.organisations.title} description={t.services.cards.organisations.description} icon={Landmark} path="/organisations" colorClass="" />
+            <ServiceCard title={t.services.cards.supervision.title} description={t.services.cards.supervision.description} icon={Compass} path="/supervision" colorClass="" />
           </div>
         </div>
       </section>
@@ -59,7 +59,7 @@ const Services = () => {
               <div className="space-y-4">
                 {t.services.approachPoints.map((point) => (
                   <div key={point} className="flex items-start gap-3">
-                    <CheckCircle2 className="text-primary mt-0.5 flex-shrink-0" size={18} />
+                    <Check className="text-primary mt-0.5 flex-shrink-0" size={16} strokeWidth={1.5} />
                     <p className="text-foreground/80 font-light">{point}</p>
                   </div>
                 ))}
