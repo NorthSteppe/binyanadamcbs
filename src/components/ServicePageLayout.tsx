@@ -96,8 +96,12 @@ const ServicePageLayout = ({
             <EditableText contentKey={`${pageKey}.tagline`} defaultValue={tagline} as="p" className="text-lg md:text-xl leading-relaxed text-foreground/60 max-w-2xl font-light" />
             {content?.quote_text && (
               <blockquote className="mt-8 border-l border-primary/30 pl-4 text-foreground/50 italic">
-                <p className="text-base">{content.quote_text}</p>
-                {content.quote_author && <footer className="text-sm mt-2 not-italic text-foreground/30">— {content.quote_author}</footer>}
+                <EditableText contentKey={`${pageKey}.heroQuote`} defaultValue={content.quote_text} as="p" className="text-base" />
+                {content.quote_author && (
+                  <footer className="text-sm mt-2 not-italic text-foreground/30">
+                    — <EditableText contentKey={`${pageKey}.heroQuoteAuthor`} defaultValue={content.quote_author} as="span" />
+                  </footer>
+                )}
               </blockquote>
             )}
           </motion.div>
@@ -120,7 +124,7 @@ const ServicePageLayout = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${accentColorClass}`} />
-                      <p className="text-sm text-card-foreground font-light">{getServiceName(service)}</p>
+                      <EditableText contentKey={`${pageKey}.service.${i}`} defaultValue={getServiceName(service)} as="p" className="text-sm text-card-foreground font-light" />
                     </div>
                     <ArrowRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -142,17 +146,19 @@ const ServicePageLayout = ({
             {packages.map((pkg, i) => (
               <ScrollReveal key={pkg.name} delay={i * 0.1}>
                 <div className="border border-border bg-background p-8">
-                  <h3 className="text-2xl font-serif mb-2 text-foreground">{pkg.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-6 font-light">{pkg.description}</p>
+                  <EditableText contentKey={`${pageKey}.pkg.${i}.name`} defaultValue={pkg.name} as="h3" className="text-2xl font-serif mb-2 text-foreground" />
+                  <EditableText contentKey={`${pageKey}.pkg.${i}.desc`} defaultValue={pkg.description} as="p" className="text-sm text-muted-foreground mb-6 font-light" />
                   <ul className="space-y-3 mb-6">
-                    {pkg.includes.map((item) => (
+                    {pkg.includes.map((item, j) => (
                       <li key={item} className="text-sm text-foreground/80 flex items-start gap-3 font-light">
                         <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${accentColorClass}`} />
-                        {item}
+                        <EditableText contentKey={`${pageKey}.pkg.${i}.inc.${j}`} defaultValue={item} />
                       </li>
                     ))}
                   </ul>
-                  <p className="text-xs text-muted-foreground italic">{t.serviceLayout.idealFor} {pkg.ideal}</p>
+                  <p className="text-xs text-muted-foreground italic">
+                    {t.serviceLayout.idealFor} <EditableText contentKey={`${pageKey}.pkg.${i}.ideal`} defaultValue={pkg.ideal} as="span" />
+                  </p>
                 </div>
               </ScrollReveal>
             ))}
@@ -167,7 +173,9 @@ const ServicePageLayout = ({
             <EditableText contentKey={`${pageKey}.readyTitle`} defaultValue={t.serviceLayout.readyTitle} as="h2" className="text-4xl md:text-5xl font-serif mb-4 text-foreground" />
             <EditableText contentKey={`${pageKey}.readyText`} defaultValue={t.serviceLayout.readyText} as="p" className="text-muted-foreground mb-10 max-w-md mx-auto font-light" />
             <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
-              <Link to="/contact">{ctaText}</Link>
+              <Link to="/contact">
+                <EditableText contentKey={`${pageKey}.ctaButton`} defaultValue={ctaText} as="span" />
+              </Link>
             </Button>
           </ScrollReveal>
         </div>

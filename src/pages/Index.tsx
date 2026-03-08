@@ -73,7 +73,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
                 <Link to="/services" className="inline-flex items-center gap-3">
-                  {t.landing.exploreServices} <ArrowRight size={16} />
+                  <EditableText contentKey="landing.exploreBtn" defaultValue={t.landing.exploreServices} as="span" /> <ArrowRight size={16} />
                 </Link>
               </Button>
 
@@ -86,7 +86,7 @@ const Index = () => {
               ) : (
                 <Button size="lg" variant="outline" asChild className="border-foreground/20 text-foreground hover:bg-foreground/10 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
                   <Link to="/contact" className="inline-flex items-center gap-3">
-                    Get in Touch
+                    <EditableText contentKey="landing.contactBtn" defaultValue="Get in Touch" as="span" />
                   </Link>
                 </Button>
               )}
@@ -102,9 +102,11 @@ const Index = () => {
               className="absolute bottom-24 right-8 hidden xl:block max-w-xs"
             >
               <blockquote className="text-sm text-foreground/50 italic leading-relaxed border-l border-primary/30 pl-4">
-                {quote.text || t.landing.quote}
+                <EditableText contentKey="landing.quoteText" defaultValue={quote.text || t.landing.quote} as="span" />
               </blockquote>
-              <p className="text-xs text-foreground/30 mt-2 pl-4">{quote.author || t.landing.quoteAuthor}</p>
+              <p className="text-xs text-foreground/30 mt-2 pl-4">
+                <EditableText contentKey="landing.quoteAuthor" defaultValue={quote.author || t.landing.quoteAuthor} as="span" />
+              </p>
             </motion.div>
           )}
         </div>
