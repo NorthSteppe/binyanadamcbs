@@ -56,6 +56,8 @@ import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
 import TodoManager from "./pages/admin/TodoManager";
 import StaffTodoManager from "./pages/admin/StaffTodoManager";
 import WhatsAppButton from "./components/WhatsAppButton";
+import MobileBottomNav from "./components/mobile/MobileBottomNav";
+import SwipeBackDetector from "./components/mobile/SwipeBackDetector";
 // Clinical tools
 import ClinicalTools from "./pages/staff/ClinicalTools";
 import ABCDataSheet from "./pages/staff/ABCDataSheet";
@@ -161,6 +163,8 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <WhatsAppButton />
+                <MobileBottomNav />
+                <SwipeBackDetector />
                 <EditModeToggle />
               </AppLoader>
             </BrowserRouter>
