@@ -179,81 +179,15 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
           )}
         </div>
 
-        {/* Mobile */}
+        {/* Mobile — simplified since we have bottom nav */}
         <div className="lg:hidden flex items-center gap-2">
           {user && <NotificationBell />}
           <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-foreground/60">
             <Globe size={18} />
           </Button>
-          <button className="p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
       </div>
 
-      {/* Mobile nav */}
-      {mobileOpen && (
-        <div className="lg:hidden bg-background/95 backdrop-blur-xl border-b border-border">
-          <nav className="container py-6 flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <div key={link.path}>
-                <Link
-                  to={link.path}
-                  onClick={() => setMobileOpen(false)}
-                  className={`px-4 py-3 text-[13px] font-light tracking-wide uppercase transition-colors block
-                    ${location.pathname === link.path ? "text-primary" : "text-foreground/60 hover:text-foreground"}`}
-                >
-                  {link.label}
-                </Link>
-                {link.children && (
-                  <div className="ml-4 flex flex-col">
-                    {link.children.map((sub) => (
-                      <Link
-                        key={sub.path}
-                        to={sub.path}
-                        onClick={() => setMobileOpen(false)}
-                        className={`px-4 py-2 text-[12px] font-light tracking-wide uppercase transition-colors
-                          ${location.pathname === sub.path ? "text-primary" : "text-foreground/40 hover:text-foreground/70"}`}
-                      >
-                        {sub.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-            <div className="pt-4 border-t border-border mt-4 flex flex-col gap-2">
-              {user ? (
-                <>
-                  {portalLinks.map((p) => (
-                    <Link key={p.path} to={p.path} onClick={() => setMobileOpen(false)}
-                      className={`px-4 py-3 text-[13px] font-light tracking-wide uppercase flex items-center gap-2
-                        ${location.pathname.startsWith(p.path) ? "text-primary" : "text-foreground/60"}`}>
-                      <p.icon size={14} />
-                      {p.label}
-                    </Link>
-                  ))}
-                  <button onClick={() => { signOut(); setMobileOpen(false); }}
-                    className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-foreground/60 text-left">
-                    {portalT.logOut || "Log Out"}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link to="/login" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-foreground/60">
-                    Log In
-                  </Link>
-                  <Link to="/signup" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-3 text-[13px] font-light tracking-wide uppercase text-primary">
-                    Get Started
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      )}
     </header>
   );
 };
