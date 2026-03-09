@@ -10,11 +10,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Verify webhook secret
+    // Verify webhook secret — fail closed if not configured
     const webhookSecret = Deno.env.get("WEBHOOK_SECRET");
-    const providedSecret = req.headers.get("x-webhook-secret");
-    
-    if (webhookSecret && providedSecret !== webhookSecret) {
+    if (!webhookSecret || req.headers.get("x-webhook-secret") !== webhookSecret) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
