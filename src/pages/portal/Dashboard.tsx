@@ -67,7 +67,19 @@ const Dashboard = () => {
     if (!files || !user) return;
     setUploading(true);
 
+    const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp", "text/plain",
+      "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const MAX_SIZE_MB = 10;
+
     for (const file of Array.from(files)) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast({ title: "Invalid file type", description: `"${file.name}" is not an allowed file type.`, variant: "destructive" });
+        continue;
+      }
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        toast({ title: "File too large", description: `"${file.name}" exceeds the ${MAX_SIZE_MB} MB limit.`, variant: "destructive" });
+        continue;
+      }
       const filePath = `${user.id}/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage.from("client-documents").upload(filePath, file);
       if (uploadError) {

@@ -72,7 +72,15 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("checkout error:", error);
+    const knownSafe = [
+      "Missing service_option_id", "User not authenticated",
+      "Service option not found", "This service has no price configured",
+    ];
+    const msg = error instanceof Error && knownSafe.includes(error.message)
+      ? error.message
+      : "An error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: msg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

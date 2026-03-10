@@ -88,7 +88,14 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("sync-stripe-price error:", error);
+    const knownSafe = [
+      "Not authenticated", "Admin only", "Missing fields",
+    ];
+    const msg = error instanceof Error && knownSafe.includes(error.message)
+      ? error.message
+      : "An error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: msg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
