@@ -83,7 +83,16 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("course checkout error:", error);
+    const knownSafe = [
+      "Missing course_id", "User not authenticated",
+      "Course not found", "This course has no price configured in Stripe",
+      "You already own this course",
+    ];
+    const msg = error instanceof Error && knownSafe.includes(error.message)
+      ? error.message
+      : "An error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: msg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
