@@ -39,15 +39,13 @@ import Productivity from "./pages/portal/Productivity";
 // Admin portal
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCalendar from "./pages/admin/AdminCalendar";
-import ClientManagement from "./pages/admin/ClientManagement";
 import ClientDetail from "./pages/admin/ClientDetail";
 import TeamRequests from "./pages/admin/TeamRequests";
 import HeroImageManager from "./pages/admin/HeroImageManager";
 import SiteContentManager from "./pages/admin/SiteContentManager";
 import TeamMemberManager from "./pages/admin/TeamMemberManager";
 import ServiceOptionsManager from "./pages/admin/ServiceOptionsManager";
-import ClientAssignments from "./pages/admin/ClientAssignments";
-import UserManagement from "./pages/admin/UserManagement";
+import UnifiedUserManagement from "./pages/admin/UnifiedUserManagement";
 import AuthSettings from "./pages/admin/AuthSettings";
 import SecurityDashboard from "./pages/admin/SecurityDashboard";
 // Staff portal
