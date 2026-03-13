@@ -36,6 +36,8 @@ type CalendarEvent = {
   priority?: string;
   status?: string;
   description?: string;
+  notes?: string;
+  plaudRecordingId?: string;
 };
 
 type AISuggestion = {
@@ -144,7 +146,7 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
       // Fetch sessions where user is the client OR an attendee
       const { data: clientSessions, error: e1 } = await supabase
         .from("sessions")
-        .select("id, title, session_date, status, duration_minutes, description, meeting_url, meeting_platform, attendee_ids")
+        .select("id, title, session_date, status, duration_minutes, description, meeting_url, meeting_platform, attendee_ids, notes, plaud_recording_id")
         .gte("session_date", rangeStart.toISOString())
         .lte("session_date", rangeEnd.toISOString());
       if (e1) throw e1;
@@ -152,7 +154,7 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
       // Also fetch sessions where user is in attendee_ids (team sessions)
       const { data: attendeeSessions, error: e2 } = await supabase
         .from("sessions")
-        .select("id, title, session_date, status, duration_minutes, description, meeting_url, meeting_platform, attendee_ids")
+        .select("id, title, session_date, status, duration_minutes, description, meeting_url, meeting_platform, attendee_ids, notes, plaud_recording_id")
         .contains("attendee_ids", [userId])
         .gte("session_date", rangeStart.toISOString())
         .lte("session_date", rangeEnd.toISOString());
@@ -219,6 +221,8 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
           end: new Date(start.getTime() + (s.duration_minutes || 60) * 60000),
           type: "session", color: "hsl(var(--primary))", status: s.status,
           description: desc || undefined,
+          notes: s.notes,
+          plaudRecordingId: s.plaud_recording_id,
         });
       });
     }
@@ -586,13 +590,16 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
                           onDragStart={(e) => handleDragStart(e, ev)}
                           onDragEnd={handleDragEnd}
                           onClick={(e) => handleEventClick(e, ev)}
-                          className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity"
+                          className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 transition-opacity flex items-center justify-between"
                           style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
                         >
-                          {ev.type === "task" && ev.priority && (
-                            <span className={`inline-block w-1.5 h-1.5 rounded-full mr-0.5 ${priorityColor(ev.priority)}`} />
-                          )}
-                          {ev.title}
+                          <div className="flex items-center min-w-0">
+                            {ev.type === "task" && ev.priority && (
+                              <span className={`inline-block w-1.5 h-1.5 rounded-full mr-0.5 shrink-0 ${priorityColor(ev.priority)}`} />
+                            )}
+                            <span className="truncate">{ev.title}</span>
+                          </div>
+                          {ev.plaudRecordingId && <Sparkles size={8} className="shrink-0 ml-0.5 text-primary opacity-80" />}
                         </div>
                       ))}
                       {dayEvents.length > maxEvents && (
@@ -659,14 +666,17 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
                                   onDragStart={(e) => handleDragStart(e, ev)}
                                   onDragEnd={handleDragEnd}
                                   onClick={(e) => handleEventClick(e, ev)}
-                                  className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-grab active:cursor-grabbing hover:opacity-80 z-10"
+                                  className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium cursor-grab active:cursor-grabbing hover:opacity-80 z-10 flex flex-col overflow-hidden"
                                   style={{
                                     top: `${topPx}px`, height: `${heightPx}px`,
                                     backgroundColor: `${ev.color}25`, color: ev.color,
                                     borderLeft: `2px solid ${ev.color}`,
                                   }}
                                 >
-                                  {ev.title}
+                                  <div className="flex justify-between items-start gap-1 w-full">
+                                    <span className="truncate">{ev.title}</span>
+                                    {ev.plaudRecordingId && <Sparkles size={8} className="shrink-0 mt-0.5 text-primary opacity-80" />}
+                                  </div>
                                 </div>
                               );
                             })}
@@ -722,9 +732,12 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
                                 borderLeft: `3px solid ${ev.color}`,
                               }}
                             >
-                              <div className="flex items-center gap-2">
-                                <span>{ev.title}</span>
-                                <span className="text-[10px] opacity-70">{duration}min</span>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="truncate">{ev.title}</span>
+                                  <span className="text-[10px] opacity-70 shrink-0">{duration}min</span>
+                                </div>
+                                {ev.plaudRecordingId && <Sparkles size={10} className="shrink-0 text-primary opacity-80" />}
                               </div>
                               {ev.description && <p className="text-[10px] opacity-60 mt-0.5 truncate">{ev.description}</p>}
                             </div>
@@ -889,6 +902,14 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
               {selectedEvent.priority && <Badge variant="outline" className="capitalize ml-1">{selectedEvent.priority} priority</Badge>}
               {selectedEvent.status && <Badge variant="secondary" className="capitalize ml-1">{selectedEvent.status}</Badge>}
               {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
+              {selectedEvent.notes && (
+                <div className="mt-2 bg-primary/5 border border-primary/20 rounded-md p-3">
+                  <div className="flex items-center gap-1.5 mb-2 font-medium text-xs text-primary">
+                    <Sparkles size={14} /> Session Notes / Summary
+                  </div>
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{selectedEvent.notes}</p>
+                </div>
+              )}
               {selectedEvent.type === "focus" && (
                 <Button variant="destructive" size="sm" onClick={() => deleteFocusBlock.mutate(selectedEvent.id)}>
                   <Trash2 size={14} className="mr-1" /> Delete

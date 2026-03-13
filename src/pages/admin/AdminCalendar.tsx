@@ -614,10 +614,11 @@ const AdminCalendar = () => {
                             onDragStart={(e) => handleDragStart(e, ev)}
                             onDragEnd={handleDragEnd}
                             onClick={(e) => handleEventClick(e, ev)}
-                            className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80"
+                            className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 flex items-center justify-between"
                             style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
                           >
-                            {ev.type === "session" && format(ev.start, "HH:mm") + " "}{ev.clientName || ev.title}
+                            <span className="truncate">{ev.type === "session" && format(ev.start, "HH:mm") + " "}{ev.clientName || ev.title}</span>
+                            {ev.plaudRecordingId && <Sparkles size={8} className="shrink-0 ml-0.5 text-primary opacity-80" />}
                           </div>
                         ))}
                         {dayEvents.length > maxEv && (
@@ -680,14 +681,17 @@ const AdminCalendar = () => {
                                   onDragStart={(e) => handleDragStart(e, ev)}
                                   onDragEnd={handleDragEnd}
                                   onClick={(e) => handleEventClick(e, ev)}
-                                  className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium truncate cursor-grab active:cursor-grabbing hover:opacity-80 z-10"
+                                  className="absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-[9px] font-medium cursor-grab active:cursor-grabbing hover:opacity-80 z-10 flex flex-col overflow-hidden"
                                   style={{
                                     top: `${topPx}px`, height: `${heightPx}px`,
                                     backgroundColor: `${ev.color}25`, color: ev.color,
                                     borderLeft: `2px solid ${ev.color}`,
                                   }}
                                 >
-                                  {ev.clientName || ev.title}
+                                  <div className="flex justify-between items-start gap-1 w-full">
+                                    <span className="truncate">{ev.clientName || ev.title}</span>
+                                    {ev.plaudRecordingId && <Sparkles size={8} className="shrink-0 mt-0.5 text-primary opacity-80" />}
+                                  </div>
                                 </div>
                               );
                             })}
@@ -738,10 +742,13 @@ const AdminCalendar = () => {
                                 borderLeft: `3px solid ${ev.color}`,
                               }}
                             >
-                              <div className="flex items-center gap-2">
-                                <span>{ev.title}</span>
-                                {ev.clientName && <span className="text-[10px] opacity-70">— {ev.clientName}</span>}
-                                <span className="text-[10px] opacity-70">{duration}min</span>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="truncate">{ev.title}</span>
+                                  {ev.clientName && <span className="text-[10px] opacity-70 shrink-0">— {ev.clientName}</span>}
+                                  <span className="text-[10px] opacity-70 shrink-0">{duration}min</span>
+                                </div>
+                                {ev.plaudRecordingId && <Sparkles size={10} className="shrink-0 text-primary opacity-80" />}
                               </div>
                               {ev.description && <p className="text-[10px] opacity-60 mt-0.5 truncate">{ev.description}</p>}
                             </div>
@@ -916,13 +923,16 @@ const AdminCalendar = () => {
               {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
               {selectedEvent.notes && (
                 <div className="mt-2 border-t border-border pt-3">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📝 Session Notes</Label>
-                  <div className="bg-muted/50 rounded p-3 text-sm whitespace-pre-wrap max-h-48 overflow-y-auto font-light">
+                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
+                    {selectedEvent.plaudRecordingId ? (
+                      <><Sparkles size={12} className="text-primary" /> Plaud AI Summary / Notes</>
+                    ) : (
+                      <>📝 Session Notes</>
+                    )}
+                  </Label>
+                  <div className="bg-muted/50 rounded p-3 text-sm whitespace-pre-wrap max-h-48 overflow-y-auto font-light leading-relaxed">
                     {selectedEvent.notes}
                   </div>
-                  {selectedEvent.plaudRecordingId && (
-                    <p className="text-[10px] text-muted-foreground mt-1">Plaud Recording: {selectedEvent.plaudRecordingId}</p>
-                  )}
                 </div>
               )}
               {selectedEvent.type === "session" && (
