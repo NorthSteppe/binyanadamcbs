@@ -91,7 +91,18 @@ const ABCDataSheet = () => {
       <EntryHistory
         clientId={clientId}
         toolType="abc"
+        toolTitle="ABC Data Sheet"
         refreshKey={refreshKey}
+        getPdfSections={(data) => {
+          const d = data as Record<string, string>;
+          return [
+            { label: "Setting / Context", value: d.setting || "" },
+            { label: "A — Antecedent", value: d.antecedent || "" },
+            { label: "B — Behaviour", value: d.behaviour || "" },
+            { label: "C — Consequence", value: d.consequence || "" },
+            { label: "Function Hypothesis", value: d.function_hypothesis || "" },
+          ];
+        }}
         renderEntry={(data, notes) => (
           <div className="space-y-2 text-sm">
             {(data as Record<string, string>).setting && <p><span className="font-medium text-muted-foreground">Setting:</span> {(data as Record<string, string>).setting}</p>}

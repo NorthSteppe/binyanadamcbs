@@ -92,7 +92,12 @@ const CaseFormulation = () => {
       <EntryHistory
         clientId={clientId}
         toolType="case_formulation"
+        toolTitle="Case Formulation"
         refreshKey={refreshKey}
+        getPdfSections={(data) => {
+          const d = data as Record<string, string>;
+          return sections.map((s) => ({ label: s.label, value: d[s.key] || "" }));
+        }}
         renderEntry={(data, notes) => {
           const d = data as Record<string, string>;
           return (

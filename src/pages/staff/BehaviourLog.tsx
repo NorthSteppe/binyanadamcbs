@@ -142,7 +142,20 @@ const BehaviourLog = () => {
       <EntryHistory
         clientId={clientId}
         toolType="behaviour_log"
+        toolTitle="Behaviour Tracking Log"
         refreshKey={refreshKey}
+        getPdfSections={(data) => {
+          const d = data as Record<string, string | number>;
+          return [
+            { label: "Target Behaviour", value: String(d.behaviour || "") },
+            { label: "Frequency", value: String(d.frequency || "") },
+            { label: "Intensity", value: d.intensity ? `${d.intensity}/10` : "" },
+            { label: "Duration (minutes)", value: String(d.duration_minutes || "") },
+            { label: "Context / Situation", value: String(d.context || "") },
+            { label: "Mood Before", value: String(d.mood_before || "") },
+            { label: "Mood After", value: String(d.mood_after || "") },
+          ];
+        }}
         renderEntry={(data, notes) => {
           const d = data as Record<string, string | number>;
           return (

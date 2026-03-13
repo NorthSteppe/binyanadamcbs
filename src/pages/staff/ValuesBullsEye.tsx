@@ -117,7 +117,17 @@ const ValuesBullsEye = () => {
       <EntryHistory
         clientId={clientId}
         toolType="values_bullseye"
+        toolTitle="Values Bull's Eye"
         refreshKey={refreshKey}
+        getPdfSections={(data) => {
+          const d = data as Record<string, { importance: number; consistency: number; description: string }>;
+          return domains.map((dom) => ({
+            label: dom.label,
+            value: d[dom.key]
+              ? `Description: ${d[dom.key].description || "—"}\nImportance: ${d[dom.key].importance}/10\nConsistency of Action: ${d[dom.key].consistency}/10`
+              : "",
+          }));
+        }}
         renderEntry={(data, notes) => {
           const d = data as Record<string, { importance: number; consistency: number; description: string }>;
           return (
