@@ -158,7 +158,25 @@ const FunctionalAssessment = () => {
       <EntryHistory
         clientId={clientId}
         toolType="functional_assessment"
+        toolTitle="Functional Assessment"
         refreshKey={refreshKey}
+        getPdfSections={(data) => {
+          const d = data as Record<string, string>;
+          return [
+            { label: "Target Behaviour", value: d.target_behaviour || "" },
+            { label: "Operational Definition", value: d.operational_definition || "" },
+            { label: "Setting Events", value: d.setting_events || "" },
+            { label: "Establishing Operations", value: d.establishing_operations || "" },
+            { label: "Discriminative Stimuli", value: d.discriminative_stimuli || "" },
+            { label: "Behaviour Topography", value: d.behaviour_topography || "" },
+            { label: "Frequency / Intensity / Duration", value: [d.frequency, d.intensity, d.duration].filter(Boolean).join(" | ") },
+            { label: "Consequences SR+", value: d.consequences_sr_plus || "" },
+            { label: "Consequences SR−", value: d.consequences_sr_minus || "" },
+            { label: "Consequences SP+", value: d.consequences_sp_plus || "" },
+            { label: "Consequences SP−", value: d.consequences_sp_minus || "" },
+            { label: "Hypothesised Function", value: d.hypothesised_function || "" },
+          ];
+        }}
         renderEntry={(data, notes) => {
           const d = data as Record<string, string>;
           return (

@@ -113,7 +113,15 @@ const HexaflexTracker = () => {
       <EntryHistory
         clientId={clientId}
         toolType="hexaflex"
+        toolTitle="Hexaflex Tracker"
         refreshKey={refreshKey}
+        getPdfSections={(data) => {
+          const d = data as Record<string, { score: number; observation: string }>;
+          return processes.map((p) => ({
+            label: p.label,
+            value: d[p.key] ? `Score: ${d[p.key].score}/10\nObservation: ${d[p.key].observation || "—"}` : "",
+          }));
+        }}
         renderEntry={(data, notes) => {
           const d = data as Record<string, { score: number; observation: string }>;
           return (
