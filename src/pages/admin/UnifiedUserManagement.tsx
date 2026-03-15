@@ -438,6 +438,49 @@ const ClientPortalPreview = ({ clientId, clientName, currentUserId }: { clientId
     fetchPortalData();
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    setUploading(true);
+    const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp", "text/plain",
+      "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const MAX_SIZE_MB = 10;
+
+    for (const file of Array.from(files)) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast.error(`"${file.name}" is not an allowed file type.`);
+        continue;
+      }
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        toast.error(`"${file.name}" exceeds the ${MAX_SIZE_MB} MB limit.`);
+        continue;
+      }
+      const filePath = `${clientId}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage.from("client-documents").upload(filePath, file);
+      if (uploadError) {
+        toast.error("Upload failed: " + uploadError.message);
+        continue;
+      }
+      const { data: urlData } = supabase.storage.from("client-documents").getPublicUrl(filePath);
+      await supabase.from("client_documents").insert({
+        client_id: clientId,
+        file_name: file.name,
+        file_url: urlData.publicUrl,
+        file_type: file.type,
+        uploaded_by: currentUserId,
+      });
+    }
+    toast.success("Documents uploaded");
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    fetchPortalData();
+  };
+
+  const deleteDocument = async (id: string) => {
+    await supabase.from("client_documents").delete().eq("id", id);
+    fetchPortalData();
+  };
+
   const noteCategories = ["general", "session-note", "assessment", "plan", "correspondence", "report"];
 
   return (
