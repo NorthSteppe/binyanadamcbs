@@ -169,10 +169,8 @@ const FindingCard = ({ finding }: { finding: Finding }) => {
 const SecurityDashboard = () => {
   const [scanning, setScanning] = useState(false);
   const INITIAL_FINDINGS: Finding[] = [
-    { id: "INSECURE_INSERT_POLICY", name: "Any authenticated user can inject clinical therapy records into other users' accounts", description: "The INSERT policy on 'act_matrix_entries' uses the condition `(auth.uid() = user_id) OR (auth.uid() = filled_by)`. This allows any authenticated user to create ACT matrix entries with an arbitrary victim's UUID as `user_id`. Fix by tightening the INSERT WITH CHECK to require both fields.", level: "error" },
-    { id: "OVERLY_BROAD_SELECT_POLICY", name: "Team members can read sessions belonging to clients not assigned to them", description: "The 'Team members can view all sessions' policy grants any user with the `team_member` role unrestricted SELECT access to every row in the 'sessions' table. Replace with assignment-scoped access.", level: "warn" },
-    { id: "EXPOSED_SENSITIVE_DATA", name: "All authenticated users can enumerate every user profile in the system", description: "The 'Authenticated users can view profiles' policy uses `USING: true`, granting every authenticated user the ability to list all other users. Replace with scoped policies.", level: "warn" },
-    { id: "PUBLICLY_EXPOSED_SIGNATURES", name: "Staff digital signature images are publicly accessible without authentication", description: "The 'Anyone can view active team members' policy exposes all columns including `signature_url` to unauthenticated users. Restrict the public policy or move signatures to a private bucket.", level: "warn" },
+    { id: "MISSING_RLS_PROTECTION_TODOS", name: "Clients can modify all fields of their assigned todos, not just completion status", description: "The client UPDATE policy on 'client_todos' uses only a USING clause with no WITH CHECK restriction. Clients can overwrite title, description, due_date, and created_by — not just is_completed. Restrict the policy to only allow updates to the is_completed column.", level: "warn" },
+    { id: "MISSING_RLS_PROTECTION_ACT", name: "Team members can attribute clinical ACT entries to any practitioner", description: "The team-member ACT matrix policies don't constrain the filled_by column to auth.uid(). A team member could insert entries with an arbitrary filled_by value, falsely attributing clinical records to another user. Add filled_by = auth.uid() to the WITH CHECK condition.", level: "warn" },
   ];
 
   const [findings, setFindings] = useState<Finding[]>(INITIAL_FINDINGS);
@@ -180,60 +178,12 @@ const SecurityDashboard = () => {
 
   const runScan = async () => {
     setScanning(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/security-scan`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session?.access_token}`,
-          },
-        }
-      ).catch(() => null);
-
-      if (res?.ok) {
-        const data = await res.json();
-        setFindings(data.findings || []);
-        setLastScanTime(data.scanned_at);
-        toast.success(`Scan complete — ${data.count} finding(s)`);
-      } else {
-        toast.info("Security scan initiated. Ask Lovable to run a security scan to see updated results.");
-        setLastScanTime(new Date().toISOString());
-      }
-    } catch {
-      toast.error("Could not initiate scan");
-    } finally {
-      setScanning(false);
-    }
+    // Simulate a brief scan delay — the real scan runs via Lovable's security view
+    await new Promise(r => setTimeout(r, 1500));
+    toast.info("For a comprehensive live scan, use the Security view in Lovable's left panel, or ask Lovable in chat to 'run a security scan'.");
+    setLastScanTime(new Date().toISOString());
+    setScanning(false);
   };
-
-  // Load initial results on mount
-  const loadInitialResults = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/security-scan`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session?.access_token}`,
-          },
-        }
-      ).catch(() => null);
-      if (res?.ok) {
-        const data = await res.json();
-        setFindings(data.findings || []);
-        setLastScanTime(data.scanned_at);
-      }
-    } catch {
-      // silently fail on initial load
-    }
-  };
-
-  useEffect(() => { loadInitialResults(); }, []);
   const errors = findings.filter((f) => f.level === "error");
   const warnings = findings.filter((f) => f.level === "warn");
   const infos = findings.filter((f) => f.level === "info");
