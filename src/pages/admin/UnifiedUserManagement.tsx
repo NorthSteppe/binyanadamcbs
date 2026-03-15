@@ -577,22 +577,34 @@ const ClientPortalPreview = ({ clientId, clientName, currentUserId }: { clientId
 
                   {/* Documents */}
                   <div>
-                    <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
-                      <FileText size={12} /> Documents ({documents.length})
-                    </h5>
+                    <div className="flex items-center justify-between mb-3">
+                      <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <FileText size={12} /> Documents ({documents.length})
+                      </h5>
+                      <div>
+                        <input ref={fileInputRef} type="file" multiple onChange={handleFileUpload} className="hidden" />
+                        <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                          <Upload size={10} /> {uploading ? "Uploading…" : "Upload"}
+                        </Button>
+                      </div>
+                    </div>
                     {documents.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No documents.</p>
                     ) : (
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {documents.map((doc) => (
-                          <a key={doc.id} href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-2 bg-card rounded-lg p-2.5 border border-border/30 hover:border-primary/20 transition-colors">
-                            <FileText size={12} className="text-primary shrink-0" />
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>
-                              <p className="text-[10px] text-muted-foreground">{format(new Date(doc.created_at), "MMM d, yyyy")}</p>
-                            </div>
-                          </a>
+                          <div key={doc.id} className="flex items-center gap-2 bg-card rounded-lg p-2.5 border border-border/30">
+                            <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0 hover:text-primary transition-colors">
+                              <FileText size={12} className="text-primary shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>
+                                <p className="text-[10px] text-muted-foreground">{format(new Date(doc.created_at), "MMM d, yyyy")}</p>
+                              </div>
+                            </a>
+                            <button onClick={() => deleteDocument(doc.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                              <Trash2 size={10} />
+                            </button>
+                          </div>
                         ))}
                       </div>
                     )}
