@@ -364,6 +364,8 @@ const ClientPortalPreview = ({ clientId, clientName, currentUserId }: { clientId
   const [notes, setNotes] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [showPortal, setShowPortal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Add todo state
   const [newTodo, setNewTodo] = useState({ title: "", description: "", due_date: "" });
