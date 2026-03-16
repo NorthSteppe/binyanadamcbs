@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChevronLeft, ChevronRight, Plus, Shield, CalendarDays,
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
-  Sparkles, Loader2, CheckCircle2, Flag, X
+  Sparkles, Loader2, CheckCircle2, Flag, X, CalendarPlus, Copy, RefreshCw
 } from "lucide-react";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
@@ -69,6 +69,8 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
+  const [copiedFeed, setCopiedFeed] = useState(false);
   const [showTasks, setShowTasks] = useState(true);
   const [showFocus, setShowFocus] = useState(true);
   const [showSessions, setShowSessions] = useState(true);
@@ -181,6 +183,47 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
     },
     enabled: !!session,
   });
+
+  const { data: feedToken, refetch: refetchToken } = useQuery({
+    queryKey: ["calendar_feed_token"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("calendar_feed_token")
+        .eq("id", session!.user.id)
+        .single();
+      if (error) throw error;
+      return (data as any)?.calendar_feed_token as string | null;
+    },
+    enabled: !!session,
+  });
+
+  const regenerateToken = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("gen_random_uuid" as any);
+      // Directly update the token with a fresh uuid
+      const newToken = crypto.randomUUID();
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ calendar_feed_token: newToken } as any)
+        .eq("id", session!.user.id);
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => { refetchToken(); toast.success("Calendar link regenerated"); },
+    onError: () => toast.error("Failed to regenerate link"),
+  });
+
+  const feedUrl = feedToken
+    ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calendar-ical-feed?token=${feedToken}`
+    : null;
+
+  const copyFeedUrl = () => {
+    if (!feedUrl) return;
+    navigator.clipboard.writeText(feedUrl);
+    setCopiedFeed(true);
+    setTimeout(() => setCopiedFeed(false), 2000);
+    toast.success("Link copied!");
+  };
 
   // All tasks for AI context
   const { data: allTasks = [] } = useQuery({
@@ -518,6 +561,9 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
           >
             {isLoadingSuggestions ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             AI Suggest
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setConnectDialogOpen(true)} className="h-8 gap-1 text-xs">
+            <CalendarPlus size={13} /> Connect
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)} className="h-8"><Shield size={14} /></Button>
           {onToggleFullscreen && (
@@ -917,6 +963,74 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Calendar Dialog */}
+      <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><CalendarPlus size={18} /> Connect to Your Calendar App</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Subscribe to your Binyan Adam CBS sessions directly in Google Calendar, Apple Calendar, or Outlook. Your calendar app will automatically stay in sync.
+            </p>
+            {feedUrl ? (
+              <>
+                <div>
+                  <Label className="text-xs mb-1.5 block">Your Personal Subscription URL</Label>
+                  <div className="flex gap-2">
+                    <Input value={feedUrl} readOnly className="text-xs font-mono" />
+                    <Button size="sm" variant="outline" onClick={copyFeedUrl} className="shrink-0 gap-1">
+                      {copiedFeed ? <CheckCircle2 size={14} className="text-green-500" /> : <Copy size={14} />}
+                      {copiedFeed ? "Copied!" : "Copy"}
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">Add to your calendar app:</p>
+                  <a
+                    href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl)}`}
+                    target="_blank" rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start">
+                      <span>📅</span> Add to Google Calendar
+                    </Button>
+                  </a>
+                  <a href={feedUrl} download="binyan-adam.ics">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start">
+                      <span>🍎</span> Add to Apple Calendar
+                    </Button>
+                  </a>
+                  <a
+                    href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl)}`}
+                    target="_blank" rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start">
+                      <span>📧</span> Add to Outlook
+                    </Button>
+                  </a>
+                </div>
+                <div className="border-t border-border pt-3">
+                  <p className="text-[11px] text-muted-foreground mb-2">If you think your link has been compromised, regenerate it. Old links will stop working.</p>
+                  <Button
+                    variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground"
+                    onClick={() => regenerateToken.mutate()}
+                    disabled={regenerateToken.isPending}
+                  >
+                    {regenerateToken.isPending ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                    Regenerate Link
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-6">
+                <Loader2 size={20} className="animate-spin mx-auto text-muted-foreground" />
+                <p className="text-xs text-muted-foreground mt-2">Setting up your calendar link…</p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
