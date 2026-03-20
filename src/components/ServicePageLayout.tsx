@@ -55,7 +55,8 @@ const ServicePageLayout = ({
 }: ServicePageLayoutProps) => {
   const { t } = useLanguage();
   const { data: content } = usePageContent(pageKey);
-  const displayImage = content?.image_url || heroImage;
+  // Prefer DB image, fall back to local asset. Guard against empty strings.
+  const displayImage = (content?.image_url && content.image_url.length > 0) ? content.image_url : heroImage;
 
   const getServiceName = (service: string | ServiceOffer) =>
     typeof service === "string" ? service : service.name;

@@ -1,9 +1,9 @@
-import { useCallback, useRef, useState } from "react";
+import { forwardRef, useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const SwipeBackDetector = () => {
+const SwipeBackDetector = forwardRef<HTMLDivElement>((_, ref) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const startX = useRef(0);
@@ -13,7 +13,6 @@ const SwipeBackDetector = () => {
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
-    // Only activate from the left 20px edge
     if (touch.clientX <= 20) {
       startX.current = touch.clientX;
       startY.current = touch.clientY;
@@ -26,7 +25,6 @@ const SwipeBackDetector = () => {
     const touch = e.touches[0];
     const dx = touch.clientX - startX.current;
     const dy = Math.abs(touch.clientY - startY.current);
-    // Cancel if vertical movement is dominant
     if (dy > dx) {
       swiping.current = false;
       setSwipeProgress(0);
@@ -50,14 +48,13 @@ const SwipeBackDetector = () => {
 
   return (
     <>
-      {/* Invisible touch capture zone on left edge */}
       <div
+        ref={ref}
         className="fixed left-0 top-0 bottom-0 w-5 z-[70]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       />
-      {/* Visual feedback */}
       {swipeProgress > 0 && (
         <motion.div
           className="fixed left-0 top-0 bottom-0 z-[69] bg-primary/10 pointer-events-none"
@@ -68,6 +65,8 @@ const SwipeBackDetector = () => {
       )}
     </>
   );
-};
+});
+
+SwipeBackDetector.displayName = "SwipeBackDetector";
 
 export default SwipeBackDetector;
