@@ -119,8 +119,19 @@ ${JSON.stringify(clients, null, 2)}
 
 Find optimal time slots for the unscheduled sessions around the fixed ones.`;
     } else {
-      // Personal task scheduler (existing behavior)
+      // Personal task scheduler
       const { tasks, sessions, focus_blocks, date } = body;
+
+      // Array length limits
+      if (Array.isArray(tasks) && tasks.length > 100) {
+        return new Response(JSON.stringify({ error: "Too many tasks (max 100)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (Array.isArray(sessions) && sessions.length > 50) {
+        return new Response(JSON.stringify({ error: "Too many sessions (max 50)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (Array.isArray(focus_blocks) && focus_blocks.length > 50) {
+        return new Response(JSON.stringify({ error: "Too many focus blocks (max 50)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
 
       systemPrompt = `You are an AI scheduling assistant. Given a user's tasks, existing sessions, and focus blocks for the day, create an optimal daily schedule.
 

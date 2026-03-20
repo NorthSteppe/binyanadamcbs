@@ -26,7 +26,21 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { tasks, projects, date } = await req.json();
+    const body = await req.json();
+    const { tasks, projects, date } = body;
+
+    // Reject oversized payloads
+    const bodyStr = JSON.stringify(body);
+    if (bodyStr.length > 50000) {
+      return new Response(JSON.stringify({ error: "Payload too large" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (Array.isArray(tasks) && tasks.length > 200) {
+      return new Response(JSON.stringify({ error: "Too many tasks (max 200)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (Array.isArray(projects) && projects.length > 50) {
+      return new Response(JSON.stringify({ error: "Too many projects (max 50)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
