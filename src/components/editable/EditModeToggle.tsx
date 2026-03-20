@@ -1,8 +1,9 @@
+import { forwardRef } from "react";
 import { useEditMode } from "@/hooks/useEditMode";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const EditModeToggle = () => {
+const EditModeToggle = forwardRef<HTMLDivElement>((_, ref) => {
   const { canEdit, editMode, setEditMode, saving } = useEditMode();
 
   if (!canEdit || !editMode) return null;
@@ -10,6 +11,7 @@ const EditModeToggle = () => {
   return (
     <AnimatePresence>
       <motion.div
+        ref={ref}
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 20, opacity: 0 }}
@@ -33,6 +35,8 @@ const EditModeToggle = () => {
       </motion.div>
     </AnimatePresence>
   );
-};
+});
+
+EditModeToggle.displayName = "EditModeToggle";
 
 export default EditModeToggle;

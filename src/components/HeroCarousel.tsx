@@ -16,14 +16,20 @@ const HeroCarousel = ({ onQuoteChange }: HeroCarouselProps) => {
 
   // Preload all images eagerly on mount
   useEffect(() => {
-    if (!images) return;
+    if (!images || images.length === 0) return;
+    const links: HTMLLinkElement[] = [];
     images.forEach((img) => {
+      if (!img.image_url) return;
       const link = document.createElement("link");
       link.rel = "preload";
       link.as = "image";
       link.href = img.image_url;
       document.head.appendChild(link);
+      links.push(link);
     });
+    return () => {
+      links.forEach((link) => link.remove());
+    };
   }, [images]);
 
   const goTo = useCallback((nextIdx: number) => {
