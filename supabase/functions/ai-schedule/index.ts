@@ -35,6 +35,39 @@ serve(async (req) => {
 
     const body = await req.json();
     const { mode } = body;
+
+    // Reject oversized payloads
+    const bodyStr = JSON.stringify(body);
+    if (bodyStr.length > 50000) {
+      return new Response(JSON.stringify({ error: "Payload too large" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub as string;
+
+    // Enforce role check for team mode
+    if (mode === "team") {
+      const svcClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const { data: roleRow } = await svcClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .in("role", ["admin", "team_member"])
+        .limit(1)
+        .maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: "Forbidden: team scheduling requires staff role" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -44,6 +77,17 @@ serve(async (req) => {
     if (mode === "team") {
       // Team calendar auto-scheduler
       const { unscheduled_sessions, existing_sessions, date, clients } = body;
+
+      // Array length limits
+      if (Array.isArray(unscheduled_sessions) && unscheduled_sessions.length > 50) {
+        return new Response(JSON.stringify({ error: "Too many unscheduled sessions (max 50)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (Array.isArray(existing_sessions) && existing_sessions.length > 50) {
+        return new Response(JSON.stringify({ error: "Too many existing sessions (max 50)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (Array.isArray(clients) && clients.length > 100) {
+        return new Response(JSON.stringify({ error: "Too many clients (max 100)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
 
       systemPrompt = `You are an AI scheduling assistant for a clinical practice. Given unscheduled client sessions and existing booked sessions for the day, optimally slot the unscheduled sessions into available time gaps.
 
@@ -75,8 +119,19 @@ ${JSON.stringify(clients, null, 2)}
 
 Find optimal time slots for the unscheduled sessions around the fixed ones.`;
     } else {
-      // Personal task scheduler (existing behavior)
+      // Personal task scheduler
       const { tasks, sessions, focus_blocks, date } = body;
+
+      // Array length limits
+      if (Array.isArray(tasks) && tasks.length > 100) {
+        return new Response(JSON.stringify({ error: "Too many tasks (max 100)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (Array.isArray(sessions) && sessions.length > 50) {
+        return new Response(JSON.stringify({ error: "Too many sessions (max 50)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (Array.isArray(focus_blocks) && focus_blocks.length > 50) {
+        return new Response(JSON.stringify({ error: "Too many focus blocks (max 50)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
 
       systemPrompt = `You are an AI scheduling assistant. Given a user's tasks, existing sessions, and focus blocks for the day, create an optimal daily schedule.
 
