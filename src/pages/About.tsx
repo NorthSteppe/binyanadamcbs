@@ -43,7 +43,7 @@ const About = () => {
       <section className="relative min-h-[60vh] flex items-end overflow-hidden">
         <EditableImage
           contentKey="about.hero"
-          defaultSrc={content?.image_url || "/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"}
+          defaultSrc={(content?.image_url && content.image_url.length > 0) ? content.image_url : "/lovable-uploads/93c59eae-410f-4380-a222-312d8d41af41.jpg"}
           alt={content?.alt_text || "Binyan Adam"}
           className="absolute inset-0"
           imgClassName="w-full h-full object-cover"
