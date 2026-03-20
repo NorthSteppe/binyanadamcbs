@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
   // Fetch sessions for this user (as client or attendee)
   const { data: sessions, error: sessionsError } = await supabase
     .from("sessions")
-    .select("id, title, session_date, duration_minutes, description, notes, meeting_url, meeting_platform")
+    .select("id, title, session_date, duration_minutes, description, meeting_url, meeting_platform")
     .or(`client_id.eq.${userId},attendee_ids.cs.{${userId}}`)
     .gte("session_date", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()) // last 90 days
     .lte("session_date", new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString()); // next 180 days
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
   // Build VEVENT blocks
   const events = (sessions || []).map((s: any) => {
     const { start, end } = toIcalDate(s.session_date, s.duration_minutes || 60);
-    const descParts = [s.description, s.meeting_platform ? `Platform: ${s.meeting_platform}` : null, s.meeting_url ? `Join: ${s.meeting_url}` : null, s.notes ? `\nNotes:\n${s.notes}` : null].filter(Boolean);
+    const descParts = [s.description, s.meeting_platform ? `Platform: ${s.meeting_platform}` : null, s.meeting_url ? `Join: ${s.meeting_url}` : null].filter(Boolean);
     const description = descParts.join("\n");
     const location = s.meeting_url || (s.meeting_platform ? s.meeting_platform : "");
 
