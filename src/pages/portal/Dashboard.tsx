@@ -268,8 +268,11 @@ const Dashboard = () => {
               )}
             </div>
           </motion.div>
+          {/* Notification Settings */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <NotificationSettings />
+          </motion.div>
         </div>
-      </section>
       <Footer />
       <FloatingAIChat />
     </div>
