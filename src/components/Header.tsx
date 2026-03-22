@@ -67,7 +67,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
         <Link to="/" className="flex items-center gap-3">
           <img
             alt="Binyan Adam"
-            className={`transition-all duration-500 ${hidelogo ? "opacity-0 scale-90" : "opacity-100 scale-100"} ${scrolled ? "h-7 md:h-8" : "h-9 md:h-10"}`}
+            className={`transition-all duration-500 mix-blend-multiply dark:mix-blend-screen dark:invert ${hidelogo ? "opacity-0 scale-90" : "opacity-100 scale-100"} ${scrolled ? "h-7 md:h-8" : "h-9 md:h-10"}`}
             src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
           />
         </Link>
