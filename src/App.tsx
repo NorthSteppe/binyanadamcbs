@@ -162,6 +162,21 @@ const App = () => (
                   <Route path="/staff/clinical/behaviour-log" element={<StaffRoute><BehaviourLog /></StaffRoute>} />
                   <Route path="/staff/clinical/case-formulation" element={<StaffRoute><CaseFormulation /></StaffRoute>} />
 
+                  {/* Supervisee portal */}
+                  <Route path="/supervisee" element={<SuperviseeRoute><SuperviseeDashboard /></SuperviseeRoute>} />
+                  <Route path="/supervisee/case-logs" element={<SuperviseeRoute><CaseLogs /></SuperviseeRoute>} />
+                  <Route path="/supervisee/documents" element={<SuperviseeRoute><SuperviseeDocuments /></SuperviseeRoute>} />
+                  <Route path="/supervisee/calendar" element={<SuperviseeRoute><AdminCalendar /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical-tools" element={<SuperviseeRoute><ClinicalTools /></SuperviseeRoute>} />
+                  <Route path="/supervisee/resources" element={<SuperviseeRoute><Resources /></SuperviseeRoute>} />
+                  <Route path="/supervisee/todos" element={<SuperviseeRoute><TodoManager /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/abc" element={<SuperviseeRoute><ABCDataSheet /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/functional-assessment" element={<SuperviseeRoute><FunctionalAssessment /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/values-bullseye" element={<SuperviseeRoute><ValuesBullsEye /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/hexaflex" element={<SuperviseeRoute><HexaflexTracker /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/behaviour-log" element={<SuperviseeRoute><BehaviourLog /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/case-formulation" element={<SuperviseeRoute><CaseFormulation /></SuperviseeRoute>} />
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <WhatsAppButton />
