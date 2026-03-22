@@ -16,7 +16,7 @@ import {
   ChevronLeft, ChevronRight, Plus, CalendarDays,
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
   ListTodo, User, Edit, X, Sparkles, Loader2, Check,
-  Video, Link2, UserPlus, ExternalLink,
+  Video, Link2, UserPlus, ExternalLink, CalendarPlus, Copy, RefreshCw, CheckCircle2,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
