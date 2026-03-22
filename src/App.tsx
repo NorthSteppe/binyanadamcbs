@@ -71,6 +71,10 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import CourseManager from "./pages/admin/CourseManager";
 import CourseLessonManager from "./pages/admin/CourseLessonManager";
+// Supervisee portal
+import SuperviseeDashboard from "./pages/supervisee/SuperviseeDashboard";
+import CaseLogs from "./pages/supervisee/CaseLogs";
+import SuperviseeDocuments from "./pages/supervisee/SuperviseeDocuments";
 
 const queryClient = new QueryClient();
 
