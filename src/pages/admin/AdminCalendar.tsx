@@ -1165,8 +1165,11 @@ const AdminCalendar = () => {
                   <a href={webcalUrl!}>
                     <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>🍎</span> Add to Apple Calendar</Button>
                   </a>
-                  <a href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl!)}`} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📧</span> Add to Outlook</Button>
+                  <a href={webcalUrl!}>
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📧</span> Add to Outlook (Desktop)</Button>
+                  </a>
+                  <a href={feedUrl!} download="binyan-adam-calendar.ics">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>⬇️</span> Download .ics File</Button>
                   </a>
                 </div>
                 <div className="border-t border-border pt-3">
