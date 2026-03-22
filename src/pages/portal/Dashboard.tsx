@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingAIChat from "@/components/FloatingAIChat";
+import NotificationSettings from "@/components/portal/NotificationSettings";
 
 interface ClientTodo {
   id: string;
@@ -266,6 +267,10 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+          </motion.div>
+          {/* Notification Settings */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <NotificationSettings />
           </motion.div>
         </div>
       </section>

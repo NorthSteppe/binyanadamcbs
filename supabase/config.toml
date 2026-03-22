@@ -15,3 +15,5 @@ project_id = "wcqjmjceelcainyyqjmi"
     verify_jwt = false
   [functions.session-notes-webhook]
     verify_jwt = false
+  [functions.send-telegram-notification]
+    verify_jwt = false
