@@ -9,6 +9,7 @@ interface AuthContextType {
   roles: string[];
   isAdmin: boolean;
   isTeamMember: boolean;
+  isSupervisee: boolean;
   isStaff: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
