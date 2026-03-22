@@ -133,7 +133,16 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Quick links row */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+              <Link to="/portal/productivity" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
+                <div className="bg-primary/10 text-primary rounded-xl p-3"><Calendar size={20} /></div>
+                <div>
+                  <p className="text-sm font-semibold text-card-foreground">My Calendar</p>
+                  <p className="text-[11px] text-muted-foreground">View sessions, tasks & sync to other calendars</p>
+                </div>
+              </Link>
+            </motion.div>
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <Link to="/portal/messages" className="relative bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
                 <div className="bg-accent text-accent-foreground rounded-xl p-3"><MessageSquare size={20} /></div>
@@ -143,25 +152,22 @@ const Dashboard = () => {
                 )}
               </Link>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
               <Link to="/portal/resources" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
                 <div className="bg-family text-family-foreground rounded-xl p-3"><BookOpen size={20} /></div>
                 <p className="text-sm font-semibold text-card-foreground">{portalT.resources || "Resource Library"}</p>
               </Link>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <Link to="/portal/toolkit" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
                 <div className="bg-primary/10 text-primary rounded-xl p-3"><Timer size={20} /></div>
                 <p className="text-sm font-semibold text-card-foreground">Toolkit</p>
               </Link>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
-              <Link to="/portal/productivity" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-primary/10 text-primary rounded-xl p-3"><LayoutDashboard size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">Productivity</p>
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
               <div className="bg-card border border-border/50 rounded-2xl p-5">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Contact Us</p>
                 <div className="space-y-2">

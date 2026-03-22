@@ -16,7 +16,7 @@ import {
   ChevronLeft, ChevronRight, Plus, CalendarDays,
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
   ListTodo, User, Edit, X, Sparkles, Loader2, Check,
-  Video, Link2, UserPlus, ExternalLink,
+  Video, Link2, UserPlus, ExternalLink, CalendarPlus, Copy, RefreshCw, CheckCircle2,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -101,6 +101,10 @@ const AdminCalendar = () => {
   const [aiSummary, setAiSummary] = useState("");
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
+  // Connect calendar
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
+  const [copiedFeed, setCopiedFeed] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Date range
@@ -161,6 +165,46 @@ const AdminCalendar = () => {
       return data || [];
     },
   });
+
+  // Calendar feed token for iCal sync
+  const { data: feedToken, refetch: refetchToken } = useQuery({
+    queryKey: ["admin_calendar_feed_token"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("calendar_feed_token")
+        .eq("id", user!.id)
+        .single();
+      if (error) throw error;
+      return (data as any)?.calendar_feed_token as string | null;
+    },
+    enabled: !!user,
+  });
+
+  const regenerateToken = useMutation({
+    mutationFn: async () => {
+      const newToken = crypto.randomUUID();
+      const { error } = await supabase
+        .from("profiles")
+        .update({ calendar_feed_token: newToken } as any)
+        .eq("id", user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { refetchToken(); toast.success("Calendar link regenerated"); },
+    onError: () => toast.error("Failed to regenerate link"),
+  });
+
+  const feedUrl = feedToken
+    ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calendar-ical-feed?token=${feedToken}`
+    : null;
+
+  const copyFeedUrl = () => {
+    if (!feedUrl) return;
+    navigator.clipboard.writeText(feedUrl);
+    setCopiedFeed(true);
+    setTimeout(() => setCopiedFeed(false), 2000);
+    toast.success("Link copied!");
+  };
 
   const nameMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -549,6 +593,9 @@ const AdminCalendar = () => {
               >
                 {aiScheduling ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                 AI Schedule
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setConnectDialogOpen(true)} className="h-8 gap-1 text-xs">
+                <CalendarPlus size={14} /> Connect
               </Button>
               <Button variant="outline" size="sm" onClick={() => setIsFullscreen(!isFullscreen)} className="h-8">
                 {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -1081,6 +1128,58 @@ const AdminCalendar = () => {
               <Check size={14} /> Apply All Suggestions
             </Button>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Calendar Dialog */}
+      <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><CalendarPlus size={18} /> Connect to Your Calendar App</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Subscribe to your team sessions in Google Calendar, Apple Calendar, or Outlook. Your calendar app will automatically stay in sync.
+            </p>
+            {feedUrl ? (
+              <>
+                <div>
+                  <Label className="text-xs mb-1.5 block">Your Personal Subscription URL</Label>
+                  <div className="flex gap-2">
+                    <Input value={feedUrl} readOnly className="text-xs font-mono" />
+                    <Button size="sm" variant="outline" onClick={copyFeedUrl} className="shrink-0 gap-1">
+                      {copiedFeed ? <CheckCircle2 size={14} className="text-green-500" /> : <Copy size={14} />}
+                      {copiedFeed ? "Copied!" : "Copy"}
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">Add to your calendar app:</p>
+                  <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl)}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📅</span> Add to Google Calendar</Button>
+                  </a>
+                  <a href={feedUrl} download="binyan-adam.ics">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>🍎</span> Add to Apple Calendar</Button>
+                  </a>
+                  <a href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl)}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📧</span> Add to Outlook</Button>
+                  </a>
+                </div>
+                <div className="border-t border-border pt-3">
+                  <p className="text-[11px] text-muted-foreground mb-2">If you think your link has been compromised, regenerate it.</p>
+                  <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => regenerateToken.mutate()} disabled={regenerateToken.isPending}>
+                    {regenerateToken.isPending ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                    Regenerate Link
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-6">
+                <Loader2 size={20} className="animate-spin mx-auto text-muted-foreground" />
+                <p className="text-xs text-muted-foreground mt-2">Setting up your calendar link…</p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -200,8 +200,6 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
 
   const regenerateToken = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("gen_random_uuid" as any);
-      // Directly update the token with a fresh uuid
       const newToken = crypto.randomUUID();
       const { error: updateError } = await supabase
         .from("profiles")
