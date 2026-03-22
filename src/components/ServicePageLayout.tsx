@@ -120,7 +120,7 @@ const ServicePageLayout = ({
               <ScrollReveal key={getServiceName(service)} delay={i * 0.06} distance={16}>
                 <Link
                   to={getServiceLink(service)}
-                  className="group block border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300"
+                  className="group block border border-border bg-card rounded-2xl p-6 hover:shadow-apple transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
