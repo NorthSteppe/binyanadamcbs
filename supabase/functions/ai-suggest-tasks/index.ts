@@ -10,7 +10,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -27,9 +26,8 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { tasks, projects, date } = body;
+    const { tasks, projects, sessions, client_todos, date } = body;
 
-    // Reject oversized payloads
     const bodyStr = JSON.stringify(body);
     if (bodyStr.length > 50000) {
       return new Response(JSON.stringify({ error: "Payload too large" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -44,27 +42,37 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a productivity coach AI. Based on a user's existing tasks, projects, and the current date, suggest 3-5 new actionable tasks they should focus on.
+    const systemPrompt = `You are a productivity coach AI for a therapy/clinical practice. Based on the user's existing tasks, upcoming sessions, assigned client todos, and projects, suggest 3-5 new actionable tasks they should focus on.
 
 Rules:
-- Analyze patterns in existing tasks and projects to suggest relevant follow-ups
+- Analyze existing tasks, upcoming sessions, and client todos to suggest relevant follow-ups
 - Prioritize by deadlines — overdue and soon-due tasks should influence suggestions
+- If the user has upcoming sessions, suggest preparation tasks (e.g. "Review notes for session with X")
+- If there are incomplete client todos, suggest follow-up or review tasks
 - Consider project context — suggest tasks that advance active projects
 - Be specific and actionable (not vague like "work on project")
 - Assign realistic time estimates (15-120 minutes)
-- Set priorities based on deadline urgency and project importance
+- Set priorities based on deadline urgency and session timing
 - If tasks are overdue, suggest catching up on those first
 - Today's date is ${date}`;
 
-    const userPrompt = `Here are the user's current tasks and projects:
+    const sessionsBlock = Array.isArray(sessions) && sessions.length > 0
+      ? `\n\nUPCOMING SESSIONS:\n${JSON.stringify(sessions, null, 2)}`
+      : "\n\nUPCOMING SESSIONS: None scheduled";
+
+    const todosBlock = Array.isArray(client_todos) && client_todos.length > 0
+      ? `\n\nASSIGNED CLIENT TODOS:\n${JSON.stringify(client_todos, null, 2)}`
+      : "";
+
+    const userPrompt = `Here is the user's current context:
 
 EXISTING TASKS:
-${JSON.stringify(tasks, null, 2)}
+${JSON.stringify(tasks || [], null, 2)}
 
 PROJECTS:
-${JSON.stringify(projects, null, 2)}
+${JSON.stringify(projects || [], null, 2)}${sessionsBlock}${todosBlock}
 
-Based on these, suggest 3-5 new tasks the user should add to their calendar today. Consider what's overdue, what's coming up, and what projects need attention.`;
+Based on all of this context, suggest 3-5 new tasks the user should add to their calendar today. Consider what's overdue, upcoming sessions that need preparation, client todos that need follow-up, and what projects need attention.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -83,7 +91,7 @@ Based on these, suggest 3-5 new tasks the user should add to their calendar toda
             type: "function",
             function: {
               name: "suggest_tasks",
-              description: "Return 3-5 actionable task suggestions based on user context",
+              description: "Return 3-5 actionable task suggestions based on user context including sessions and todos",
               parameters: {
                 type: "object",
                 properties: {
@@ -97,7 +105,7 @@ Based on these, suggest 3-5 new tasks the user should add to their calendar toda
                         priority: { type: "string", enum: ["low", "medium", "high", "urgent"] },
                         estimated_minutes: { type: "number", description: "Estimated time in minutes" },
                         suggested_time: { type: "string", description: "Suggested time slot in HH:MM format" },
-                        reason: { type: "string", description: "Why this is being suggested (deadline, project need, etc.)" },
+                        reason: { type: "string", description: "Why this is being suggested (deadline, session prep, client follow-up, etc.)" },
                       },
                       required: ["title", "description", "priority", "estimated_minutes", "suggested_time", "reason"],
                     },
