@@ -167,7 +167,7 @@ const Signup = () => {
                 <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-xl bg-background border-border h-11" />
               </div>
               <div className="space-y-3">
-                <Label className="text-[12px] uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
+                <Label className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
                 <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team" | "supervisee")} className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="client" id="role-client" />
