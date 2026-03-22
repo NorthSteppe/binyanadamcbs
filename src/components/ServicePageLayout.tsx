@@ -140,8 +140,8 @@ const ServicePageLayout = ({
       <section className="py-24 bg-card border-t border-border">
         <div className="container">
           <ScrollReveal>
-            <EditableText contentKey={`${pageKey}.packagesTitle`} defaultValue={t.serviceLayout.packages} as="h2" className="text-4xl md:text-5xl font-serif mb-4 text-foreground" />
-            <EditableText contentKey={`${pageKey}.packagesSubtitle`} defaultValue={t.serviceLayout.packagesSubtitle} as="p" className="text-muted-foreground mb-16 max-w-xl font-light" />
+            <EditableText contentKey={`${pageKey}.packagesTitle`} defaultValue={t.serviceLayout.packages} as="h2" className="text-4xl md:text-5xl font-display mb-4 text-foreground tracking-tight" />
+            <EditableText contentKey={`${pageKey}.packagesSubtitle`} defaultValue={t.serviceLayout.packagesSubtitle} as="p" className="text-muted-foreground mb-16 max-w-xl" />
           </ScrollReveal>
           <div className="grid md:grid-cols-2 gap-6">
             {packages.map((pkg, i) => (
