@@ -124,8 +124,8 @@ const Dashboard = () => {
                   <Calendar size={32} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">{portalT.bookSession || "Book a Session"}</h2>
-                  <p className="text-primary-foreground/80 text-sm mt-1">Choose from available services and pick a time that works for you</p>
+                  <h2 className="text-2xl font-display tracking-tight">{portalT.bookSession || "Book a Session"}</h2>
+                  <p className="text-primary-foreground/70 text-sm mt-1">Choose from available services and pick a time that works for you</p>
                 </div>
                 <div className="ms-auto text-primary-foreground/60 group-hover:translate-x-1 transition-transform text-2xl">→</div>
               </div>
