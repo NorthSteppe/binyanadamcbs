@@ -18,7 +18,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [accountType, setAccountType] = useState<"client" | "team">("client");
+  const [accountType, setAccountType] = useState<"client" | "team" | "supervisee">("client");
   const [loading, setLoading] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [googleRoleChoice, setGoogleRoleChoice] = useState<"client" | "team">("client");
