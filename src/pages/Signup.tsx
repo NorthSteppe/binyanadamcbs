@@ -133,12 +133,12 @@ const Signup = () => {
           transition={{ duration: 0.6 }}
           className="w-full max-w-md mx-auto px-6"
         >
-          <div className="bg-card border border-border p-10">
+          <div className="bg-card border border-border rounded-2xl p-10 shadow-apple">
             <div className="flex justify-center mb-8">
-              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-14" />
+              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-12" />
             </div>
-            <h1 className="text-3xl font-serif mb-2 text-center">{t.signup.title}</h1>
-            <p className="text-muted-foreground text-center mb-8 text-sm font-light">{t.signup.subtitle}</p>
+            <h1 className="text-3xl font-display mb-2 text-center tracking-tight">{t.signup.title}</h1>
+            <p className="text-muted-foreground text-center mb-8 text-sm">{t.signup.subtitle}</p>
 
             <Button
               variant="outline"
