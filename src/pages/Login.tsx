@@ -33,6 +33,7 @@ const Login = () => {
     const roles = data?.map(r => r.role) || [];
     if (roles.includes("admin")) return "/admin";
     if (roles.includes("team_member")) return "/staff";
+    if (roles.includes("supervisee")) return "/supervisee";
     return "/portal";
   };
 
