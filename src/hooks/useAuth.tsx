@@ -102,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session, user, profile, roles,
       isAdmin: roles.includes("admin"),
       isTeamMember: roles.includes("team_member"),
+      isSupervisee: roles.includes("supervisee"),
       isStaff: roles.includes("admin") || roles.includes("team_member"),
       loading, signOut
     }}>
