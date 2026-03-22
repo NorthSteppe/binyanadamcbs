@@ -194,7 +194,7 @@ const Signup = () => {
                 <Label htmlFor="password" className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{t.signup.passwordLabel}</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="rounded-xl bg-background border-border h-11" />
               </div>
-              <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={loading}>
+              <Button type="submit" className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-[14px] font-medium shadow-apple" size="lg" disabled={loading}>
                 {loading ? t.signup.loading : t.signup.button}
               </Button>
             </form>
