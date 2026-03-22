@@ -58,42 +58,46 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const currentPortal = portalLinks.find(p => location.pathname.startsWith(p.path)) || portalLinks[0];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/40" : "bg-transparent"}`}>
-      <div className={`container flex items-center justify-between transition-all duration-500 ${scrolled ? "h-16" : "h-20 md:h-24"}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      scrolled
+        ? "glass shadow-apple"
+        : "bg-transparent"
+    }`}>
+      <div className={`container flex items-center justify-between transition-all duration-500 ${scrolled ? "h-14" : "h-16 md:h-20"}`}>
         <Link to="/" className="flex items-center gap-3">
           <img
             alt="Binyan Adam"
-            className={`transition-all duration-500 ${hidelogo ? "opacity-0 scale-75" : "opacity-100 scale-100"} ${scrolled ? "h-8 md:h-9" : "h-10 md:h-12"}`}
+            className={`transition-all duration-500 ${hidelogo ? "opacity-0 scale-90" : "opacity-100 scale-100"} ${scrolled ? "h-7 md:h-8" : "h-9 md:h-10"}`}
             src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
           />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden lg:flex items-center gap-0">
+        <nav className="hidden lg:flex items-center gap-1">
           {navLinks.map((link) =>
             link.children ? (
               <div key={link.path} className="relative group">
                 <Link
                   to={link.path}
-                  className={`px-4 py-2 text-[13px] font-sans font-light tracking-wide uppercase transition-colors duration-300 inline-flex items-center gap-1
+                  className={`px-4 py-2 text-[13px] font-medium tracking-tight transition-colors duration-300 inline-flex items-center gap-1.5 rounded-full
                     ${[link.path, ...link.children.map(c => c.path)].includes(location.pathname)
-                      ? "text-primary"
-                      : "text-foreground/60 hover:text-foreground"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                     }`}
                 >
                   {link.label}
-                  <svg className="w-3 h-3 opacity-50 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  <svg className="w-3 h-3 opacity-40 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </Link>
-                <div className="absolute left-0 top-full pt-1 opacity-0 translate-x-[-8px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
-                  <div className="bg-card/95 backdrop-blur-xl border border-border/40 py-2 min-w-[180px]">
+                <div className="absolute left-0 top-full pt-2 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+                  <div className="glass rounded-2xl py-2 min-w-[200px] shadow-apple-lg">
                     {link.children.map((sub) => (
                       <Link
                         key={sub.path}
                         to={sub.path}
-                        className={`block px-5 py-2.5 text-[12px] font-light tracking-wide uppercase transition-all duration-200
+                        className={`block px-4 py-2.5 text-[13px] font-medium tracking-tight transition-all duration-200 rounded-lg mx-1
                           ${location.pathname === sub.path
-                            ? "text-primary bg-primary/5"
-                            : "text-foreground/60 hover:text-foreground hover:bg-muted/50 hover:translate-x-1"
+                            ? "text-foreground bg-accent"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
                           }`}
                       >
                         {sub.label}
@@ -106,10 +110,10 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 text-[13px] font-sans font-light tracking-wide uppercase transition-colors duration-300
+                className={`px-4 py-2 text-[13px] font-medium tracking-tight transition-colors duration-300 rounded-full
                   ${location.pathname === link.path
-                    ? "text-primary"
-                    : "text-foreground/60 hover:text-foreground"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                   }`}
               >
                 {link.label}
@@ -118,34 +122,32 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
           )}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-1.5">
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleLanguage}
-            className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent"
+            className="text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-full h-8 px-3"
           >
             {language === "en" ? "HE" : "EN"}
           </Button>
-
-          <span className="text-border mx-1">|</span>
 
           {user ? (
             <>
               <NotificationBell />
               {portalLinks.length > 1 ? (
                 <div className="relative group">
-                  <Button variant="ghost" size="sm" asChild className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent">
+                  <Button variant="ghost" size="sm" asChild className="text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-full h-8 px-3">
                     <Link to={currentPortal.path}>{currentPortal.label} ▾</Link>
                   </Button>
-                  <div className="absolute right-0 top-full pt-1 hidden group-hover:block">
-                    <div className="bg-card border border-border/50 backdrop-blur-xl py-1 min-w-[160px]">
+                  <div className="absolute right-0 top-full pt-2 hidden group-hover:block">
+                    <div className="glass rounded-2xl py-2 min-w-[180px] shadow-apple-lg">
                       {portalLinks.map((p) => (
                         <Link
                           key={p.path}
                           to={p.path}
-                          className={`flex items-center gap-2 px-4 py-2 text-[12px] font-light tracking-wide uppercase transition-colors
-                            ${location.pathname.startsWith(p.path) ? "text-primary" : "text-foreground/60 hover:text-foreground hover:bg-muted/50"}`}
+                          className={`flex items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium tracking-tight transition-colors rounded-lg mx-1
+                            ${location.pathname.startsWith(p.path) ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"}`}
                         >
                           <p.icon size={14} />
                           {p.label}
@@ -155,27 +157,27 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
                   </div>
                 </div>
               ) : (
-                <Button variant="ghost" size="sm" asChild className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent">
+                <Button variant="ghost" size="sm" asChild className="text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-full h-8 px-3">
                   <Link to={portalLinks[0].path}>{portalLinks[0].label}</Link>
                 </Button>
               )}
               <Button
                 size="sm"
                 onClick={signOut}
-                className="border border-foreground/20 bg-transparent text-foreground/80 hover:bg-foreground/10 text-[13px] font-light tracking-wide rounded-none px-5"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-medium rounded-full px-5 h-8 shadow-apple"
               >
                 {portalT.logOut || "Log Out"}
               </Button>
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild className="text-[13px] font-light tracking-wide text-foreground/60 hover:text-foreground hover:bg-transparent">
+              <Button variant="ghost" size="sm" asChild className="text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-full h-8 px-3">
                 <Link to="/login">Log In</Link>
               </Button>
               <Button
                 size="sm"
                 asChild
-                className="border border-foreground/20 bg-transparent text-foreground/80 hover:bg-foreground/10 text-[13px] font-light tracking-wide rounded-none px-5"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-medium rounded-full px-5 h-8 shadow-apple"
               >
                 <Link to="/signup">Get Started</Link>
               </Button>
@@ -183,15 +185,14 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
           )}
         </div>
 
-        {/* Mobile — simplified since we have bottom nav */}
+        {/* Mobile */}
         <div className="lg:hidden flex items-center gap-2">
           {user && <NotificationBell />}
-          <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-foreground/60">
+          <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-muted-foreground rounded-full">
             <Globe size={18} />
           </Button>
         </div>
       </div>
-
     </header>
   );
 };
