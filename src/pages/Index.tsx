@@ -36,15 +36,15 @@ const Index = () => {
         {/* Background carousel */}
         <div className="absolute inset-0 z-0">
           <HeroCarousel onQuoteChange={handleQuoteChange} />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/70 to-transparent" />
         </div>
 
         <div className="container relative z-10 pb-24 md:pb-32 pt-40">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-2xl"
           >
             {/* Logo */}
@@ -52,7 +52,7 @@ const Index = () => {
               <img
                 src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
                 alt="Binyan Adam"
-                className={`h-14 md:h-16 transition-opacity duration-500 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
+                className={`h-12 md:h-14 transition-opacity duration-500 ${showBigLogo ? "opacity-100" : "opacity-0"}`}
               />
             </div>
 
@@ -60,31 +60,31 @@ const Index = () => {
               contentKey="landing.title"
               defaultValue={t.landing.title}
               as="h1"
-              className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6 font-serif"
+              className="text-5xl md:text-6xl lg:text-7xl text-glass-hero leading-[1.05] mb-6 font-display tracking-tight"
             />
 
             <EditableText
               contentKey="landing.subtitle"
               defaultValue={t.landing.subtitle}
               as="p"
-              className="text-base md:text-lg text-foreground/60 leading-relaxed mb-10 max-w-lg font-light"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed mb-10 max-w-lg font-light"
             />
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
+              <Button size="lg" asChild className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 h-12 text-[14px] font-medium shadow-apple-lg">
                 <Link to="/services" className="inline-flex items-center gap-3">
                   <EditableText contentKey="landing.exploreBtn" defaultValue={t.landing.exploreServices} as="span" /> <ArrowRight size={16} />
                 </Link>
               </Button>
 
               {user ? (
-                <Button size="lg" variant="outline" asChild className="border-foreground/20 text-foreground hover:bg-foreground/10 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
+                <Button size="lg" variant="outline" asChild className="border-border text-foreground hover:bg-accent rounded-full px-8 h-12 text-[14px] font-medium">
                   <Link to={isAdmin ? "/admin" : isTeamMember ? "/staff" : "/portal"} className="inline-flex items-center gap-3">
                     {isAdmin ? <><Shield size={16} /> Admin Portal</> : isTeamMember ? <><Users size={16} /> Therapist Portal</> : <><LayoutDashboard size={16} /> My Portal</>}
                   </Link>
                 </Button>
               ) : (
-                <Button size="lg" variant="outline" asChild className="border-foreground/20 text-foreground hover:bg-foreground/10 rounded-none px-8 h-12 text-[13px] uppercase tracking-wider font-sans">
+                <Button size="lg" variant="outline" asChild className="border-border text-foreground hover:bg-accent rounded-full px-8 h-12 text-[14px] font-medium">
                   <Link to="/contact" className="inline-flex items-center gap-3">
                     <EditableText contentKey="landing.contactBtn" defaultValue="Get in Touch" as="span" />
                   </Link>
@@ -101,7 +101,7 @@ const Index = () => {
               transition={{ delay: 0.8, duration: 0.8 }}
               className="absolute bottom-24 right-8 hidden xl:block max-w-xs"
             >
-              <blockquote className="text-sm text-foreground/50 italic leading-relaxed border-l border-primary/30 pl-4">
+              <blockquote className="text-sm text-foreground/50 italic leading-relaxed border-l-2 border-foreground/10 pl-4">
                 <EditableText contentKey="landing.quoteText" defaultValue={quote.text || t.landing.quote} as="span" />
               </blockquote>
               <p className="text-xs text-foreground/30 mt-2 pl-4">
@@ -118,8 +118,8 @@ const Index = () => {
           transition={{ delay: 1.2 }}
           className="absolute bottom-8 right-8 z-10 hidden md:flex flex-col items-center gap-2"
         >
-          <span className="text-[10px] uppercase tracking-[0.3em] text-foreground/30 [writing-mode:vertical-lr]">Scroll</span>
-          <div className="w-px h-12 bg-gradient-to-b from-foreground/30 to-transparent" />
+          <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 [writing-mode:vertical-lr]">Scroll</span>
+          <div className="w-px h-12 bg-gradient-to-b from-muted-foreground/30 to-transparent" />
         </motion.div>
       </section>
 

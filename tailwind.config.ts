@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Outfit", "system-ui", "sans-serif"],
-        serif: ["Outfit", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        serif: ["DM Sans", "Inter", "system-ui", "-apple-system", "sans-serif"],
+        display: ["DM Sans", "Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -89,8 +90,13 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
+      },
+      boxShadow: {
+        "apple": "0 2px 8px -2px rgba(0,0,0,0.05), 0 4px 20px -4px rgba(0,0,0,0.05)",
+        "apple-lg": "0 4px 14px -4px rgba(0,0,0,0.06), 0 8px 40px -8px rgba(0,0,0,0.08)",
+        "apple-xl": "0 8px 30px -8px rgba(0,0,0,0.08), 0 16px 60px -16px rgba(0,0,0,0.1)",
       },
       keyframes: {
         "accordion-down": {

@@ -93,34 +93,34 @@ const Signup = () => {
       <Header />
 
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
-        <DialogContent className="bg-card border-border rounded-none">
+        <DialogContent className="bg-card border-border rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="font-serif text-2xl">What type of account do you need?</DialogTitle>
+            <DialogTitle className="font-display text-2xl tracking-tight">What type of account do you need?</DialogTitle>
           </DialogHeader>
           <RadioGroup value={googleRoleChoice} onValueChange={(v) => setGoogleRoleChoice(v as any)} className="space-y-3 pt-2">
-            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
+             <div className="flex items-center gap-3 p-4 border border-border rounded-xl hover:border-foreground/20 cursor-pointer transition-colors">
               <RadioGroupItem value="client" id="g-client" />
               <Label htmlFor="g-client" className="cursor-pointer flex-1">
                 <span className="font-medium text-foreground">Client</span>
                 <p className="text-xs text-muted-foreground font-light">Access the client portal, book sessions, and use tools.</p>
               </Label>
             </div>
-            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
+             <div className="flex items-center gap-3 p-4 border border-border rounded-xl hover:border-foreground/20 cursor-pointer transition-colors">
               <RadioGroupItem value="team" id="g-team" />
               <Label htmlFor="g-team" className="cursor-pointer flex-1">
                 <span className="font-medium text-foreground">Therapist / Staff</span>
                 <p className="text-xs text-muted-foreground font-light">Request team access (requires admin approval).</p>
               </Label>
             </div>
-            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
+            <div className="flex items-center gap-3 p-4 border border-border rounded-xl hover:border-foreground/20 cursor-pointer transition-colors">
               <RadioGroupItem value="supervisee" id="g-supervisee" />
               <Label htmlFor="g-supervisee" className="cursor-pointer flex-1">
                 <span className="font-medium text-foreground">Supervisee</span>
-                <p className="text-xs text-muted-foreground font-light">Supervision portal with case logging (requires admin approval).</p>
+                <p className="text-xs text-muted-foreground">Supervision portal with case logging (requires admin approval).</p>
               </Label>
             </div>
           </RadioGroup>
-          <Button className="w-full rounded-none mt-2 bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" onClick={confirmGoogleSignup}>
+          <Button className="w-full rounded-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-[14px] font-medium shadow-apple" onClick={confirmGoogleSignup}>
             Continue with Google
           </Button>
         </DialogContent>
@@ -133,16 +133,16 @@ const Signup = () => {
           transition={{ duration: 0.6 }}
           className="w-full max-w-md mx-auto px-6"
         >
-          <div className="bg-card border border-border p-10">
+          <div className="bg-card border border-border rounded-2xl p-10 shadow-apple">
             <div className="flex justify-center mb-8">
-              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-14" />
+              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-12" />
             </div>
-            <h1 className="text-3xl font-serif mb-2 text-center">{t.signup.title}</h1>
-            <p className="text-muted-foreground text-center mb-8 text-sm font-light">{t.signup.subtitle}</p>
+            <h1 className="text-3xl font-display mb-2 text-center tracking-tight">{t.signup.title}</h1>
+            <p className="text-muted-foreground text-center mb-8 text-sm">{t.signup.subtitle}</p>
 
             <Button
               variant="outline"
-              className="w-full rounded-none mb-6 gap-3 border-border hover:bg-muted h-11"
+              className="w-full rounded-full mb-6 gap-3 border-border hover:bg-accent h-11"
               size="lg"
               onClick={handleGoogleSignup}
             >
@@ -163,11 +163,11 @@ const Signup = () => {
 
             <form onSubmit={handleSignup} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-[12px] uppercase tracking-wider text-muted-foreground">{(t as any).signup?.nameLabel || "Full Name"}</Label>
-                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-none bg-background border-border h-11" />
+                <Label htmlFor="fullName" className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{(t as any).signup?.nameLabel || "Full Name"}</Label>
+                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-xl bg-background border-border h-11" />
               </div>
               <div className="space-y-3">
-                <Label className="text-[12px] uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
+                <Label className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
                 <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team" | "supervisee")} className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="client" id="role-client" />
@@ -187,18 +187,18 @@ const Signup = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.signup.emailLabel}</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none bg-background border-border h-11" />
+                <Label htmlFor="email" className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{t.signup.emailLabel}</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-xl bg-background border-border h-11" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.signup.passwordLabel}</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="rounded-none bg-background border-border h-11" />
+                <Label htmlFor="password" className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{t.signup.passwordLabel}</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="rounded-xl bg-background border-border h-11" />
               </div>
-              <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={loading}>
+              <Button type="submit" className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-[14px] font-medium shadow-apple" size="lg" disabled={loading}>
                 {loading ? t.signup.loading : t.signup.button}
               </Button>
             </form>
-            <p className="text-sm text-muted-foreground text-center mt-8 font-light">
+            <p className="text-sm text-muted-foreground text-center mt-8">
               {t.signup.hasAccount}{" "}
               <Link to="/login" className="text-primary hover:underline">{t.signup.logInLink}</Link>
             </p>

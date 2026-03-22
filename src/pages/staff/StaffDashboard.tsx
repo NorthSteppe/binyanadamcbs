@@ -28,7 +28,7 @@ const StaffDashboard = () => {
               <div className="bg-primary/10 text-primary rounded-xl p-2.5">
                 <Users size={22} />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">Therapist Portal</h1>
+              <h1 className="text-3xl md:text-4xl font-display tracking-tight text-foreground">Therapist Portal</h1>
             </div>
             <p className="text-muted-foreground mb-10 ml-14">
               Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}. Your tools and caseload.
@@ -39,7 +39,7 @@ const StaffDashboard = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {therapistTools.map((tool, i) => (
               <motion.div key={tool.path} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
-                <Link to={tool.path} className="bg-card border border-border/50 rounded-2xl p-5 flex items-start gap-4 hover:border-primary/30 hover:shadow-sm transition-all block h-full">
+                <Link to={tool.path} className="bg-card border border-border rounded-2xl p-5 flex items-start gap-4 hover:shadow-apple hover:-translate-y-0.5 transition-all block h-full">
                   <div className="bg-primary/10 text-primary rounded-xl p-3 shrink-0">
                     <tool.icon size={20} />
                   </div>

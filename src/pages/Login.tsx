@@ -70,16 +70,16 @@ const Login = () => {
           transition={{ duration: 0.6 }}
           className="w-full max-w-md mx-auto px-6"
         >
-          <div className="bg-card border border-border p-10">
+          <div className="bg-card border border-border rounded-2xl p-10 shadow-apple">
             <div className="flex justify-center mb-8">
-              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-14" />
+              <img src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png" alt="Binyan Adam" className="h-12" />
             </div>
-            <h1 className="text-3xl font-serif mb-2 text-center">{t.login.title}</h1>
-            <p className="text-muted-foreground text-center mb-8 text-sm font-light">{t.login.subtitle}</p>
+            <h1 className="text-3xl font-display mb-2 text-center tracking-tight">{t.login.title}</h1>
+            <p className="text-muted-foreground text-center mb-8 text-sm">{t.login.subtitle}</p>
 
             <Button
               variant="outline"
-              className="w-full rounded-none mb-6 gap-3 border-border hover:bg-muted h-11"
+              className="w-full rounded-full mb-6 gap-3 border-border hover:bg-accent h-11"
               size="lg"
               onClick={handleGoogleLogin}
             >
@@ -100,20 +100,20 @@ const Login = () => {
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.login.emailLabel}</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none bg-background border-border h-11" />
+                <Label htmlFor="email" className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{t.login.emailLabel}</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-xl bg-background border-border h-11" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-[12px] uppercase tracking-wider text-muted-foreground">{t.login.passwordLabel}</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-none bg-background border-border h-11" />
+                <Label htmlFor="password" className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{t.login.passwordLabel}</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-xl bg-background border-border h-11" />
               </div>
-              <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={loading}>
+              <Button type="submit" className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-[14px] font-medium shadow-apple" size="lg" disabled={loading}>
                 {loading ? t.login.loading : t.login.button}
               </Button>
             </form>
-            <p className="text-sm text-muted-foreground text-center mt-8 font-light">
+            <p className="text-sm text-muted-foreground text-center mt-8">
               {t.login.noAccount}{" "}
-              <Link to="/signup" className="text-primary hover:underline">{t.login.signUpLink}</Link>
+              <Link to="/signup" className="text-foreground font-medium hover:underline">{t.login.signUpLink}</Link>
             </p>
           </div>
         </motion.div>
