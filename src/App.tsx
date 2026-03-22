@@ -10,6 +10,8 @@ import EditModeToggle from "@/components/editable/EditModeToggle";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import StaffRoute from "@/components/StaffRoute";
+import SuperviseeRoute from "@/components/SuperviseeRoute";
+import StaffRoute from "@/components/StaffRoute";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Education from "./pages/Education";
