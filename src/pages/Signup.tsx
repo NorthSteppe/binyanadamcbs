@@ -93,7 +93,7 @@ const Signup = () => {
       <Header />
 
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
-        <DialogContent className="bg-card border-border rounded-none">
+        <DialogContent className="bg-card border-border rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-serif text-2xl">What type of account do you need?</DialogTitle>
           </DialogHeader>
