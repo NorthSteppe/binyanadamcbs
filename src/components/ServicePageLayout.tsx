@@ -92,9 +92,9 @@ const ServicePageLayout = ({
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-3xl"
           >
-            <EditableText contentKey={`${pageKey}.subtitle`} defaultValue={subtitle} as="p" className="text-[11px] font-sans uppercase tracking-[0.25em] mb-4 text-primary" />
-            <EditableText contentKey={`${pageKey}.title`} defaultValue={title} as="h1" className="text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 text-foreground font-serif" />
-            <EditableText contentKey={`${pageKey}.tagline`} defaultValue={tagline} as="p" className="text-lg md:text-xl leading-relaxed text-foreground/60 max-w-2xl font-light" />
+            <EditableText contentKey={`${pageKey}.subtitle`} defaultValue={subtitle} as="p" className="text-[12px] font-medium uppercase tracking-widest mb-4 text-muted-foreground" />
+            <EditableText contentKey={`${pageKey}.title`} defaultValue={title} as="h1" className="text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 text-glass-hero font-display tracking-tight" />
+            <EditableText contentKey={`${pageKey}.tagline`} defaultValue={tagline} as="p" className="text-lg md:text-xl leading-relaxed text-muted-foreground max-w-2xl" />
             {content?.quote_text && (
               <blockquote className="mt-8 border-l border-primary/30 pl-4 text-foreground/50 italic">
                 <EditableText contentKey={`${pageKey}.heroQuote`} defaultValue={content.quote_text} as="p" className="text-base" />
