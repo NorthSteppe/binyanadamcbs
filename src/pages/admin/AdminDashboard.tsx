@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useEditMode } from "@/hooks/useEditMode";
+import NotificationSettings from "@/components/portal/NotificationSettings";
 
 interface ToolItem {
   label: string;
