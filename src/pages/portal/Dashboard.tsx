@@ -181,48 +181,6 @@ const Dashboard = () => {
               </div>
             </motion.div>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <Link to="/portal/messages" className="relative bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-accent text-accent-foreground rounded-xl p-3"><MessageSquare size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">{portalT.messages || "Messages"}</p>
-                {unreadCount > 0 && (
-                  <span className="absolute top-3 end-3 bg-destructive text-destructive-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">{unreadCount}</span>
-                )}
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Link to="/portal/resources" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-family text-family-foreground rounded-xl p-3"><BookOpen size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">{portalT.resources || "Resource Library"}</p>
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
-              <Link to="/portal/toolkit" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-primary/10 text-primary rounded-xl p-3"><Timer size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">Toolkit</p>
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
-              <Link to="/portal/productivity" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-primary/10 text-primary rounded-xl p-3"><LayoutDashboard size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">Productivity</p>
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-              <div className="bg-card border border-border/50 rounded-2xl p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Contact Us</p>
-                <div className="space-y-2">
-                  <a href="tel:+447715460054" className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors">
-                    <Phone size={14} className="text-primary" /> +44 7715 460054
-                  </a>
-                  <a href="mailto:adamdayan@bacbs.com" className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors">
-                    <Mail size={14} className="text-primary" /> adamdayan@bacbs.com
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Upcoming sessions */}
