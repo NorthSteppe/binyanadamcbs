@@ -1130,6 +1130,58 @@ const AdminCalendar = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Connect Calendar Dialog */}
+      <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><CalendarPlus size={18} /> Connect to Your Calendar App</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Subscribe to your team sessions in Google Calendar, Apple Calendar, or Outlook. Your calendar app will automatically stay in sync.
+            </p>
+            {feedUrl ? (
+              <>
+                <div>
+                  <Label className="text-xs mb-1.5 block">Your Personal Subscription URL</Label>
+                  <div className="flex gap-2">
+                    <Input value={feedUrl} readOnly className="text-xs font-mono" />
+                    <Button size="sm" variant="outline" onClick={copyFeedUrl} className="shrink-0 gap-1">
+                      {copiedFeed ? <CheckCircle2 size={14} className="text-green-500" /> : <Copy size={14} />}
+                      {copiedFeed ? "Copied!" : "Copy"}
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">Add to your calendar app:</p>
+                  <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl)}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📅</span> Add to Google Calendar</Button>
+                  </a>
+                  <a href={feedUrl} download="binyan-adam.ics">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>🍎</span> Add to Apple Calendar</Button>
+                  </a>
+                  <a href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl)}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📧</span> Add to Outlook</Button>
+                  </a>
+                </div>
+                <div className="border-t border-border pt-3">
+                  <p className="text-[11px] text-muted-foreground mb-2">If you think your link has been compromised, regenerate it.</p>
+                  <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => regenerateToken.mutate()} disabled={regenerateToken.isPending}>
+                    {regenerateToken.isPending ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                    Regenerate Link
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-6">
+                <Loader2 size={20} className="animate-spin mx-auto text-muted-foreground" />
+                <p className="text-xs text-muted-foreground mt-2">Setting up your calendar link…</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
