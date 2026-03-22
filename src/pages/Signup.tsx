@@ -112,6 +112,13 @@ const Signup = () => {
                 <p className="text-xs text-muted-foreground font-light">Request team access (requires admin approval).</p>
               </Label>
             </div>
+            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
+              <RadioGroupItem value="supervisee" id="g-supervisee" />
+              <Label htmlFor="g-supervisee" className="cursor-pointer flex-1">
+                <span className="font-medium text-foreground">Supervisee</span>
+                <p className="text-xs text-muted-foreground font-light">Supervision portal with case logging (requires admin approval).</p>
+              </Label>
+            </div>
           </RadioGroup>
           <Button className="w-full rounded-none mt-2 bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" onClick={confirmGoogleSignup}>
             Continue with Google
