@@ -51,6 +51,10 @@ const StaffDashboard = () => {
               </motion.div>
             ))}
           </div>
+
+          <div className="mt-8">
+            <NotificationSettings />
+          </div>
         </div>
       </section>
       <Footer />
