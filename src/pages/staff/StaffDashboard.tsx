@@ -28,7 +28,7 @@ const StaffDashboard = () => {
               <div className="bg-primary/10 text-primary rounded-xl p-2.5">
                 <Users size={22} />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">Therapist Portal</h1>
+              <h1 className="text-3xl md:text-4xl font-display tracking-tight text-foreground">Therapist Portal</h1>
             </div>
             <p className="text-muted-foreground mb-10 ml-14">
               Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}. Your tools and caseload.
