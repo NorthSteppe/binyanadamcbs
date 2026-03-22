@@ -146,9 +146,9 @@ const ServicePageLayout = ({
           <div className="grid md:grid-cols-2 gap-6">
             {packages.map((pkg, i) => (
               <ScrollReveal key={pkg.name} delay={i * 0.1}>
-                <div className="border border-border bg-background p-8">
-                  <EditableText contentKey={`${pageKey}.pkg.${i}.name`} defaultValue={pkg.name} as="h3" className="text-2xl font-serif mb-2 text-foreground" />
-                  <EditableText contentKey={`${pageKey}.pkg.${i}.desc`} defaultValue={pkg.description} as="p" className="text-sm text-muted-foreground mb-6 font-light" />
+                <div className="border border-border bg-background rounded-2xl p-8">
+                  <EditableText contentKey={`${pageKey}.pkg.${i}.name`} defaultValue={pkg.name} as="h3" className="text-2xl font-display mb-2 text-foreground tracking-tight" />
+                  <EditableText contentKey={`${pageKey}.pkg.${i}.desc`} defaultValue={pkg.description} as="p" className="text-sm text-muted-foreground mb-6" />
                   <ul className="space-y-3 mb-6">
                     {pkg.includes.map((item, j) => (
                       <li key={item} className="text-sm text-foreground/80 flex items-start gap-3 font-light">
