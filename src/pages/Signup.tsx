@@ -142,7 +142,7 @@ const Signup = () => {
 
             <Button
               variant="outline"
-              className="w-full rounded-none mb-6 gap-3 border-border hover:bg-muted h-11"
+              className="w-full rounded-full mb-6 gap-3 border-border hover:bg-accent h-11"
               size="lg"
               onClick={handleGoogleSignup}
             >
