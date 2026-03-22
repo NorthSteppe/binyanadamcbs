@@ -198,6 +198,10 @@ const AdminCalendar = () => {
     ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calendar-ical-feed?token=${feedToken}`
     : null;
 
+  const webcalUrl = feedUrl
+    ? feedUrl.replace(/^https?:\/\//, "webcal://")
+    : null;
+
   const copyFeedUrl = () => {
     if (!feedUrl) return;
     navigator.clipboard.writeText(feedUrl);
@@ -1155,13 +1159,13 @@ const AdminCalendar = () => {
                 </div>
                 <div className="grid grid-cols-1 gap-2">
                   <p className="text-xs font-medium text-muted-foreground">Add to your calendar app:</p>
-                  <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl)}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl!)}`} target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📅</span> Add to Google Calendar</Button>
                   </a>
-                  <a href={feedUrl} download="binyan-adam.ics">
+                  <a href={webcalUrl!}>
                     <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>🍎</span> Add to Apple Calendar</Button>
                   </a>
-                  <a href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl)}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl!)}`} target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="w-full gap-2 text-sm justify-start"><span>📧</span> Add to Outlook</Button>
                   </a>
                 </div>
