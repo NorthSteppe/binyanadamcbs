@@ -60,13 +60,13 @@ const Signup = () => {
     if (error) {
       toast({ title: t.signup.title, description: error.message, variant: "destructive" });
     } else {
-      if (accountType === "team") {
+      if (accountType === "team" || accountType === "supervisee") {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           await supabase.from("team_requests").insert({ user_id: session.user.id });
         }
       }
-      toast({ title: t.signup.successTitle, description: accountType === "team" ? "Account created. Your team access request is pending admin approval." : t.signup.successDescription });
+      toast({ title: t.signup.successTitle, description: (accountType === "team" || accountType === "supervisee") ? "Account created. Your access request is pending admin approval." : t.signup.successDescription });
       navigate("/login");
     }
   };
