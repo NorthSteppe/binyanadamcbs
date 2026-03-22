@@ -198,7 +198,7 @@ const Signup = () => {
                 {loading ? t.signup.loading : t.signup.button}
               </Button>
             </form>
-            <p className="text-sm text-muted-foreground text-center mt-8 font-light">
+            <p className="text-sm text-muted-foreground text-center mt-8">
               {t.signup.hasAccount}{" "}
               <Link to="/login" className="text-primary hover:underline">{t.signup.logInLink}</Link>
             </p>
