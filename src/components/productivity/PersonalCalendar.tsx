@@ -215,6 +215,10 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
     ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calendar-ical-feed?token=${feedToken}`
     : null;
 
+  const webcalUrl = feedUrl
+    ? feedUrl.replace(/^https?:\/\//, "webcal://")
+    : null;
+
   const copyFeedUrl = () => {
     if (!feedUrl) return;
     navigator.clipboard.writeText(feedUrl);
