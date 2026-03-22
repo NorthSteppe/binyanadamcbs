@@ -163,8 +163,8 @@ const Signup = () => {
 
             <form onSubmit={handleSignup} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-[12px] uppercase tracking-wider text-muted-foreground">{(t as any).signup?.nameLabel || "Full Name"}</Label>
-                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-none bg-background border-border h-11" />
+                <Label htmlFor="fullName" className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">{(t as any).signup?.nameLabel || "Full Name"}</Label>
+                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="rounded-xl bg-background border-border h-11" />
               </div>
               <div className="space-y-3">
                 <Label className="text-[12px] uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
