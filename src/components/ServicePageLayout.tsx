@@ -113,7 +113,7 @@ const ServicePageLayout = ({
       <section className="py-24">
         <div className="container">
           <ScrollReveal>
-            <EditableText contentKey={`${pageKey}.whatWeOffer`} defaultValue={t.serviceLayout.whatWeOffer} as="h2" className="text-4xl md:text-5xl font-serif mb-16 text-foreground" />
+            <EditableText contentKey={`${pageKey}.whatWeOffer`} defaultValue={t.serviceLayout.whatWeOffer} as="h2" className="text-4xl md:text-5xl font-display mb-16 text-foreground tracking-tight" />
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {services.map((service, i) => (
