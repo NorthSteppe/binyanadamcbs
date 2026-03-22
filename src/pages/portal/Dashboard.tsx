@@ -110,7 +110,7 @@ const Dashboard = () => {
       <section className="pt-28 pb-20">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-3xl md:text-4xl mb-2">
+            <h1 className="text-3xl md:text-4xl font-display tracking-tight mb-2">
               {portalT.welcome || "Welcome back"}{profile?.full_name ? `, ${profile.full_name}` : ""}
             </h1>
             <p className="text-muted-foreground mb-10">{portalT.dashboardSubtitle || "Your client portal"}</p>
