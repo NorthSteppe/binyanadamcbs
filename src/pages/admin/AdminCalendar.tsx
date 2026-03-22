@@ -101,6 +101,10 @@ const AdminCalendar = () => {
   const [aiSummary, setAiSummary] = useState("");
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
+  // Connect calendar
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
+  const [copiedFeed, setCopiedFeed] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Date range
