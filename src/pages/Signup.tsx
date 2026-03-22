@@ -98,7 +98,7 @@ const Signup = () => {
             <DialogTitle className="font-display text-2xl tracking-tight">What type of account do you need?</DialogTitle>
           </DialogHeader>
           <RadioGroup value={googleRoleChoice} onValueChange={(v) => setGoogleRoleChoice(v as any)} className="space-y-3 pt-2">
-            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
+             <div className="flex items-center gap-3 p-4 border border-border rounded-xl hover:border-foreground/20 cursor-pointer transition-colors">
               <RadioGroupItem value="client" id="g-client" />
               <Label htmlFor="g-client" className="cursor-pointer flex-1">
                 <span className="font-medium text-foreground">Client</span>
