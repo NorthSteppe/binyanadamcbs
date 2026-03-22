@@ -25,7 +25,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
+  const { user, isAdmin, isTeamMember, roles, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (!authLoading && user) {
