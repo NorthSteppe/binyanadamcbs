@@ -49,11 +49,16 @@ const PRIORITIES = [
   { value: "urgent", label: "Urgent", color: "bg-red-200 text-red-800 dark:bg-red-950 dark:text-red-300" },
 ];
 
-const TaskBoard = () => {
+interface TaskBoardProps {
+  filterProjectId?: string | null;
+}
+
+const TaskBoard = ({ filterProjectId }: TaskBoardProps) => {
   const { session } = useAuth();
   const qc = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: "", description: "", priority: "medium", status: "todo", estimated_minutes: 30, due_date: "", project_id: "" });
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
   const { data: tasks = [] } = useQuery({
     queryKey: ["user_tasks"],
@@ -94,11 +99,32 @@ const TaskBoard = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["user_tasks"] });
+      qc.invalidateQueries({ queryKey: ["project_task_counts"] });
       setDialogOpen(false);
       setNewTask({ title: "", description: "", priority: "medium", status: "todo", estimated_minutes: 30, due_date: "", project_id: "" });
       toast.success("Task created");
     },
     onError: () => toast.error("Failed to create task"),
+  });
+
+  const createTaskFromSuggestion = useMutation({
+    mutationFn: async ({ title, description, priority, status }: { title: string; description: string; priority: string; status: string }) => {
+      const { error } = await supabase.from("user_tasks").insert({
+        user_id: session!.user.id,
+        title,
+        description,
+        priority,
+        status,
+        estimated_minutes: 30,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user_tasks"] });
+      qc.invalidateQueries({ queryKey: ["all_user_tasks_for_ai"] });
+      toast.success("Suggestion added to board!");
+    },
+    onError: () => toast.error("Failed to add suggestion"),
   });
 
   const updateTaskStatus = useMutation({
@@ -109,7 +135,10 @@ const TaskBoard = () => {
       const { error } = await supabase.from("user_tasks").update(updates).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["user_tasks"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user_tasks"] });
+      qc.invalidateQueries({ queryKey: ["project_task_counts"] });
+    },
   });
 
   const deleteTask = useMutation({
@@ -117,16 +146,81 @@ const TaskBoard = () => {
       const { error } = await supabase.from("user_tasks").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["user_tasks"] }); toast.success("Task deleted"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user_tasks"] });
+      qc.invalidateQueries({ queryKey: ["project_task_counts"] });
+      toast.success("Task deleted");
+    },
   });
 
   const getProject = (id: string | null) => projects.find((p) => p.id === id);
   const getPriorityStyle = (p: string) => PRIORITIES.find((pr) => pr.value === p)?.color || "";
 
+  // Filter tasks by project if selected
+  const filteredTasks = filterProjectId
+    ? tasks.filter((t) => t.project_id === filterProjectId)
+    : tasks;
+
+  // Drag-and-drop handlers for columns
+  const handleColumnDragOver = (e: React.DragEvent, columnKey: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    setDragOverColumn(columnKey);
+  };
+
+  const handleColumnDragLeave = () => {
+    setDragOverColumn(null);
+  };
+
+  const handleColumnDrop = (e: React.DragEvent, columnKey: string) => {
+    e.preventDefault();
+    setDragOverColumn(null);
+
+    // Check if this is an AI suggestion drop
+    const plain = e.dataTransfer.getData("text/plain");
+    if (plain === "ai-suggestion") {
+      try {
+        const suggestion = JSON.parse(e.dataTransfer.getData("application/json"));
+        createTaskFromSuggestion.mutate({
+          title: suggestion.title,
+          description: suggestion.description,
+          priority: suggestion.priority,
+          status: columnKey,
+        });
+      } catch {
+        // ignore
+      }
+      return;
+    }
+
+    // Check if it's an existing task being moved between columns
+    const taskId = e.dataTransfer.getData("task-id");
+    if (taskId) {
+      updateTaskStatus.mutate({ id: taskId, status: columnKey });
+    }
+  };
+
+  const handleTaskDragStart = (e: React.DragEvent, taskId: string) => {
+    e.dataTransfer.setData("task-id", taskId);
+    e.dataTransfer.effectAllowed = "move";
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = "0.5";
+  };
+
+  const handleTaskDragEnd = (e: React.DragEvent) => {
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = "1";
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Task Board</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          Task Board
+          {filterProjectId && (
+            <span className="text-sm font-normal text-muted-foreground ml-2">
+              — {projects.find((p) => p.id === filterProjectId)?.name}
+            </span>
+          )}
+        </h2>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm"><Plus size={16} className="mr-1" /> Add Task</Button>
@@ -182,9 +276,18 @@ const TaskBoard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {COLUMNS.map((col) => {
           const Icon = col.icon;
-          const colTasks = tasks.filter((t) => t.status === col.key);
+          const colTasks = filteredTasks.filter((t) => t.status === col.key);
+          const isOver = dragOverColumn === col.key;
           return (
-            <div key={col.key} className="bg-muted/30 rounded-xl p-3 min-h-[200px]">
+            <div
+              key={col.key}
+              className={`rounded-xl p-3 min-h-[200px] transition-colors ${
+                isOver ? "bg-primary/10 ring-2 ring-primary/30" : "bg-muted/30"
+              }`}
+              onDragOver={(e) => handleColumnDragOver(e, col.key)}
+              onDragLeave={handleColumnDragLeave}
+              onDrop={(e) => handleColumnDrop(e, col.key)}
+            >
               <div className="flex items-center gap-2 mb-3 px-1">
                 <Icon size={16} className={col.color} />
                 <span className="text-sm font-medium text-foreground">{col.label}</span>
@@ -201,7 +304,10 @@ const TaskBoard = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-card border border-border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow group"
+                        draggable
+                        onDragStart={(e: any) => handleTaskDragStart(e, task.id)}
+                        onDragEnd={(e: any) => handleTaskDragEnd(e)}
+                        className="bg-card border border-border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow group cursor-grab active:cursor-grabbing"
                       >
                         <div className="flex items-start gap-2">
                           <GripVertical size={14} className="text-muted-foreground/40 mt-0.5 shrink-0" />
@@ -251,6 +357,11 @@ const TaskBoard = () => {
                     );
                   })}
                 </AnimatePresence>
+                {isOver && colTasks.length === 0 && (
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center">
+                    <p className="text-xs text-primary/60">Drop here to add</p>
+                  </div>
+                )}
               </div>
             </div>
           );
