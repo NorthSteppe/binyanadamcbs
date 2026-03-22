@@ -403,6 +403,24 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
     setIsLoadingSuggestions(true);
     setShowSuggestionsPanel(true);
     try {
+      // Fetch upcoming sessions for context (next 7 days)
+      const now = new Date();
+      const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const { data: upcomingSessions } = await supabase
+        .from("sessions")
+        .select("title, session_date, duration_minutes, status, description")
+        .gte("session_date", now.toISOString())
+        .lte("session_date", weekLater.toISOString())
+        .order("session_date", { ascending: true })
+        .limit(20);
+
+      // Fetch client todos assigned to this user
+      const { data: clientTodos } = await supabase
+        .from("client_todos")
+        .select("title, description, due_date, is_completed")
+        .eq("is_completed", false)
+        .limit(20);
+
       const resp = await fetch(SUGGEST_URL, {
         method: "POST",
         headers: {
@@ -415,6 +433,12 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
             due_date: t.due_date, estimated_minutes: t.estimated_minutes, labels: t.labels,
           })),
           projects: allProjects.map((p: any) => ({ name: p.name })),
+          sessions: (upcomingSessions || []).map((s: any) => ({
+            title: s.title, date: s.session_date, duration: s.duration_minutes, status: s.status,
+          })),
+          client_todos: (clientTodos || []).map((t: any) => ({
+            title: t.title, description: t.description, due_date: t.due_date,
+          })),
           date: format(new Date(), "yyyy-MM-dd"),
         }),
       });
