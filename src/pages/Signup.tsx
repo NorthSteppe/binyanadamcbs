@@ -44,6 +44,7 @@ const Signup = () => {
   if (!authLoading && user) {
     if (isAdmin) return <Navigate to="/admin" replace />;
     if (isTeamMember) return <Navigate to="/staff" replace />;
+    if (roles.includes("supervisee")) return <Navigate to="/supervisee" replace />;
     return <Navigate to="/portal" replace />;
   }
 
