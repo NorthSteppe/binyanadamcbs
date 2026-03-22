@@ -166,6 +166,46 @@ const AdminCalendar = () => {
     },
   });
 
+  // Calendar feed token for iCal sync
+  const { data: feedToken, refetch: refetchToken } = useQuery({
+    queryKey: ["admin_calendar_feed_token"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("calendar_feed_token")
+        .eq("id", user!.id)
+        .single();
+      if (error) throw error;
+      return (data as any)?.calendar_feed_token as string | null;
+    },
+    enabled: !!user,
+  });
+
+  const regenerateToken = useMutation({
+    mutationFn: async () => {
+      const newToken = crypto.randomUUID();
+      const { error } = await supabase
+        .from("profiles")
+        .update({ calendar_feed_token: newToken } as any)
+        .eq("id", user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { refetchToken(); toast.success("Calendar link regenerated"); },
+    onError: () => toast.error("Failed to regenerate link"),
+  });
+
+  const feedUrl = feedToken
+    ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calendar-ical-feed?token=${feedToken}`
+    : null;
+
+  const copyFeedUrl = () => {
+    if (!feedUrl) return;
+    navigator.clipboard.writeText(feedUrl);
+    setCopiedFeed(true);
+    setTimeout(() => setCopiedFeed(false), 2000);
+    toast.success("Link copied!");
+  };
+
   const nameMap = useMemo(() => {
     const m = new Map<string, string>();
     clients.forEach((c) => m.set(c.id, c.full_name || "Unknown"));
