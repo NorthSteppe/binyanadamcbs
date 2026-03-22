@@ -119,7 +119,7 @@ const Dashboard = () => {
           {/* Big Book a Session Button */}
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Link to="/portal/booking">
-              <div className="relative bg-primary text-primary-foreground rounded-2xl p-8 mb-8 flex items-center gap-5 hover:shadow-lg transition-shadow cursor-pointer group">
+              <div className="relative bg-primary text-primary-foreground rounded-2xl p-8 mb-8 flex items-center gap-5 hover:shadow-apple-lg transition-all cursor-pointer group">
                 <div className="bg-primary-foreground/20 rounded-xl p-4">
                   <Calendar size={32} />
                 </div>
