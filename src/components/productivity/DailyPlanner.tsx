@@ -135,10 +135,10 @@ const DailyPlanner = () => {
   const planItems: PlanItem[] = plan?.plan_data as PlanItem[] || [];
 
   const typeStyles: Record<string, string> = {
-    task: "border-l-blue-500 bg-blue-50 dark:bg-blue-950/30",
-    focus: "border-l-purple-500 bg-purple-50 dark:bg-purple-950/30",
-    session: "border-l-primary bg-primary/5",
-    break: "border-l-green-500 bg-green-50 dark:bg-green-950/30",
+    task: "border-l-blue-500 bg-card",
+    focus: "border-l-purple-500 bg-card",
+    session: "border-l-primary bg-card",
+    break: "border-l-green-500 bg-card",
   };
 
   return (
