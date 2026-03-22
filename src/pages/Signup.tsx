@@ -18,14 +18,14 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [accountType, setAccountType] = useState<"client" | "team">("client");
+  const [accountType, setAccountType] = useState<"client" | "team" | "supervisee">("client");
   const [loading, setLoading] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const [googleRoleChoice, setGoogleRoleChoice] = useState<"client" | "team">("client");
+  const [googleRoleChoice, setGoogleRoleChoice] = useState<"client" | "team" | "supervisee">("client");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
+  const { user, isAdmin, isTeamMember, roles, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -44,6 +44,7 @@ const Signup = () => {
   if (!authLoading && user) {
     if (isAdmin) return <Navigate to="/admin" replace />;
     if (isTeamMember) return <Navigate to="/staff" replace />;
+    if (roles.includes("supervisee")) return <Navigate to="/supervisee" replace />;
     return <Navigate to="/portal" replace />;
   }
 
@@ -59,13 +60,13 @@ const Signup = () => {
     if (error) {
       toast({ title: t.signup.title, description: error.message, variant: "destructive" });
     } else {
-      if (accountType === "team") {
+      if (accountType === "team" || accountType === "supervisee") {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           await supabase.from("team_requests").insert({ user_id: session.user.id });
         }
       }
-      toast({ title: t.signup.successTitle, description: accountType === "team" ? "Account created. Your team access request is pending admin approval." : t.signup.successDescription });
+      toast({ title: t.signup.successTitle, description: (accountType === "team" || accountType === "supervisee") ? "Account created. Your access request is pending admin approval." : t.signup.successDescription });
       navigate("/login");
     }
   };
@@ -109,6 +110,13 @@ const Signup = () => {
               <Label htmlFor="g-team" className="cursor-pointer flex-1">
                 <span className="font-medium text-foreground">Therapist / Staff</span>
                 <p className="text-xs text-muted-foreground font-light">Request team access (requires admin approval).</p>
+              </Label>
+            </div>
+            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
+              <RadioGroupItem value="supervisee" id="g-supervisee" />
+              <Label htmlFor="g-supervisee" className="cursor-pointer flex-1">
+                <span className="font-medium text-foreground">Supervisee</span>
+                <p className="text-xs text-muted-foreground font-light">Supervision portal with case logging (requires admin approval).</p>
               </Label>
             </div>
           </RadioGroup>
@@ -160,7 +168,7 @@ const Signup = () => {
               </div>
               <div className="space-y-3">
                 <Label className="text-[12px] uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
-                <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team")} className="flex gap-6">
+                <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team" | "supervisee")} className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="client" id="role-client" />
                     <Label htmlFor="role-client" className="cursor-pointer font-light text-foreground/80">Client</Label>
@@ -169,9 +177,13 @@ const Signup = () => {
                     <RadioGroupItem value="team" id="role-team" />
                     <Label htmlFor="role-team" className="cursor-pointer font-light text-foreground/80">Team Member</Label>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="supervisee" id="role-supervisee" />
+                    <Label htmlFor="role-supervisee" className="cursor-pointer font-light text-foreground/80">Supervisee</Label>
+                  </div>
                 </RadioGroup>
-                {accountType === "team" && (
-                  <p className="text-xs text-muted-foreground font-light">Team access requires admin approval after signup.</p>
+                {(accountType === "team" || accountType === "supervisee") && (
+                  <p className="text-xs text-muted-foreground font-light">Access requires admin approval after signup.</p>
                 )}
               </div>
               <div className="space-y-2">

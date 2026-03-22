@@ -19,11 +19,12 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { user, isAdmin, isTeamMember, loading: authLoading } = useAuth();
+  const { user, isAdmin, isTeamMember, roles, loading: authLoading } = useAuth();
 
   if (!authLoading && user) {
     if (isAdmin) return <Navigate to="/admin" replace />;
     if (isTeamMember) return <Navigate to="/staff" replace />;
+    if (roles.includes("supervisee")) return <Navigate to="/supervisee" replace />;
     return <Navigate to="/portal" replace />;
   }
 
@@ -32,6 +33,7 @@ const Login = () => {
     const roles = data?.map(r => r.role) || [];
     if (roles.includes("admin")) return "/admin";
     if (roles.includes("team_member")) return "/staff";
+    if (roles.includes("supervisee")) return "/supervisee";
     return "/portal";
   };
 

@@ -10,6 +10,7 @@ import EditModeToggle from "@/components/editable/EditModeToggle";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import StaffRoute from "@/components/StaffRoute";
+import SuperviseeRoute from "@/components/SuperviseeRoute";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Education from "./pages/Education";
@@ -69,6 +70,10 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import CourseManager from "./pages/admin/CourseManager";
 import CourseLessonManager from "./pages/admin/CourseLessonManager";
+// Supervisee portal
+import SuperviseeDashboard from "./pages/supervisee/SuperviseeDashboard";
+import CaseLogs from "./pages/supervisee/CaseLogs";
+import SuperviseeDocuments from "./pages/supervisee/SuperviseeDocuments";
 
 const queryClient = new QueryClient();
 
@@ -155,6 +160,21 @@ const App = () => (
                   <Route path="/staff/clinical/hexaflex" element={<StaffRoute><HexaflexTracker /></StaffRoute>} />
                   <Route path="/staff/clinical/behaviour-log" element={<StaffRoute><BehaviourLog /></StaffRoute>} />
                   <Route path="/staff/clinical/case-formulation" element={<StaffRoute><CaseFormulation /></StaffRoute>} />
+
+                  {/* Supervisee portal */}
+                  <Route path="/supervisee" element={<SuperviseeRoute><SuperviseeDashboard /></SuperviseeRoute>} />
+                  <Route path="/supervisee/case-logs" element={<SuperviseeRoute><CaseLogs /></SuperviseeRoute>} />
+                  <Route path="/supervisee/documents" element={<SuperviseeRoute><SuperviseeDocuments /></SuperviseeRoute>} />
+                  <Route path="/supervisee/calendar" element={<SuperviseeRoute><AdminCalendar /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical-tools" element={<SuperviseeRoute><ClinicalTools /></SuperviseeRoute>} />
+                  <Route path="/supervisee/resources" element={<SuperviseeRoute><Resources /></SuperviseeRoute>} />
+                  <Route path="/supervisee/todos" element={<SuperviseeRoute><TodoManager /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/abc" element={<SuperviseeRoute><ABCDataSheet /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/functional-assessment" element={<SuperviseeRoute><FunctionalAssessment /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/values-bullseye" element={<SuperviseeRoute><ValuesBullsEye /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/hexaflex" element={<SuperviseeRoute><HexaflexTracker /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/behaviour-log" element={<SuperviseeRoute><BehaviourLog /></SuperviseeRoute>} />
+                  <Route path="/supervisee/clinical/case-formulation" element={<SuperviseeRoute><CaseFormulation /></SuperviseeRoute>} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

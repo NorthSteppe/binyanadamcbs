@@ -9,6 +9,7 @@ interface AuthContextType {
   roles: string[];
   isAdmin: boolean;
   isTeamMember: boolean;
+  isSupervisee: boolean;
   isStaff: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   roles: [],
   isAdmin: false,
   isTeamMember: false,
+  isSupervisee: false,
   isStaff: false,
   loading: true,
   signOut: async () => {},
@@ -100,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session, user, profile, roles,
       isAdmin: roles.includes("admin"),
       isTeamMember: roles.includes("team_member"),
+      isSupervisee: roles.includes("supervisee"),
       isStaff: roles.includes("admin") || roles.includes("team_member"),
       loading, signOut
     }}>
