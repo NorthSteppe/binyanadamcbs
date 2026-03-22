@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   roles: [],
   isAdmin: false,
   isTeamMember: false,
+  isSupervisee: false,
   isStaff: false,
   loading: true,
   signOut: async () => {},
