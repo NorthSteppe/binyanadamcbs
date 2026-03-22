@@ -171,9 +171,9 @@ const ServicePageLayout = ({
       <section className="py-24 border-t border-border">
         <div className="container text-center">
           <ScrollReveal>
-            <EditableText contentKey={`${pageKey}.readyTitle`} defaultValue={t.serviceLayout.readyTitle} as="h2" className="text-4xl md:text-5xl font-serif mb-4 text-foreground" />
-            <EditableText contentKey={`${pageKey}.readyText`} defaultValue={t.serviceLayout.readyText} as="p" className="text-muted-foreground mb-10 max-w-md mx-auto font-light" />
-            <Button size="lg" asChild className="bg-foreground text-background hover:bg-foreground/90 rounded-none px-10 h-12 text-[13px] uppercase tracking-wider font-sans">
+            <EditableText contentKey={`${pageKey}.readyTitle`} defaultValue={t.serviceLayout.readyTitle} as="h2" className="text-4xl md:text-5xl font-display mb-4 text-foreground tracking-tight" />
+            <EditableText contentKey={`${pageKey}.readyText`} defaultValue={t.serviceLayout.readyText} as="p" className="text-muted-foreground mb-10 max-w-md mx-auto" />
+            <Button size="lg" asChild className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-10 h-12 text-[14px] font-medium shadow-apple">
               <Link to="/contact">
                 <EditableText contentKey={`${pageKey}.ctaButton`} defaultValue={ctaText} as="span" />
               </Link>
