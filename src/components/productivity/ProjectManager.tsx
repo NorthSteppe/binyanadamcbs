@@ -125,7 +125,7 @@ const ProjectManager = ({ selectedProjectId, onSelectProject }: ProjectManagerPr
       >
         <div className="w-3 h-3 rounded-full bg-muted-foreground/30 shrink-0" />
         <span>All Tasks</span>
-        <span className="ml-auto text-xs text-muted-foreground">{Object.values(taskCounts as any).reduce((sum: number, c: any) => sum + c.total, 0) || tasks.length || 0}</span>
+        <span className="ml-auto text-xs text-muted-foreground">{Object.values(taskCounts as any).reduce((sum: number, c: any) => sum + c.total, 0) || 0}</span>
       </button>
 
       <AnimatePresence>
