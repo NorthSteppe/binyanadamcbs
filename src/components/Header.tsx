@@ -11,7 +11,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { language, setLanguage, t } = useLanguage();
-  const { user, isAdmin, isTeamMember, isStaff, signOut } = useAuth();
+  const { user, isAdmin, isTeamMember, isSupervisee, isStaff, signOut } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
