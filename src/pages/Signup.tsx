@@ -168,7 +168,7 @@ const Signup = () => {
               </div>
               <div className="space-y-3">
                 <Label className="text-[12px] uppercase tracking-wider text-muted-foreground">I am signing up as</Label>
-                <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team")} className="flex gap-6">
+                <RadioGroup value={accountType} onValueChange={(v) => setAccountType(v as "client" | "team" | "supervisee")} className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="client" id="role-client" />
                     <Label htmlFor="role-client" className="cursor-pointer font-light text-foreground/80">Client</Label>
@@ -177,9 +177,13 @@ const Signup = () => {
                     <RadioGroupItem value="team" id="role-team" />
                     <Label htmlFor="role-team" className="cursor-pointer font-light text-foreground/80">Team Member</Label>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="supervisee" id="role-supervisee" />
+                    <Label htmlFor="role-supervisee" className="cursor-pointer font-light text-foreground/80">Supervisee</Label>
+                  </div>
                 </RadioGroup>
-                {accountType === "team" && (
-                  <p className="text-xs text-muted-foreground font-light">Team access requires admin approval after signup.</p>
+                {(accountType === "team" || accountType === "supervisee") && (
+                  <p className="text-xs text-muted-foreground font-light">Access requires admin approval after signup.</p>
                 )}
               </div>
               <div className="space-y-2">
