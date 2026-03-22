@@ -95,7 +95,7 @@ const Signup = () => {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="bg-card border-border rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="font-serif text-2xl">What type of account do you need?</DialogTitle>
+            <DialogTitle className="font-display text-2xl tracking-tight">What type of account do you need?</DialogTitle>
           </DialogHeader>
           <RadioGroup value={googleRoleChoice} onValueChange={(v) => setGoogleRoleChoice(v as any)} className="space-y-3 pt-2">
             <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
