@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingAIChat from "@/components/FloatingAIChat";
+import NotificationSettings from "@/components/portal/NotificationSettings";
 
 interface ClientTodo {
   id: string;
