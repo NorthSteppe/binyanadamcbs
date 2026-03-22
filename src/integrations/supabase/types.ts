@@ -816,6 +816,69 @@ export type Database = {
         }
         Relationships: []
       }
+      supervisee_case_logs: {
+        Row: {
+          client_age: string
+          client_name: string
+          client_response: string
+          created_at: string
+          data_summary: string
+          diagnosis: string
+          duration_minutes: number
+          id: string
+          interventions_used: string
+          next_steps: string
+          session_date: string
+          session_type: string
+          setting: string
+          status: string
+          supervisee_id: string
+          supervision_notes: string
+          targets_addressed: string
+          updated_at: string
+        }
+        Insert: {
+          client_age?: string
+          client_name?: string
+          client_response?: string
+          created_at?: string
+          data_summary?: string
+          diagnosis?: string
+          duration_minutes?: number
+          id?: string
+          interventions_used?: string
+          next_steps?: string
+          session_date?: string
+          session_type?: string
+          setting?: string
+          status?: string
+          supervisee_id: string
+          supervision_notes?: string
+          targets_addressed?: string
+          updated_at?: string
+        }
+        Update: {
+          client_age?: string
+          client_name?: string
+          client_response?: string
+          created_at?: string
+          data_summary?: string
+          diagnosis?: string
+          duration_minutes?: number
+          id?: string
+          interventions_used?: string
+          next_steps?: string
+          session_date?: string
+          session_type?: string
+          setting?: string
+          status?: string
+          supervisee_id?: string
+          supervision_notes?: string
+          targets_addressed?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           avatar_url: string | null
