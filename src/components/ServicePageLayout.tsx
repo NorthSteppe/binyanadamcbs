@@ -151,7 +151,7 @@ const ServicePageLayout = ({
                   <EditableText contentKey={`${pageKey}.pkg.${i}.desc`} defaultValue={pkg.description} as="p" className="text-sm text-muted-foreground mb-6" />
                   <ul className="space-y-3 mb-6">
                     {pkg.includes.map((item, j) => (
-                      <li key={item} className="text-sm text-foreground/80 flex items-start gap-3 font-light">
+                      <span className="text-sm text-foreground/80 flex items-start gap-3">font-light
                         <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${accentColorClass}`} />
                         <EditableText contentKey={`${pageKey}.pkg.${i}.inc.${j}`} defaultValue={item} />
                       </li>
