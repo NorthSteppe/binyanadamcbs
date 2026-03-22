@@ -188,7 +188,11 @@ const AdminDashboard = () => {
                 </Link>
               ))}
             </div>
-          </motion.div>
+        </motion.div>
+
+          <div className="mt-8">
+            <NotificationSettings />
+          </div>
         </div>
       </section>
       <Footer />
