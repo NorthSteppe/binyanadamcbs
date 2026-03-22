@@ -21,7 +21,7 @@ const Signup = () => {
   const [accountType, setAccountType] = useState<"client" | "team" | "supervisee">("client");
   const [loading, setLoading] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const [googleRoleChoice, setGoogleRoleChoice] = useState<"client" | "team">("client");
+  const [googleRoleChoice, setGoogleRoleChoice] = useState<"client" | "team" | "supervisee">("client");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
