@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useEditMode } from "@/hooks/useEditMode";
+import NotificationSettings from "@/components/portal/NotificationSettings";
 
 interface ToolItem {
   label: string;
@@ -187,7 +188,11 @@ const AdminDashboard = () => {
                 </Link>
               ))}
             </div>
-          </motion.div>
+        </motion.div>
+
+          <div className="mt-8">
+            <NotificationSettings />
+          </div>
         </div>
       </section>
       <Footer />

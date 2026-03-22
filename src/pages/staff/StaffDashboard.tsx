@@ -4,6 +4,7 @@ import { Users, ListTodo, BookOpen, Wrench, Calendar, ClipboardList } from "luci
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationSettings from "@/components/portal/NotificationSettings";
 
 const therapistTools = [
   { label: "Calendar", path: "/staff/calendar", icon: Calendar, description: "View and manage sessions" },
@@ -49,6 +50,10 @@ const StaffDashboard = () => {
                 </Link>
               </motion.div>
             ))}
+          </div>
+
+          <div className="mt-8">
+            <NotificationSettings />
           </div>
         </div>
       </section>
