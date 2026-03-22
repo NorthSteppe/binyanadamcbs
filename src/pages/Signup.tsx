@@ -105,7 +105,7 @@ const Signup = () => {
                 <p className="text-xs text-muted-foreground font-light">Access the client portal, book sessions, and use tools.</p>
               </Label>
             </div>
-            <div className="flex items-center gap-3 p-4 border border-border hover:border-primary/30 cursor-pointer transition-colors">
+             <div className="flex items-center gap-3 p-4 border border-border rounded-xl hover:border-foreground/20 cursor-pointer transition-colors">
               <RadioGroupItem value="team" id="g-team" />
               <Label htmlFor="g-team" className="cursor-pointer flex-1">
                 <span className="font-medium text-foreground">Therapist / Staff</span>
