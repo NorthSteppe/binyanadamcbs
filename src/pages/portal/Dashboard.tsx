@@ -273,6 +273,7 @@ const Dashboard = () => {
             <NotificationSettings />
           </motion.div>
         </div>
+      </section>
       <Footer />
       <FloatingAIChat />
     </div>
