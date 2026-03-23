@@ -19,12 +19,12 @@ const NotificationSettings = () => {
   useEffect(() => {
     if (!user) return;
     supabase
-      .from("profiles")
+      .from("profile_secrets" as any)
       .select("telegram_chat_id")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .single()
-      .then(({ data }) => {
-        const tid = (data as any)?.telegram_chat_id;
+      .then(({ data }: any) => {
+        const tid = data?.telegram_chat_id;
         if (tid) {
           setChatId(tid);
           setConnected(true);
@@ -36,9 +36,8 @@ const NotificationSettings = () => {
     if (!user || !chatId.trim()) return;
     setSaving(true);
     const { error } = await supabase
-      .from("profiles")
-      .update({ telegram_chat_id: chatId.trim() } as any)
-      .eq("id", user.id);
+      .from("profile_secrets" as any)
+      .upsert({ user_id: user.id, telegram_chat_id: chatId.trim() });
     setSaving(false);
     if (error) {
       toast.error("Failed to save Telegram Chat ID");
@@ -52,9 +51,9 @@ const NotificationSettings = () => {
     if (!user) return;
     setSaving(true);
     await supabase
-      .from("profiles")
-      .update({ telegram_chat_id: null } as any)
-      .eq("id", user.id);
+      .from("profile_secrets" as any)
+      .update({ telegram_chat_id: null })
+      .eq("user_id", user.id);
     setChatId("");
     setConnected(false);
     setSaving(false);

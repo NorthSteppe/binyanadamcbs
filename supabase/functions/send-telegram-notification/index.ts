@@ -81,14 +81,21 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Get user's telegram_chat_id
-    const { data: profile, error: profileError } = await supabase
+    // Get user's telegram_chat_id from profile_secrets
+    const { data: secrets, error: secretsError } = await supabase
+      .from("profile_secrets")
+      .select("telegram_chat_id")
+      .eq("user_id", user_id)
+      .single();
+
+    // Get user's name from profiles
+    const { data: profile } = await supabase
       .from("profiles")
-      .select("telegram_chat_id, full_name")
+      .select("full_name")
       .eq("id", user_id)
       .single();
 
-    if (profileError || !profile?.telegram_chat_id) {
+    if (secretsError || !secrets?.telegram_chat_id) {
       return new Response(
         JSON.stringify({ sent: false, reason: "No Telegram chat ID configured" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -111,7 +118,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_id: profile.telegram_chat_id,
+        chat_id: secrets.telegram_chat_id,
         text,
         parse_mode: "HTML",
         disable_web_page_preview: true,

@@ -188,9 +188,9 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
     queryKey: ["calendar_feed_token"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("profile_secrets" as any)
         .select("calendar_feed_token")
-        .eq("id", session!.user.id)
+        .eq("user_id", session!.user.id)
         .single();
       if (error) throw error;
       return (data as any)?.calendar_feed_token as string | null;
@@ -202,9 +202,9 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
     mutationFn: async () => {
       const newToken = crypto.randomUUID();
       const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ calendar_feed_token: newToken } as any)
-        .eq("id", session!.user.id);
+        .from("profile_secrets" as any)
+        .update({ calendar_feed_token: newToken })
+        .eq("user_id", session!.user.id);
       if (updateError) throw updateError;
     },
     onSuccess: () => { refetchToken(); toast.success("Calendar link regenerated"); },
