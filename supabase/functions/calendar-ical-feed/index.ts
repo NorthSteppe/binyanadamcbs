@@ -53,11 +53,22 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  // Look up the user by their feed token
+  // Look up the user by their feed token in profile_secrets
+  const { data: secretRow, error: secretError } = await supabase
+    .from("profile_secrets")
+    .select("user_id")
+    .eq("calendar_feed_token", token)
+    .single();
+
+  if (secretError || !secretRow) {
+    return new Response("Invalid or expired token", { status: 401 });
+  }
+
+  // Get the user's profile info
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id, full_name")
-    .eq("calendar_feed_token", token)
+    .eq("id", secretRow.user_id)
     .single();
 
   if (profileError || !profile) {
