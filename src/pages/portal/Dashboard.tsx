@@ -87,11 +87,10 @@ const Dashboard = () => {
         toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
         continue;
       }
-      const { data: urlData } = supabase.storage.from("client-documents").getPublicUrl(filePath);
       await supabase.from("client_documents").insert({
         client_id: user.id,
         file_name: file.name,
-        file_url: urlData.publicUrl,
+        file_url: filePath,
         file_type: file.type,
         uploaded_by: user.id,
       });
@@ -261,8 +260,15 @@ const Dashboard = () => {
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {documents.slice(0, 6).map((doc) => (
-                    <a key={doc.id} href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border/30 hover:border-primary/20 transition-colors">
+                    <button key={doc.id} onClick={async () => {
+                      const { data, error } = await supabase.storage.from("client-documents").download(doc.file_url);
+                      if (error || !data) return;
+                      const url = URL.createObjectURL(data);
+                      const a = document.createElement("a");
+                      a.href = url; a.download = doc.file_name; a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border/30 hover:border-primary/20 transition-colors text-left">
                       <FileText size={16} className="text-primary shrink-0" />
                       <div className="min-w-0">
                         <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>

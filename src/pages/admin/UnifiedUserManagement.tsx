@@ -462,11 +462,10 @@ const ClientPortalPreview = ({ clientId, clientName, currentUserId }: { clientId
         toast.error("Upload failed: " + uploadError.message);
         continue;
       }
-      const { data: urlData } = supabase.storage.from("client-documents").getPublicUrl(filePath);
       await supabase.from("client_documents").insert({
         client_id: clientId,
         file_name: file.name,
-        file_url: urlData.publicUrl,
+        file_url: filePath,
         file_type: file.type,
         uploaded_by: currentUserId,
       });
@@ -595,7 +594,13 @@ const ClientPortalPreview = ({ clientId, clientName, currentUserId }: { clientId
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {documents.map((doc) => (
                           <div key={doc.id} className="flex items-center gap-2 bg-card rounded-lg p-2.5 border border-border/30">
-                            <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0 hover:text-primary transition-colors">
+                            <button onClick={async () => {
+                              const { data, error } = await supabase.storage.from("client-documents").download(doc.file_url);
+                              if (error || !data) return;
+                              const url = URL.createObjectURL(data);
+                              const a = document.createElement("a"); a.href = url; a.download = doc.file_name; a.click();
+                              URL.revokeObjectURL(url);
+                            }} className="flex items-center gap-2 flex-1 min-w-0 hover:text-primary transition-colors text-left">
                               <FileText size={12} className="text-primary shrink-0" />
                               <div className="min-w-0">
                                 <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>

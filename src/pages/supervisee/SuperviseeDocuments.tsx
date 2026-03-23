@@ -48,7 +48,7 @@ const SuperviseeDocuments = () => {
       const { error: storageError } = await supabase.storage.from("client-documents").upload(filePath, file);
       if (storageError) throw storageError;
 
-      const { data: urlData } = supabase.storage.from("client-documents").getPublicUrl(filePath);
+      // filePath is stored directly — no public URL needed
       const { error: dbError } = await supabase.from("client_documents").insert({
         client_id: user.id,
         uploaded_by: user.id,

@@ -117,11 +117,10 @@ const EntryHistory = ({ clientId, toolType, toolTitle, renderEntry, getPdfSectio
       const { error: uploadError } = await supabase.storage.from("client-documents").upload(filePath, blob, { contentType: "application/pdf" });
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from("client-documents").getPublicUrl(filePath);
       const { error: dbError } = await supabase.from("client_documents").insert({
         client_id: clientId,
         file_name: fileName,
-        file_url: urlData.publicUrl,
+        file_url: filePath,
         file_type: "application/pdf",
         uploaded_by: user.id,
         notes: `Auto-generated from ${toolTitle || toolType}`,
