@@ -606,7 +606,7 @@ const ClientPortalPreview = ({ clientId, clientName, currentUserId }: { clientId
                                 <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>
                                 <p className="text-[10px] text-muted-foreground">{format(new Date(doc.created_at), "MMM d, yyyy")}</p>
                               </div>
-                            </a>
+                            </button>
                             <button onClick={() => deleteDocument(doc.id)} className="text-muted-foreground hover:text-destructive shrink-0">
                               <Trash2 size={10} />
                             </button>

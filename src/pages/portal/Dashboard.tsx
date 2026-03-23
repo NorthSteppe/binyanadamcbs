@@ -274,7 +274,7 @@ const Dashboard = () => {
                         <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>
                         <p className="text-[10px] text-muted-foreground">{new Date(doc.created_at).toLocaleDateString()}</p>
                       </div>
-                    </a>
+                    </button>
                   ))}
                 </div>
               )}
