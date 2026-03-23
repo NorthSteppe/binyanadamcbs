@@ -594,6 +594,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_secrets: {
+        Row: {
+          calendar_feed_token: string | null
+          created_at: string
+          telegram_chat_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calendar_feed_token?: string | null
+          created_at?: string
+          telegram_chat_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calendar_feed_token?: string | null
+          created_at?: string
+          telegram_chat_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
