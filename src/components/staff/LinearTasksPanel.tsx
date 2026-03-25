@@ -125,7 +125,7 @@ const LinearTasksPanel = () => {
 
       // Also fetch team members
       const membersData = await linearQuery(
-        `query($teamId: ID!) { team(id: $teamId) { members { nodes { id name avatarUrl } } } }`,
+        `query($teamId: String!) { team(id: $teamId) { members { nodes { id name avatarUrl } } } }`,
         { teamId: selectedTeam }
       );
       setMembers(membersData?.team?.members?.nodes || []);
