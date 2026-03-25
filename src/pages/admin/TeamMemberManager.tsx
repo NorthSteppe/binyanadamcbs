@@ -107,7 +107,7 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
           rows={3}
           onChange={(e) => set("credentials", e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">Enter each credential on a new line. These will be displayed on the team member's profile.</p>
+        <p className="text-xs text-muted-foreground">Enter each credential on a new line. These will be displayed on the therapist's profile.</p>
       </div>
 
       {/* Signature */}
@@ -124,7 +124,7 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
           </Button>
           <input ref={sigRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "signature")} />
         </div>
-        <p className="text-xs text-muted-foreground">Upload a transparent PNG of the team member's signature.</p>
+        <p className="text-xs text-muted-foreground">Upload a transparent PNG of the therapist's signature.</p>
       </div>
 
       {/* Social Media */}
@@ -170,7 +170,7 @@ const TeamMemberManager = () => {
 
   const addNew = () => {
     upsert.mutate({
-      name: "New Team Member",
+      name: "New Therapist",
       role: "",
       bio: "",
       initials: "??",
@@ -186,11 +186,11 @@ const TeamMemberManager = () => {
       <div className="container py-24 flex-1 max-w-4xl">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-1">Team Profiles</h1>
-            <p className="text-muted-foreground font-light">Manage team bios, credentials, signatures, and social links.</p>
+            <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-1">Therapist Profiles</h1>
+            <p className="text-muted-foreground font-light">Manage therapist bios, credentials, signatures, and social links.</p>
           </div>
           <Button onClick={addNew} className="gap-1">
-            <Plus size={16} /> Add Member
+            <Plus size={16} /> Add Therapist
           </Button>
         </div>
 

@@ -78,7 +78,7 @@ const AuthSettings = () => {
           {[
             { label: "Total Users", value: stats?.totalUsers ?? "–", icon: Users },
             { label: "Admins", value: stats?.admins ?? "–", icon: Shield },
-            { label: "Team Members", value: stats?.teamMembers ?? "–", icon: Users },
+            { label: "Therapists", value: stats?.teamMembers ?? "–", icon: Users },
             { label: "Clients", value: stats?.clients ?? "–", icon: Users },
             { label: "Pending Requests", value: stats?.pendingRequests ?? "–", icon: UserPlus },
           ].map((stat) => (
@@ -163,7 +163,7 @@ const AuthSettings = () => {
             <div className="space-y-3">
               {[
                 { role: "Admin", description: "Full access to all portals, settings, and user management", color: "bg-destructive/10 text-destructive" },
-                { role: "Team Member", description: "Access to therapist tools, client management, and calendar", color: "bg-primary/10 text-primary" },
+                { role: "Therapist", description: "Access to therapist tools, client management, and calendar", color: "bg-primary/10 text-primary" },
                 { role: "Client", description: "Access to personal portal, booking, messaging, and toolkit", color: "bg-secondary text-secondary-foreground" },
               ].map((r) => (
                 <div key={r.role} className="flex items-start gap-3 py-3 border-b border-border last:border-0">
@@ -174,7 +174,7 @@ const AuthSettings = () => {
             </div>
 
             <p className="text-xs text-muted-foreground font-light">
-              Staff roles (Admin, Team Member) require manual approval via the Team Requests queue.
+              Staff roles (Admin, Therapist) require manual approval via the Team Requests queue.
               Roles can be managed in <a href="/admin/users" className="text-primary hover:underline">User Management</a>.
             </p>
           </div>

@@ -85,7 +85,7 @@ const StaffTodoManager = () => {
         <div className="container max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-3xl mb-2 flex items-center gap-3"><ListTodo size={28} className="text-primary" /> Staff To-Do List</h1>
-            <p className="text-muted-foreground mb-8">Create and manage tasks for yourself and team members.</p>
+            <p className="text-muted-foreground mb-8">Create and manage tasks for yourself and therapists.</p>
           </motion.div>
 
           {/* Create form */}

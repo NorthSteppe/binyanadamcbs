@@ -152,7 +152,12 @@ const App = () => (
                   <Route path="/staff/todos" element={<StaffRoute><TodoManager /></StaffRoute>} />
                   <Route path="/staff/staff-todos" element={<StaffRoute><StaffTodoManager /></StaffRoute>} />
                   <Route path="/staff/resources" element={<StaffRoute><Resources /></StaffRoute>} />
+                  <Route path="/staff/messages" element={<StaffRoute><Messages /></StaffRoute>} />
+                  <Route path="/staff/booking" element={<StaffRoute><Booking /></StaffRoute>} />
+                  <Route path="/staff/productivity" element={<StaffRoute><Productivity /></StaffRoute>} />
+                  <Route path="/staff/toolkit" element={<StaffRoute><Toolkit /></StaffRoute>} />
                   <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
+                  <Route path="/staff/toolkit/pomodoro" element={<StaffRoute><ToolkitPomodoro /></StaffRoute>} />
                   <Route path="/staff/clinical-tools" element={<StaffRoute><ClinicalTools /></StaffRoute>} />
                   <Route path="/staff/clinical/abc" element={<StaffRoute><ABCDataSheet /></StaffRoute>} />
                   <Route path="/staff/clinical/functional-assessment" element={<StaffRoute><FunctionalAssessment /></StaffRoute>} />

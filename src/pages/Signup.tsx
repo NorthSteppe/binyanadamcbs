@@ -175,7 +175,7 @@ const Signup = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="team" id="role-team" />
-                    <Label htmlFor="role-team" className="cursor-pointer font-light text-foreground/80">Team Member</Label>
+                    <Label htmlFor="role-team" className="cursor-pointer font-light text-foreground/80">Therapist</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="supervisee" id="role-supervisee" />
