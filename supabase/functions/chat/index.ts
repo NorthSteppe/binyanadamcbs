@@ -55,26 +55,16 @@ serve(async (req) => {
       });
     }
 
-    const validRoles = ["user", "assistant"];
-    for (const msg of messages) {
-      if (!msg.role || !msg.content || typeof msg.content !== "string") {
-        return new Response(JSON.stringify({ error: "Invalid message format" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (!validRoles.includes(msg.role)) {
-        return new Response(JSON.stringify({ error: "Invalid message role" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (msg.content.length > MAX_MESSAGE_LENGTH) {
-        return new Response(JSON.stringify({ error: "Message too long" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    const validRoles = ["user", "assistant", "system"];
+    const sanitized = messages
+      .filter((msg: any) => msg.role && validRoles.includes(msg.role) && typeof msg.content === "string" && msg.content.length <= MAX_MESSAGE_LENGTH)
+      .map((msg: any) => ({ role: msg.role, content: msg.content.slice(0, MAX_MESSAGE_LENGTH) }));
+
+    if (sanitized.length === 0) {
+      return new Response(JSON.stringify({ error: "No valid messages" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Only send the last 20 messages to control costs
