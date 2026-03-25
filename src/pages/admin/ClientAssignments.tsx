@@ -90,7 +90,7 @@ const ClientAssignments = () => {
                 <Select value={selClient} onValueChange={setSelClient}>
                   <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
                   <SelectContent>
-                    {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.full_name || "Unnamed"}</SelectItem>)}
+                    {clients.filter(c => c.id).map(c => <SelectItem key={c.id} value={c.id}>{c.full_name || "Unnamed"}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -99,7 +99,7 @@ const ClientAssignments = () => {
                 <Select value={selAssignee} onValueChange={setSelAssignee}>
                   <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
                   <SelectContent>
-                    {teamMembers.map(t => <SelectItem key={t.id} value={t.id}>{t.full_name || "Unnamed"}</SelectItem>)}
+                    {teamMembers.filter(t => t.id).map(t => <SelectItem key={t.id} value={t.id}>{t.full_name || "Unnamed"}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
