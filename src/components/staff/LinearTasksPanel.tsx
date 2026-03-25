@@ -109,7 +109,7 @@ const LinearTasksPanel = () => {
     setLoading(true);
     try {
       const data = await linearQuery(
-        `query($teamId: String!) {
+        `query($teamId: ID!) {
           issues(filter: { team: { id: { eq: $teamId } }, state: { type: { nin: ["canceled"] } } }, first: 100, orderBy: updatedAt) {
             nodes {
               id identifier title description priority url createdAt updatedAt dueDate
@@ -125,7 +125,7 @@ const LinearTasksPanel = () => {
 
       // Also fetch team members
       const membersData = await linearQuery(
-        `query($teamId: String!) { team(id: $teamId) { members { nodes { id name avatarUrl } } } }`,
+        `query($teamId: ID!) { team(id: $teamId) { members { nodes { id name avatarUrl } } } }`,
         { teamId: selectedTeam }
       );
       setMembers(membersData?.team?.members?.nodes || []);
