@@ -36,6 +36,15 @@ const categories: ToolCategory[] = [
     ],
   },
   {
+    title: "Task Management",
+    description: "Delegate, track, and manage tasks across the team",
+    iconBgClass: "bg-primary/10 text-primary",
+    tools: [
+      { label: "Task Board", path: "/admin/task-board", icon: Settings, description: "Kanban board to delegate and track team tasks" },
+      { label: "Staff To-Dos", path: "/admin/staff-todos", icon: Settings, description: "Legacy list view of staff tasks" },
+    ],
+  },
+  {
     title: "Services & Booking",
     description: "Configure what clients can book and how much it costs",
     iconBgClass: "bg-secondary text-secondary-foreground",

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { EditModeProvider } from "@/hooks/useEditMode";
+import { PreferencesProvider } from "@/hooks/usePreferences";
 import EditModeToggle from "@/components/editable/EditModeToggle";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
@@ -54,6 +55,8 @@ import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
 import TodoManager from "./pages/admin/TodoManager";
 import StaffTodoManager from "./pages/admin/StaffTodoManager";
+import TaskBoardPage from "./pages/admin/TaskBoard";
+import SettingsPage from "./pages/portal/Settings";
 import WhatsAppButton from "./components/WhatsAppButton";
 import MobileBottomNav from "./components/mobile/MobileBottomNav";
 import SwipeBackDetector from "./components/mobile/SwipeBackDetector";
@@ -93,6 +96,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
+        <PreferencesProvider>
         <EditModeProvider>
           <TooltipProvider>
             <Toaster />
@@ -129,6 +133,7 @@ const App = () => (
                   <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
                   <Route path="/portal/productivity" element={<ProtectedRoute><Productivity /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
                   {/* Admin portal */}
                   <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -141,6 +146,7 @@ const App = () => (
                   <Route path="/admin/service-options" element={<AdminRoute><ServiceOptionsManager /></AdminRoute>} />
                   <Route path="/admin/users" element={<AdminRoute><UnifiedUserManagement /></AdminRoute>} />
                   <Route path="/admin/staff-todos" element={<AdminRoute><StaffTodoManager /></AdminRoute>} />
+                  <Route path="/admin/task-board" element={<AdminRoute><TaskBoardPage /></AdminRoute>} />
                   <Route path="/admin/auth-settings" element={<AdminRoute><AuthSettings /></AdminRoute>} />
                   <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
                   <Route path="/admin/courses" element={<AdminRoute><CourseManager /></AdminRoute>} />
@@ -191,6 +197,7 @@ const App = () => (
             </BrowserRouter>
           </TooltipProvider>
         </EditModeProvider>
+        </PreferencesProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
