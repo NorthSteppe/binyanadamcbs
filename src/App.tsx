@@ -53,8 +53,6 @@ import SecurityDashboard from "./pages/admin/SecurityDashboard";
 // Staff portal
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
-import StaffDashboard from "./pages/staff/StaffDashboard";
-import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
 import TodoManager from "./pages/admin/TodoManager";
 import StaffTodoManager from "./pages/admin/StaffTodoManager";
 import TaskBoardPage from "./pages/admin/TaskBoard";
