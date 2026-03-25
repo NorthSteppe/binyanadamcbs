@@ -2,9 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
-  ListTodo, BookOpen, Wrench, UserCog, LayoutDashboard, ArrowRight,
-  Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, ShieldAlert, KeyRound, Pencil,
-  GraduationCap,
+  UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -22,7 +20,6 @@ interface ToolItem {
 interface ToolCategory {
   title: string;
   description: string;
-  accentClass: string;
   iconBgClass: string;
   tools: ToolItem[];
 }
@@ -31,18 +28,16 @@ const categories: ToolCategory[] = [
   {
     title: "Website Design & Content",
     description: "Control how your website looks and what it says",
-    accentClass: "text-primary",
     iconBgClass: "bg-primary/10 text-primary",
     tools: [
       { label: "Hero Images", path: "/admin/hero-images", icon: ImageIcon, description: "Manage the landing page slideshow images, quotes, and timing" },
       { label: "Site Content", path: "/admin/site-content", icon: FileEdit, description: "Edit page images, quotes, and text across all service pages" },
-      { label: "Team Profiles", path: "/admin/team-members", icon: Users, description: "Add, edit, or remove staff bios shown on the About page" },
+      { label: "Therapist Profiles", path: "/admin/team-members", icon: Users, description: "Add, edit, or remove therapist bios shown on the About page" },
     ],
   },
   {
     title: "Services & Booking",
     description: "Configure what clients can book and how much it costs",
-    accentClass: "text-primary",
     iconBgClass: "bg-secondary text-secondary-foreground",
     tools: [
       { label: "Service Options", path: "/admin/service-options", icon: Settings, description: "Define session types, durations, and pricing" },
@@ -53,33 +48,14 @@ const categories: ToolCategory[] = [
   {
     title: "Users & Access",
     description: "Manage who can access what across the platform",
-    accentClass: "text-primary",
     iconBgClass: "bg-muted text-muted-foreground",
     tools: [
       { label: "User Management", path: "/admin/users", icon: UserCog, description: "Manage all users, roles, therapist assignments, and view client portals" },
       { label: "Auth Settings", path: "/admin/auth-settings", icon: KeyRound, description: "Configure sign-up, sign-in methods, and security" },
       { label: "Security Dashboard", path: "/admin/security", icon: ShieldAlert, description: "Run security scans and review vulnerabilities" },
-      { label: "Team Requests", path: "/admin/team-requests", icon: UserPlus, description: "Review pending staff access requests" },
+      { label: "Team Requests", path: "/admin/team-requests", icon: UserPlus, description: "Review pending therapist access requests" },
     ],
   },
-  {
-    title: "Therapist Tools",
-    description: "Day-to-day tools for clinical and administrative work",
-    accentClass: "text-primary",
-    iconBgClass: "bg-accent text-accent-foreground",
-    tools: [
-      { label: "Staff To-Dos", path: "/admin/staff-todos", icon: ListTodo, description: "Manage and assign tasks to staff" },
-      { label: "Client To-Dos", path: "/staff/todos", icon: ClipboardList, description: "Manage task lists for clients" },
-      { label: "Clinical Tools", path: "/staff/clinical-tools", icon: ClipboardList, description: "CBS data collection: ABC, functional assessment, hexaflex & more" },
-      { label: "Resources", path: "/staff/resources", icon: BookOpen, description: "Upload and manage the resource library" },
-      { label: "ACT Matrix", path: "/staff/toolkit/act-matrix", icon: Wrench, description: "Fill in ACT Matrix for clients" },
-    ],
-  },
-];
-
-const portalLinks = [
-  { path: "/portal", label: "Client Portal", description: "View as a client — dashboard, booking, toolkit", icon: LayoutDashboard, iconBg: "bg-primary/10 text-primary" },
-  { path: "/staff", label: "Therapist Portal", description: "View as a therapist — clients, calendar, tools", icon: Users, iconBg: "bg-accent text-accent-foreground" },
 ];
 
 const AdminDashboard = () => {
@@ -115,7 +91,7 @@ const AdminDashboard = () => {
               </button>
             </div>
             <p className="text-muted-foreground mb-12 ml-14 font-light">
-              Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}. Manage your practice from here.
+              Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}. Manage your practice website and users.
             </p>
           </motion.div>
 
@@ -159,7 +135,7 @@ const AdminDashboard = () => {
             ))}
           </div>
 
-          {/* Portal Switcher */}
+          {/* Portal Switcher - only Therapist Portal */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -168,27 +144,22 @@ const AdminDashboard = () => {
           >
             <div className="mb-4">
               <h2 className="text-xl font-serif text-foreground">Switch Portal</h2>
-              <p className="text-sm text-muted-foreground font-light">Preview the platform from a different perspective</p>
+              <p className="text-sm text-muted-foreground font-light">Access your therapist tools and workspace</p>
             </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {portalLinks.map((p) => (
-                <Link
-                  key={p.path}
-                  to={p.path}
-                  className="group bg-card border border-border/50 p-5 flex items-center gap-4 hover:border-primary/30 transition-all"
-                >
-                  <div className={`${p.iconBg} rounded-lg p-2.5 shrink-0`}>
-                    <p.icon size={18} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-card-foreground group-hover:text-primary transition-colors">{p.label}</p>
-                    <p className="text-xs text-muted-foreground font-light">{p.description}</p>
-                  </div>
-                  <ArrowRight size={16} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              ))}
-            </div>
-        </motion.div>
+            <Link
+              to="/staff"
+              className="group bg-card border border-border/50 p-5 flex items-center gap-4 hover:border-primary/30 transition-all max-w-md"
+            >
+              <div className="bg-accent text-accent-foreground rounded-lg p-2.5 shrink-0">
+                <Users size={18} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-card-foreground group-hover:text-primary transition-colors">Therapist Portal</p>
+                <p className="text-xs text-muted-foreground font-light">Clinical tools, productivity, messages, and caseload</p>
+              </div>
+              <ArrowRight size={16} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          </motion.div>
 
           <div className="mt-8">
             <NotificationSettings />
