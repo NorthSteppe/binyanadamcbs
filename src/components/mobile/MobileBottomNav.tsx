@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Info, User, LogIn, Shield, Users, Briefcase } from "lucide-react";
+import { Home, BookOpen, Info, User, LogIn, Shield, Users, Briefcase, MessageSquare, BarChart3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,22 +12,20 @@ const MobileBottomNav = () => {
 
   if (!isMobile) return null;
 
-  // Determine which tabs to show based on context
   const getNavItems = () => {
     if (location.pathname.startsWith("/admin")) {
       return [
         { icon: Shield, label: "Admin", path: "/admin" },
-        { icon: Users, label: "Clients", path: "/admin/clients" },
-        { icon: BookOpen, label: "Courses", path: "/admin/courses" },
+        { icon: Users, label: "Therapist", path: "/staff" },
         { icon: Home, label: "Home", path: "/" },
       ];
     }
     if (location.pathname.startsWith("/staff")) {
       return [
-        { icon: Briefcase, label: "Staff", path: "/staff" },
+        { icon: Briefcase, label: "Dashboard", path: "/staff" },
+        { icon: BarChart3, label: "Productivity", path: "/staff/productivity" },
+        { icon: MessageSquare, label: "Messages", path: "/staff/messages" },
         { icon: BookOpen, label: "Tools", path: "/staff/clinical-tools" },
-        { icon: Users, label: "Todos", path: "/staff/todos" },
-        { icon: Home, label: "Home", path: "/" },
       ];
     }
     if (location.pathname.startsWith("/portal")) {
@@ -46,7 +44,7 @@ const MobileBottomNav = () => {
     ];
     if (user) {
       if (isAdmin) items.push({ icon: Shield, label: "Admin", path: "/admin" });
-      else if (isTeamMember) items.push({ icon: Briefcase, label: "Staff", path: "/staff" });
+      else if (isTeamMember) items.push({ icon: Briefcase, label: "Therapist", path: "/staff" });
       else items.push({ icon: User, label: "Portal", path: "/portal" });
     } else {
       items.push({ icon: LogIn, label: "Log In", path: "/login" });
