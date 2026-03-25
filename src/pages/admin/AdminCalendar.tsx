@@ -866,7 +866,7 @@ const AdminCalendar = () => {
                   </div>
                 </div>
                 <div>
-                  <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Invite Team Members</Label>
+                  <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Invite Therapists</Label>
                   <div className="grid grid-cols-2 gap-1.5 max-h-[120px] overflow-y-auto border border-border/50 rounded-lg p-2">
                     {staffMembers.map((s) => (
                       <label key={s.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">

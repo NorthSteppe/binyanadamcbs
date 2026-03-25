@@ -80,7 +80,7 @@ const ClientAssignments = () => {
         <div className="container max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-3xl mb-2 flex items-center gap-3"><Users size={28} className="text-primary" /> Client Assignments</h1>
-            <p className="text-muted-foreground mb-8">Assign clients to team members or admins.</p>
+            <p className="text-muted-foreground mb-8">Assign clients to therapists or admins.</p>
           </motion.div>
 
           <div className="bg-card rounded-xl border border-border/50 p-5 mb-8">

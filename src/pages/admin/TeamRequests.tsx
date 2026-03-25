@@ -61,7 +61,7 @@ const TeamRequests = () => {
       .update({ status: "approved", reviewed_at: new Date().toISOString(), reviewed_by: user?.id })
       .eq("id", request.id);
 
-    toast.success(`${request.full_name} approved as team member`);
+    toast.success(`${request.full_name} approved as therapist`);
     fetchRequests();
   };
 
@@ -88,7 +88,7 @@ const TeamRequests = () => {
               <Users className="text-primary" size={28} />
               Team Access Requests
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">Approve or reject team member sign-up requests</p>
+            <p className="text-muted-foreground text-sm mt-1">Approve or reject therapist sign-up requests</p>
           </div>
 
           {loading ? (

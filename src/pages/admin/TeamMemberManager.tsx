@@ -107,7 +107,7 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
           rows={3}
           onChange={(e) => set("credentials", e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">Enter each credential on a new line. These will be displayed on the team member's profile.</p>
+        <p className="text-xs text-muted-foreground">Enter each credential on a new line. These will be displayed on the therapist's profile.</p>
       </div>
 
       {/* Signature */}
@@ -124,7 +124,7 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
           </Button>
           <input ref={sigRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "signature")} />
         </div>
-        <p className="text-xs text-muted-foreground">Upload a transparent PNG of the team member's signature.</p>
+        <p className="text-xs text-muted-foreground">Upload a transparent PNG of the therapist's signature.</p>
       </div>
 
       {/* Social Media */}

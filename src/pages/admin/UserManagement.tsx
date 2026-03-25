@@ -23,7 +23,7 @@ type UserRow = {
 const ROLE_OPTIONS = ["admin", "team_member", "client"] as const;
 const ROLE_LABELS: Record<string, string> = {
   admin: "Admin",
-  team_member: "Team Member",
+  team_member: "Therapist",
   client: "Client",
 };
 const ROLE_COLORS: Record<string, string> = {
