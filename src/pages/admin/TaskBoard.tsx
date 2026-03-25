@@ -180,7 +180,7 @@ const TaskBoard = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Team Members</SelectItem>
-                      {staff.map(s => (
+                      {staff.filter(s => s.id).map(s => (
                         <SelectItem key={s.id} value={s.id}>{s.full_name || "Unnamed"}</SelectItem>
                       ))}
                     </SelectContent>
@@ -369,7 +369,7 @@ const TaskForm = ({
         <Select value={assignee} onValueChange={setAssignee}>
           <SelectTrigger><SelectValue placeholder="Select person" /></SelectTrigger>
           <SelectContent>
-            {staff.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name || "Unnamed"}</SelectItem>)}
+            {staff.filter(s => s.id).map(s => <SelectItem key={s.id} value={s.id}>{s.full_name || "Unnamed"}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>

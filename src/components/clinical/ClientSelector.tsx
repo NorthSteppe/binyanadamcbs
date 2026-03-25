@@ -49,7 +49,7 @@ const ClientSelector = ({ value, onChange }: ClientSelectorProps) => {
         <SelectValue placeholder="Select client..." />
       </SelectTrigger>
       <SelectContent>
-        {clients.map((c) => (
+        {clients.filter(c => c.id).map((c) => (
           <SelectItem key={c.id} value={c.id}>
             {c.full_name || "Unnamed"}
           </SelectItem>
