@@ -170,7 +170,7 @@ const TeamMemberManager = () => {
 
   const addNew = () => {
     upsert.mutate({
-      name: "New Team Member",
+      name: "New Therapist",
       role: "",
       bio: "",
       initials: "??",
@@ -186,11 +186,11 @@ const TeamMemberManager = () => {
       <div className="container py-24 flex-1 max-w-4xl">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-1">Team Profiles</h1>
-            <p className="text-muted-foreground font-light">Manage team bios, credentials, signatures, and social links.</p>
+            <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-1">Therapist Profiles</h1>
+            <p className="text-muted-foreground font-light">Manage therapist bios, credentials, signatures, and social links.</p>
           </div>
           <Button onClick={addNew} className="gap-1">
-            <Plus size={16} /> Add Member
+            <Plus size={16} /> Add Therapist
           </Button>
         </div>
 
