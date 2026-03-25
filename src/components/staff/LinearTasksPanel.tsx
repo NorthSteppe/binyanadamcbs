@@ -222,11 +222,11 @@ const LinearTasksPanel = () => {
                     <SelectItem value="4">Low</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={newAssignee} onValueChange={setNewAssignee}>
+                <Select value={newAssignee || "unassigned"} onValueChange={v => setNewAssignee(v === "unassigned" ? "" : v)}>
                   <SelectTrigger><SelectValue placeholder="Assignee" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Unassigned</SelectItem>
-                    {members.map(m => (
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {members.filter(m => m.id).map(m => (
                       <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
                     ))}
                   </SelectContent>
