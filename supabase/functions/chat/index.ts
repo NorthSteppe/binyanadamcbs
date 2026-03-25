@@ -68,7 +68,7 @@ serve(async (req) => {
     }
 
     // Only send the last 20 messages to control costs
-    const recentMessages = messages.slice(-20);
+    const recentMessages = sanitized.slice(-20);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
