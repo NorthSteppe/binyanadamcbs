@@ -24,10 +24,23 @@ const TodoManager = () => {
   const [newDesc, setNewDesc] = useState("");
   const [newDue, setNewDue] = useState("");
 
+  const { isAdmin } = useAuth();
+
   const fetchAll = async () => {
-    const { data: profiles } = await supabase.from("profiles").select("id, full_name");
-    const allProfiles = profiles || [];
-    setClients(allProfiles);
+    let clientList: Profile[] = [];
+    if (isAdmin) {
+      const { data: profiles } = await supabase.from("profiles").select("id, full_name");
+      clientList = profiles || [];
+    } else {
+      // Team members: only assigned clients
+      const { data: assignments } = await supabase.from("client_assignments").select("client_id");
+      if (assignments && assignments.length > 0) {
+        const ids = assignments.map(a => a.client_id);
+        const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", ids);
+        clientList = profiles || [];
+      }
+    }
+    setClients(clientList);
 
     const { data: todoData } = await supabase.from("client_todos").select("*").order("created_at", { ascending: false });
     if (todoData) {
