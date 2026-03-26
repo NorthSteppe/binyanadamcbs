@@ -44,7 +44,7 @@ const TodoManager = () => {
 
     const { data: todoData } = await supabase.from("client_todos").select("*").order("created_at", { ascending: false });
     if (todoData) {
-      setTodos(todoData.map(t => ({ ...t, client_name: allProfiles.find(p => p.id === t.client_id)?.full_name || "Unknown" })) as Todo[]);
+      setTodos(todoData.map(t => ({ ...t, client_name: clientList.find(p => p.id === t.client_id)?.full_name || "Unknown" })) as Todo[]);
     }
   };
 
