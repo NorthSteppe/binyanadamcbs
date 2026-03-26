@@ -55,11 +55,6 @@ const StaffTodoManager = () => {
       })));
     }
   };
-      setTodos(data.map(t => ({
-        ...t, assigned_name: nameMap[t.assigned_to] || "Unknown", creator_name: nameMap[t.created_by] || "Unknown",
-      })));
-    }
-  };
 
   useEffect(() => { fetchStaff(); fetchTodos(); }, []);
 
