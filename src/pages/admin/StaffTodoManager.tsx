@@ -47,9 +47,14 @@ const StaffTodoManager = () => {
   const fetchTodos = async () => {
     const { data } = await supabase.from("staff_todos").select("*").order("created_at", { ascending: false });
     if (data) {
-      const userIds = [...new Set([...data.map(t => t.assigned_to), ...data.map(t => t.created_by)])];
-      const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", userIds);
-      const nameMap = Object.fromEntries((profiles || []).map(p => [p.id, p.full_name]));
+      // Use get_safe_profiles to get names for all users referenced
+      const { data: profiles } = await supabase.rpc("get_safe_profiles");
+      const nameMap = Object.fromEntries((profiles as any[] || []).map((p: any) => [p.id, p.full_name]));
+      setTodos(data.map(t => ({
+        ...t, assigned_name: nameMap[t.assigned_to] || "Unknown", creator_name: nameMap[t.created_by] || "Unknown",
+      })));
+    }
+  };
       setTodos(data.map(t => ({
         ...t, assigned_name: nameMap[t.assigned_to] || "Unknown", creator_name: nameMap[t.created_by] || "Unknown",
       })));
