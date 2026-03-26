@@ -29,11 +29,18 @@ const StaffTodoManager = () => {
   const [filter, setFilter] = useState<"all" | "mine" | "created">("all");
 
   const fetchStaff = async () => {
+    // Use get_safe_profiles + user_roles to find all staff members
     const { data: roles } = await supabase.from("user_roles").select("user_id").in("role", ["admin", "team_member"]);
     if (roles) {
       const ids = roles.map(r => r.user_id);
-      const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", ids);
-      if (profiles) setStaffMembers(profiles);
+      const { data: profiles } = await supabase.rpc("get_safe_profiles");
+      if (profiles) {
+        setStaffMembers(
+          (profiles as any[])
+            .filter((p: any) => ids.includes(p.id) && p.full_name)
+            .map((p: any) => ({ id: p.id, full_name: p.full_name }))
+        );
+      }
     }
   };
 
