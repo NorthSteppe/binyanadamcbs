@@ -45,14 +45,17 @@ const Messages = () => {
   const [showNewChat, setShowNewChat] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Fetch all users for new conversation
+  // Fetch all users for new conversation — use get_safe_profiles to bypass RLS restrictions
   const fetchUsers = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url")
-      .neq("id", user.id);
-    if (data) setAllUsers(data);
+    const { data } = await supabase.rpc("get_safe_profiles");
+    if (data) {
+      setAllUsers(
+        (data as any[])
+          .filter((u: any) => u.id !== user.id && u.full_name)
+          .map((u: any) => ({ id: u.id, full_name: u.full_name, avatar_url: u.avatar_url }))
+      );
+    }
   }, [user]);
 
   // Fetch all messages for this user
