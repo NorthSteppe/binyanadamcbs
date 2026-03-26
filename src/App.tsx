@@ -27,6 +27,7 @@ import TeamBrionny from "./pages/TeamBrionny";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import Unsubscribe from "./pages/Unsubscribe";
 import ScrollToTop from "./components/ScrollToTop";
 // Client portal
 import Dashboard from "./pages/portal/Dashboard";
@@ -122,6 +123,7 @@ const App = () => (
                   <Route path="/courses/:slug" element={<CourseDetail />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
+                  <Route path="/unsubscribe" element={<Unsubscribe />} />
 
                   {/* Client portal */}
                   <Route path="/portal" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
