@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/i18n/LanguageContext";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { EditModeProvider } from "@/hooks/useEditMode";
 import { PreferencesProvider } from "@/hooks/usePreferences";
+import { useEmailNotificationListener } from "@/hooks/useEmailNotificationListener";
 import EditModeToggle from "@/components/editable/EditModeToggle";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
@@ -27,6 +28,7 @@ import TeamBrionny from "./pages/TeamBrionny";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import Unsubscribe from "./pages/Unsubscribe";
 import ScrollToTop from "./components/ScrollToTop";
 // Client portal
 import Dashboard from "./pages/portal/Dashboard";
@@ -82,6 +84,7 @@ const queryClient = new QueryClient();
 
 const AppLoader = ({ children }: { children: React.ReactNode }) => {
   const { loading } = useAuth();
+  useEmailNotificationListener();
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -122,6 +125,7 @@ const App = () => (
                   <Route path="/courses/:slug" element={<CourseDetail />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
+                  <Route path="/unsubscribe" element={<Unsubscribe />} />
 
                   {/* Client portal */}
                   <Route path="/portal" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
