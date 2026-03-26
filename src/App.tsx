@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/i18n/LanguageContext";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { EditModeProvider } from "@/hooks/useEditMode";
 import { PreferencesProvider } from "@/hooks/usePreferences";
+import { useEmailNotificationListener } from "@/hooks/useEmailNotificationListener";
 import EditModeToggle from "@/components/editable/EditModeToggle";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
@@ -83,6 +84,7 @@ const queryClient = new QueryClient();
 
 const AppLoader = ({ children }: { children: React.ReactNode }) => {
   const { loading } = useAuth();
+  useEmailNotificationListener();
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
