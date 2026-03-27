@@ -50,6 +50,84 @@ export type Database = {
         }
         Relationships: []
       }
+      business_entries: {
+        Row: {
+          amount_cents: number
+          category: string
+          client_id: string | null
+          created_at: string
+          created_by: string
+          description: string
+          entry_date: string
+          entry_type: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          category?: string
+          client_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string
+          entry_date?: string
+          entry_type?: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          category?: string
+          client_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          entry_date?: string
+          entry_type?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_plans: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          goals: Json
+          id: string
+          shared_with_team: boolean
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          created_by: string
+          goals?: Json
+          id?: string
+          shared_with_team?: boolean
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          goals?: Json
+          id?: string
+          shared_with_team?: boolean
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       calendar_shares: {
         Row: {
           can_view_focus: boolean
