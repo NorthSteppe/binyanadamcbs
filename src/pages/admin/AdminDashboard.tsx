@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
-  UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert,
+  UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -25,6 +25,14 @@ interface ToolCategory {
 }
 
 const categories: ToolCategory[] = [
+  {
+    title: "Business & Finance",
+    description: "Track revenue, expenses, profit, and business growth",
+    iconBgClass: "bg-primary/10 text-primary",
+    tools: [
+      { label: "Business Dashboard", path: "/admin/business", icon: BarChart3, description: "Revenue analytics, profit tracking, forecasts, and client growth" },
+    ],
+  },
   {
     title: "Website Design & Content",
     description: "Control how your website looks and what it says",
