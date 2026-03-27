@@ -84,7 +84,7 @@ const queryClient = new QueryClient();
 
 const AppLoader = ({ children }: { children: React.ReactNode }) => {
   const { loading } = useAuth();
-  useEmailNotificationListener();
+  // Email notifications are now handled server-side via database trigger
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
