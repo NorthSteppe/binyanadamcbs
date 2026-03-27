@@ -52,6 +52,7 @@ import ServiceOptionsManager from "./pages/admin/ServiceOptionsManager";
 import UnifiedUserManagement from "./pages/admin/UnifiedUserManagement";
 import AuthSettings from "./pages/admin/AuthSettings";
 import SecurityDashboard from "./pages/admin/SecurityDashboard";
+import BusinessDashboard from "./pages/admin/BusinessDashboard";
 // Staff portal
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
@@ -155,6 +156,7 @@ const App = () => (
                   <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
                   <Route path="/admin/courses" element={<AdminRoute><CourseManager /></AdminRoute>} />
                   <Route path="/admin/courses/:courseId/lessons" element={<AdminRoute><CourseLessonManager /></AdminRoute>} />
+                  <Route path="/admin/business" element={<AdminRoute><BusinessDashboard /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
