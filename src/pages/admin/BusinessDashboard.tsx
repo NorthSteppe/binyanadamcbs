@@ -409,7 +409,7 @@ const BusinessDashboard = () => {
                           }
                           return <circle cx={cx} cy={cy} r={4} fill="hsl(var(--primary))" />;
                         }}
-                        strokeDasharray={(d: any) => ""}
+                        strokeDasharray="0"
                       />
                     </LineChart>
                   </ResponsiveContainer>
