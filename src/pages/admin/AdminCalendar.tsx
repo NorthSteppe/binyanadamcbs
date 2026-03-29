@@ -350,9 +350,13 @@ const AdminCalendar = () => {
   // CRUD
   const handleCreateSession = async () => {
     if (!newSession.title || !newSession.client_id || !selectedDate) return;
+    const isManualClient = newSession.client_id.startsWith("manual:");
+    const actualClientId = isManualClient ? newSession.client_id.replace("manual:", "") : newSession.client_id;
     const baseDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${newSession.time}:00`;
     const basePayload = {
-      title: newSession.title, client_id: newSession.client_id,
+      title: newSession.title,
+      client_id: isManualClient ? user!.id : actualClientId,
+      manual_client_id: isManualClient ? actualClientId : null,
       duration_minutes: newSession.duration_minutes, description: newSession.description || null,
       meeting_platform: newSession.meeting_platform || null,
       meeting_url: newSession.meeting_url || null,
