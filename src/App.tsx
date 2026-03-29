@@ -134,6 +134,12 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
+                  {/* Blog / Insights */}
+                  <Route path="/insights" element={<InsightsHub />} />
+                  <Route path="/insights/article/:slug" element={<ArticlePage />} />
+                  <Route path="/insights/category/:slug" element={<CategoryPage />} />
+                  <Route path="/insights/tag/:slug" element={<TagPage />} />
+                  <Route path="/insights/authors/:slug" element={<AuthorPage />} />
 
                   {/* Client portal */}
                   <Route path="/portal" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
