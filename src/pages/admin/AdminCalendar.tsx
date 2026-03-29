@@ -927,75 +927,74 @@ const AdminCalendar = () => {
 
       {/* ===== CREATE DIALOG ===== */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle className="flex items-center gap-2 text-base">
               <Plus size={16} /> New — {selectedDate && format(selectedDate, "MMM d, yyyy")}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Button variant={createType === "session" ? "default" : "outline"} size="sm" onClick={() => setCreateType("session")} className="text-xs gap-1"><Clock size={12} /> Session</Button>
-              <Button variant={createType === "task" ? "default" : "outline"} size="sm" onClick={() => setCreateType("task")} className="text-xs gap-1"><ListTodo size={12} /> Task</Button>
-            </div>
+          <div className="flex gap-2 px-6">
+            <Button variant={createType === "session" ? "default" : "outline"} size="sm" onClick={() => setCreateType("session")} className="text-xs gap-1 h-7"><Clock size={12} /> Session</Button>
+            <Button variant={createType === "task" ? "default" : "outline"} size="sm" onClick={() => setCreateType("task")} className="text-xs gap-1 h-7"><ListTodo size={12} /> Task</Button>
+          </div>
 
+          <ScrollArea className="flex-1 px-6 pb-2">
+            <div className="space-y-3 pr-2">
             {createType === "session" ? (
               <>
-                <div><Label>Title</Label><Input value={newSession.title} onChange={(e) => setNewSession({ ...newSession, title: e.target.value })} placeholder="Session title" /></div>
-                <div>
-                  <Label>Client</Label>
-                  <Select value={newSession.client_id} onValueChange={(v) => setNewSession({ ...newSession, client_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-                    <SelectContent>
-                      {clients.length > 0 && (
-                        <>
-                          <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Registered Users</div>
-                          {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
-                        </>
-                      )}
-                      {manualClients.length > 0 && (
-                        <>
-                          <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/50 mt-1">Manual Clients (no account)</div>
-                          {manualClients.map((c) => (
-                            <SelectItem key={`manual:${c.id}`} value={`manual:${c.id}`}>
-                              {c.full_name} <span className="text-muted-foreground text-[10px] ml-1">({c.client_type})</span>
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label>Time</Label><Input type="time" value={newSession.time} onChange={(e) => setNewSession({ ...newSession, time: e.target.value })} /></div>
-                  <div><Label>Duration (min)</Label><Input type="number" value={newSession.duration_minutes} onChange={(e) => setNewSession({ ...newSession, duration_minutes: parseInt(e.target.value) || 60 })} /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2"><Label className="text-xs">Title</Label><Input value={newSession.title} onChange={(e) => setNewSession({ ...newSession, title: e.target.value })} placeholder="Session title" className="h-8 text-sm" /></div>
+                  <div className="col-span-2">
+                    <Label className="text-xs">Client</Label>
+                    <Select value={newSession.client_id} onValueChange={(v) => setNewSession({ ...newSession, client_id: v })}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select client" /></SelectTrigger>
+                      <SelectContent>
+                        {clients.length > 0 && (
+                          <>
+                            <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Registered Users</div>
+                            {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
+                          </>
+                        )}
+                        {manualClients.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/50 mt-1">Manual Clients (no account)</div>
+                            {manualClients.map((c) => (
+                              <SelectItem key={`manual:${c.id}`} value={`manual:${c.id}`}>
+                                {c.full_name} <span className="text-muted-foreground text-[10px] ml-1">({c.client_type})</span>
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label className="text-xs">Time</Label><Input type="time" value={newSession.time} onChange={(e) => setNewSession({ ...newSession, time: e.target.value })} className="h-8 text-sm" /></div>
+                  <div><Label className="text-xs">Duration (min)</Label><Input type="number" value={newSession.duration_minutes} onChange={(e) => setNewSession({ ...newSession, duration_minutes: parseInt(e.target.value) || 60 })} className="h-8 text-sm" /></div>
                   <div>
-                    <Label className="flex items-center gap-1"><Video size={12} /> Meeting Platform</Label>
+                    <Label className="text-xs flex items-center gap-1"><Video size={10} /> Platform</Label>
                     <Select value={newSession.meeting_platform || "none"} onValueChange={(v) => setNewSession({ ...newSession, meeting_platform: v === "none" ? "" : v })}>
-                      <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         <SelectItem value="zoom">Zoom</SelectItem>
-                        <SelectItem value="teams">Microsoft Teams</SelectItem>
+                        <SelectItem value="teams">MS Teams</SelectItem>
                         <SelectItem value="google-meet">Google Meet</SelectItem>
                         <SelectItem value="in-person">In Person</SelectItem>
-                        <SelectItem value="phone">Phone Call</SelectItem>
+                        <SelectItem value="phone">Phone</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label className="flex items-center gap-1"><Link2 size={12} /> Meeting Link</Label>
-                    <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." />
+                    <Label className="text-xs flex items-center gap-1"><Link2 size={10} /> Link</Label>
+                    <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." className="h-8 text-sm" />
                   </div>
                 </div>
                 <div>
-                  <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Invite Therapists</Label>
-                  <div className="grid grid-cols-2 gap-1.5 max-h-[120px] overflow-y-auto border border-border/50 rounded-lg p-2">
+                  <Label className="text-xs flex items-center gap-1 mb-1"><UserPlus size={10} /> Invite Therapists</Label>
+                  <div className="grid grid-cols-2 gap-1 max-h-[80px] overflow-y-auto border border-border/50 rounded-lg p-1.5">
                     {staffMembers.map((s) => (
-                      <label key={s.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                      <label key={s.id} className="flex items-center gap-1.5 text-[11px] cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
                         <Checkbox
                           checked={newSession.attendee_ids.includes(s.id)}
                           onCheckedChange={(checked) => {
@@ -1006,57 +1005,67 @@ const AdminCalendar = () => {
                                 : prev.attendee_ids.filter((id) => id !== s.id),
                             }));
                           }}
+                          className="h-3.5 w-3.5"
                         />
                         {s.full_name}
                       </label>
                     ))}
                   </div>
                 </div>
-                <div><Label>Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} /></div>
-                {/* Recurring Sessions */}
-                <div className="border border-border/50 rounded-lg p-3 space-y-3 bg-muted/30">
-                  <Label className="flex items-center gap-1.5 text-sm"><Repeat size={14} /> Recurring Sessions</Label>
-                  <Select value={newSession.recurrence} onValueChange={(v) => setNewSession({ ...newSession, recurrence: v })}>
-                    <SelectTrigger className="text-xs h-8"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">One-off (no repeat)</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="biweekly">Every 2 weeks</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div><Label className="text-xs">Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} className="text-sm" /></div>
+                {/* Recurring */}
+                <div className="border border-border/50 rounded-lg p-2.5 space-y-2 bg-muted/30">
+                  <Label className="flex items-center gap-1.5 text-xs"><Repeat size={12} /> Recurrence</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select value={newSession.recurrence} onValueChange={(v) => setNewSession({ ...newSession, recurrence: v })}>
+                      <SelectTrigger className="text-xs h-7"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">One-off</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="biweekly">Biweekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {newSession.recurrence !== "none" && (
+                      <Input type="number" min={2} max={52} value={newSession.recurrence_count} onChange={(e) => setNewSession({ ...newSession, recurrence_count: parseInt(e.target.value) || 4 })} className="h-7 text-xs" placeholder="# sessions" />
+                    )}
+                  </div>
                   {newSession.recurrence !== "none" && (
-                    <div>
-                      <Label className="text-xs">Number of sessions</Label>
-                      <Input type="number" min={2} max={52} value={newSession.recurrence_count} onChange={(e) => setNewSession({ ...newSession, recurrence_count: parseInt(e.target.value) || 4 })} className="h-8 text-xs" />
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        Will create {newSession.recurrence_count} sessions ({newSession.recurrence === "weekly" ? "every week" : newSession.recurrence === "biweekly" ? "every 2 weeks" : "every month"})
-                      </p>
-                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      Creates {newSession.recurrence_count} sessions ({newSession.recurrence === "weekly" ? "every week" : newSession.recurrence === "biweekly" ? "every 2 weeks" : "monthly"})
+                    </p>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
-                  <AlertCircle size={14} className="shrink-0" />
-                  <span>Sessions are created as unpaid. Admin can mark payment once received.</span>
-                </div>
-                <Button className="w-full" onClick={handleCreateSession}>
-                  {newSession.recurrence !== "none" ? `Create ${newSession.recurrence_count} Sessions` : "Create Session"}
-                </Button>
               </>
             ) : (
               <>
-                <div><Label>Title</Label><Input value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} placeholder="Task title" /></div>
+                <div><Label className="text-xs">Title</Label><Input value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} placeholder="Task title" className="h-8 text-sm" /></div>
                 <div>
-                  <Label>Assign To</Label>
+                  <Label className="text-xs">Assign To</Label>
                   <Select value={newTask.assigned_to} onValueChange={(v) => setNewTask({ ...newTask, assigned_to: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select staff" /></SelectTrigger>
                     <SelectContent>{staffMembers.map((s) => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div><Label>Description</Label><Textarea value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} placeholder="Optional" rows={2} /></div>
-                <Button className="w-full" onClick={handleCreateTask}>Create Task</Button>
+                <div><Label className="text-xs">Description</Label><Textarea value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} placeholder="Optional" rows={2} className="text-sm" /></div>
               </>
             )}
+            </div>
+          </ScrollArea>
+
+          {/* Sticky footer */}
+          <div className="border-t border-border px-6 py-3 bg-background">
+            {createType === "session" && (
+              <div className="flex items-center gap-2 text-[10px] text-amber-600 mb-2">
+                <AlertCircle size={12} className="shrink-0" />
+                Sessions created as unpaid. Mark payment once received.
+              </div>
+            )}
+            <Button className="w-full h-9" onClick={createType === "session" ? handleCreateSession : handleCreateTask}>
+              {createType === "session"
+                ? (newSession.recurrence !== "none" ? `Create ${newSession.recurrence_count} Sessions` : "Create Session")
+                : "Create Task"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
