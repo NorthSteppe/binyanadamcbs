@@ -71,6 +71,7 @@ const categories: ToolCategory[] = [
     iconBgClass: "bg-muted text-muted-foreground",
     tools: [
       { label: "User Management", path: "/admin/users", icon: UserCog, description: "Manage all users, roles, therapist assignments, and view client portals" },
+      { label: "Manual Clients", path: "/admin/manual-clients", icon: UserPlus, description: "Add clients and supervisees who don't have an account" },
       { label: "Auth Settings", path: "/admin/auth-settings", icon: KeyRound, description: "Configure sign-up, sign-in methods, and security" },
       { label: "Security Dashboard", path: "/admin/security", icon: ShieldAlert, description: "Run security scans and review vulnerabilities" },
       { label: "Team Requests", path: "/admin/team-requests", icon: UserPlus, description: "Review pending therapist access requests" },
