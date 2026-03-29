@@ -87,6 +87,7 @@ import CategoryPage from "./pages/insights/CategoryPage";
 import TagPage from "./pages/insights/TagPage";
 import AuthorPage from "./pages/insights/AuthorPage";
 import BlogManager from "./pages/admin/BlogManager";
+import BadgeManager from "./pages/admin/BadgeManager";
 
 const queryClient = new QueryClient();
 
@@ -171,6 +172,7 @@ const App = () => (
                   <Route path="/admin/courses/:courseId/lessons" element={<AdminRoute><CourseLessonManager /></AdminRoute>} />
                   <Route path="/admin/business" element={<AdminRoute><BusinessDashboard /></AdminRoute>} />
                   <Route path="/admin/blog" element={<AdminRoute><BlogManager /></AdminRoute>} />
+                  <Route path="/admin/badges" element={<AdminRoute><BadgeManager /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />

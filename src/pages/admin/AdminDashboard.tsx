@@ -42,6 +42,7 @@ const categories: ToolCategory[] = [
       { label: "Site Content", path: "/admin/site-content", icon: FileEdit, description: "Edit page images, quotes, and text across all service pages" },
       { label: "Therapist Profiles", path: "/admin/team-members", icon: Users, description: "Add, edit, or remove therapist bios shown on the About page" },
       { label: "Blog Manager", path: "/admin/blog", icon: BookOpen, description: "Create, schedule, and manage Insights articles, categories, and authors" },
+      { label: "Partner Badges", path: "/admin/badges", icon: Shield, description: "Manage accreditation logos on the landing page, add links to external sites" },
     ],
   },
   {
