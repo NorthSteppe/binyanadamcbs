@@ -1373,6 +1373,125 @@ const AdminCalendar = () => {
           </div>
         </DialogContent>
       </Dialog>
+      {/* ===== DAY DETAIL POPUP ===== */}
+      <Dialog open={dayDetailOpen} onOpenChange={setDayDetailOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {selectedDate && (() => {
+            const key = format(selectedDate, "yyyy-MM-dd");
+            const dayEvents = eventsByDay.get(key) || [];
+            const hebDay = getHebrewDay(selectedDate);
+            const dayHolidays = getAllHolidays(selectedDate);
+            const daySessions = dayEvents.filter(e => e.type === "session");
+            const dayTasks = dayEvents.filter(e => e.type === "task");
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center justify-between">
+                    <span className="text-lg font-serif">{format(selectedDate, "EEEE, MMMM d, yyyy")}</span>
+                  </DialogTitle>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                    <span dir="rtl" className="font-light">{hebDay}</span>
+                    {dayHolidays.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {dayHolidays.map((h, i) => (
+                          <Badge key={i} variant="secondary" className={`text-[10px] ${h.type === "bank" ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300" : "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"}`}>
+                            {h.emoji} {h.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </DialogHeader>
+
+                {/* Quick actions */}
+                <div className="flex gap-2 mt-2">
+                  <Button size="sm" className="gap-1.5 flex-1" onClick={() => handleDayDetailCreate("session")}>
+                    <Plus size={14} /> New Session
+                  </Button>
+                  <Button size="sm" variant="outline" className="gap-1.5 flex-1" onClick={() => handleDayDetailCreate("task")}>
+                    <ListTodo size={14} /> New Task
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setCurrentDate(selectedDate); setViewMode("day"); setDayDetailOpen(false); }}>
+                    <Maximize2 size={14} />
+                  </Button>
+                </div>
+
+                {/* Sessions */}
+                {daySessions.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Sessions ({daySessions.length})</h4>
+                    <div className="space-y-2">
+                      {daySessions.sort((a, b) => a.start.getTime() - b.start.getTime()).map(ev => (
+                        <div
+                          key={ev.id}
+                          onClick={(e) => { setDayDetailOpen(false); handleEventClick(e, ev); }}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors group"
+                        >
+                          <div className="w-1 h-10 rounded-full shrink-0" style={{ backgroundColor: ev.color }} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium truncate">{ev.title}</span>
+                              {ev.status && (
+                                <Badge variant="secondary" className="text-[9px]" style={{ backgroundColor: `${ev.color}20`, color: ev.color }}>
+                                  {ev.status}
+                                </Badge>
+                              )}
+                              {isAdmin && !ev.isPaid && (
+                                <Badge variant="destructive" className="text-[9px] gap-0.5">
+                                  <DollarSign size={8} /> Unpaid
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <span className="flex items-center gap-1"><Clock size={10} />{format(ev.start, "HH:mm")} – {format(ev.end, "HH:mm")}</span>
+                              {ev.clientName && <span className="flex items-center gap-1"><User size={10} />{ev.clientName}</span>}
+                            </div>
+                          </div>
+                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tasks */}
+                {dayTasks.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tasks ({dayTasks.length})</h4>
+                    <div className="space-y-2">
+                      {dayTasks.map(ev => (
+                        <div
+                          key={ev.id}
+                          onClick={(e) => { setDayDetailOpen(false); handleEventClick(e, ev); }}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors group"
+                        >
+                          <div className="w-1 h-10 rounded-full shrink-0 bg-blue-500" />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm font-medium truncate">{ev.title}</span>
+                            {ev.assignedName && (
+                              <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><User size={10} />{ev.assignedName}</p>
+                            )}
+                          </div>
+                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {dayEvents.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <CalendarDays size={32} className="mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">No events scheduled for this day</p>
+                    <p className="text-xs mt-1">Click above to create a session or task</p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
