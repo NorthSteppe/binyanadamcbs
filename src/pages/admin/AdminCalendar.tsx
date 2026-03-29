@@ -86,6 +86,7 @@ const AdminCalendar = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [dayDetailOpen, setDayDetailOpen] = useState(false);
 
   // New session form
   const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], recurrence: "none" as string, recurrence_count: 4 });
