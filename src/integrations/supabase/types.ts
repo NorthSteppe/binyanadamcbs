@@ -960,6 +960,39 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_badges: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_secrets: {
         Row: {
           calendar_feed_token: string | null
