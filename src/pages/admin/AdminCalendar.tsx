@@ -825,6 +825,24 @@ const AdminCalendar = () => {
           {/* ===== DAY VIEW ===== */}
           {viewMode === "day" && (
             <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+              {/* Day view header with Hebrew date and holidays */}
+              {(() => {
+                const dayHolidays = getAllHolidays(currentDate);
+                return dayHolidays.length > 0 ? (
+                  <div className="px-3 py-2 border-b border-border/30 bg-muted/30 flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-muted-foreground" dir="rtl">{getHebrewDay(currentDate)}</span>
+                    {dayHolidays.map((h, i) => (
+                      <span key={i} className={`text-[10px] px-2 py-0.5 rounded-full ${h.type === "bank" ? "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300" : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300"}`}>
+                        {h.emoji} {h.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-3 py-1.5 border-b border-border/30 bg-muted/30">
+                    <span className="text-xs text-muted-foreground" dir="rtl">{getHebrewDay(currentDate)}</span>
+                  </div>
+                );
+              })()}
               <div ref={scrollRef} className={`overflow-y-auto ${calendarHeight}`}>
                 {HOURS.map((hour) => {
                   const key = format(currentDate, "yyyy-MM-dd");
