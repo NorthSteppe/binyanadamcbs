@@ -355,7 +355,7 @@ const AdminCalendar = () => {
       }
       toast.success("Session created");
       setCreateOpen(false);
-      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] });
+      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4 });
       qc.invalidateQueries({ queryKey: ["team_sessions"] });
     }
   };
