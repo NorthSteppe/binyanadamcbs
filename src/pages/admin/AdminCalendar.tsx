@@ -337,29 +337,59 @@ const AdminCalendar = () => {
   // CRUD
   const handleCreateSession = async () => {
     if (!newSession.title || !newSession.client_id || !selectedDate) return;
-    const dateTime = `${format(selectedDate, "yyyy-MM-dd")}T${newSession.time}:00`;
-    const { error } = await supabase.from("sessions").insert({
-      title: newSession.title, client_id: newSession.client_id, session_date: dateTime,
+    const baseDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${newSession.time}:00`;
+    const basePayload = {
+      title: newSession.title, client_id: newSession.client_id,
       duration_minutes: newSession.duration_minutes, description: newSession.description || null,
       meeting_platform: newSession.meeting_platform || null,
       meeting_url: newSession.meeting_url || null,
       attendee_ids: newSession.attendee_ids,
-    } as any);
-    if (error) toast.error("Failed to create session");
-    else {
-      // Send invite notifications to attendees
-      for (const aid of newSession.attendee_ids) {
-        await supabase.rpc("create_notification", {
-          _user_id: aid, _type: "session", _title: "Session Invite",
-          _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}`,
-          _link: "/admin/calendar",
-        });
+      is_paid: false,
+    } as any;
+
+    // Calculate dates for recurring sessions
+    const dates: Date[] = [new Date(baseDateTime)];
+    if (newSession.recurrence !== "none") {
+      const count = newSession.recurrence_count || 4;
+      for (let i = 1; i < count; i++) {
+        const base = dates[0];
+        const next = new Date(base);
+        if (newSession.recurrence === "weekly") next.setDate(base.getDate() + 7 * i);
+        else if (newSession.recurrence === "biweekly") next.setDate(base.getDate() + 14 * i);
+        else if (newSession.recurrence === "monthly") next.setMonth(base.getMonth() + i);
+        dates.push(next);
       }
-      toast.success("Session created");
-      setCreateOpen(false);
-      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4 });
-      qc.invalidateQueries({ queryKey: ["team_sessions"] });
     }
+
+    // Insert first session
+    const { data: firstSession, error } = await supabase.from("sessions").insert({
+      ...basePayload, session_date: dates[0].toISOString(),
+    } as any).select("id").single();
+
+    if (error) { toast.error("Failed to create session"); return; }
+
+    // Insert remaining recurring sessions with parent reference
+    if (dates.length > 1 && firstSession) {
+      const remaining = dates.slice(1).map((d) => ({
+        ...basePayload, session_date: d.toISOString(),
+        recurrence_parent_id: firstSession.id,
+      }));
+      const { error: recErr } = await supabase.from("sessions").insert(remaining as any);
+      if (recErr) toast.error("Some recurring sessions failed to create");
+    }
+
+    // Send invite notifications to attendees
+    for (const aid of newSession.attendee_ids) {
+      await supabase.rpc("create_notification", {
+        _user_id: aid, _type: "session", _title: "Session Invite",
+        _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}${dates.length > 1 ? ` (recurring × ${dates.length})` : ""}`,
+        _link: "/admin/calendar",
+      });
+    }
+    toast.success(dates.length > 1 ? `${dates.length} recurring sessions created` : "Session created");
+    setCreateOpen(false);
+    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4 });
+    qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
   const handleCreateTask = async () => {
