@@ -239,6 +239,8 @@ const AdminCalendar = () => {
           attendeeIds: s.attendee_ids || [],
           notes: s.notes || "",
           plaudRecordingId: s.plaud_recording_id || "",
+          isPaid: s.is_paid || false,
+          paymentMethod: s.payment_method || "",
         });
       });
     }
