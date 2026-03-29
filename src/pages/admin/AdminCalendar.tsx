@@ -229,8 +229,9 @@ const AdminCalendar = () => {
   const nameMap = useMemo(() => {
     const m = new Map<string, string>();
     clients.forEach((c) => m.set(c.id, c.full_name || "Unknown"));
+    manualClients.forEach((c) => m.set(c.id, c.full_name || "Unknown"));
     return m;
-  }, [clients]);
+  }, [clients, manualClients]);
 
   // Build unified events
   const events = useMemo(() => {
