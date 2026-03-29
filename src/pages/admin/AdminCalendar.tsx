@@ -706,7 +706,10 @@ const AdminCalendar = () => {
                             style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
                           >
                             <span className="truncate">{ev.type === "session" && format(ev.start, "HH:mm") + " "}{ev.clientName || ev.title}</span>
-                            {ev.plaudRecordingId && <Sparkles size={8} className="shrink-0 ml-0.5 text-primary opacity-80" />}
+                            <span className="flex items-center gap-0.5 shrink-0">
+                              {isAdmin && ev.type === "session" && !ev.isPaid && <DollarSign size={7} className="text-destructive" />}
+                              {ev.plaudRecordingId && <Sparkles size={8} className="ml-0.5 text-primary opacity-80" />}
+                            </span>
                           </div>
                         ))}
                         {dayEvents.length > maxEv && (
