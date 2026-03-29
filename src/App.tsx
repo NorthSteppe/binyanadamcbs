@@ -80,6 +80,13 @@ import CourseLessonManager from "./pages/admin/CourseLessonManager";
 import SuperviseeDashboard from "./pages/supervisee/SuperviseeDashboard";
 import CaseLogs from "./pages/supervisee/CaseLogs";
 import SuperviseeDocuments from "./pages/supervisee/SuperviseeDocuments";
+// Blog / Insights
+import InsightsHub from "./pages/insights/InsightsHub";
+import ArticlePage from "./pages/insights/ArticlePage";
+import CategoryPage from "./pages/insights/CategoryPage";
+import TagPage from "./pages/insights/TagPage";
+import AuthorPage from "./pages/insights/AuthorPage";
+import BlogManager from "./pages/admin/BlogManager";
 
 const queryClient = new QueryClient();
 
