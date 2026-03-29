@@ -1072,177 +1072,169 @@ const AdminCalendar = () => {
 
       {/* ===== EVENT DETAIL DIALOG ===== */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2" style={{ color: selectedEvent?.color }}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle className="flex items-center gap-2 text-base" style={{ color: selectedEvent?.color }}>
               {selectedEvent?.type === "session" ? "📅" : "✅"} {selectedEvent?.title}
             </DialogTitle>
           </DialogHeader>
           {selectedEvent && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock size={14} />
-                {format(selectedEvent.start, "HH:mm")} – {format(selectedEvent.end, "HH:mm")}
-                <span className="text-xs">({differenceInMinutes(selectedEvent.end, selectedEvent.start)} min)</span>
-              </div>
-              {selectedEvent.clientName && (
-                <div className="flex items-center gap-2 text-sm">
-                  <User size={14} className="text-muted-foreground" /> {selectedEvent.clientName}
-                </div>
-              )}
-              {selectedEvent.assignedName && (
-                <div className="flex items-center gap-2 text-sm">
-                  <User size={14} className="text-muted-foreground" /> Assigned to: {selectedEvent.assignedName}
-                </div>
-              )}
-              <Badge variant="outline" className="capitalize">{selectedEvent.type}</Badge>
-              {selectedEvent.status && (
-                <>
-                  <Badge variant="secondary" className="capitalize ml-1">{selectedEvent.status}</Badge>
-                  <div className="mt-2">
-                    <Label className="text-xs">Change Status</Label>
-                    <Select value={selectedEvent.status} onValueChange={(v) => { handleStatusChange(selectedEvent.id, v); setSelectedEvent({ ...selectedEvent, status: v }); }}>
-                      <SelectTrigger className="w-full text-xs h-8"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                        <SelectItem value="no-show">No Show</SelectItem>
-                      </SelectContent>
-                    </Select>
+            <>
+              <ScrollArea className="flex-1 px-6 pb-2">
+                <div className="space-y-3 pr-2">
+                  {/* Key info row */}
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock size={12} />{format(selectedEvent.start, "HH:mm")}–{format(selectedEvent.end, "HH:mm")} ({differenceInMinutes(selectedEvent.end, selectedEvent.start)}min)</span>
+                    {selectedEvent.clientName && <span className="flex items-center gap-1"><User size={12} />{selectedEvent.clientName}</span>}
+                    {selectedEvent.assignedName && <span className="flex items-center gap-1"><User size={12} />{selectedEvent.assignedName}</span>}
                   </div>
-                </>
-              )}
-              {selectedEvent.meetingPlatform && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Video size={14} className="text-muted-foreground" />
-                  <span className="capitalize">{selectedEvent.meetingPlatform.replace("-", " ")}</span>
-                  {selectedEvent.meetingUrl && (
-                    <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs">
-                      <ExternalLink size={10} /> Join
-                    </a>
-                  )}
-                </div>
-              )}
-              {selectedEvent.attendeeIds && selectedEvent.attendeeIds.length > 0 && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground flex items-center gap-1 mb-1"><UserPlus size={14} /> Attendees:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedEvent.attendeeIds.map((id) => (
-                      <Badge key={id} variant="secondary" className="text-xs">{nameMap.get(id) || "Unknown"}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
-              {/* Payment Status - Admin Only */}
-              {isAdmin && selectedEvent.type === "session" && (
-                <div className="border border-border/50 rounded-lg p-3 space-y-2 bg-muted/30">
-                  <Label className="text-xs flex items-center gap-1.5">
-                    <DollarSign size={14} /> Payment Status
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    {selectedEvent.isPaid ? (
-                      <Badge className="bg-green-500/10 text-green-600 border-green-500/30 gap-1">
-                        <CheckCircle2 size={10} /> Paid
-                        {selectedEvent.paymentMethod && ` (${selectedEvent.paymentMethod})`}
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive" className="gap-1">
-                        <AlertCircle size={10} /> Not Paid
+
+                  {/* Status + badges */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Badge variant="outline" className="capitalize text-[10px]">{selectedEvent.type}</Badge>
+                    {selectedEvent.status && <Badge variant="secondary" className="capitalize text-[10px]">{selectedEvent.status}</Badge>}
+                    {selectedEvent.meetingPlatform && (
+                      <Badge variant="outline" className="text-[10px] gap-1 capitalize">
+                        <Video size={9} />{selectedEvent.meetingPlatform.replace("-", " ")}
+                        {selectedEvent.meetingUrl && (
+                          <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-primary ml-1" onClick={(e) => e.stopPropagation()}>
+                            <ExternalLink size={9} />
+                          </a>
+                        )}
                       </Badge>
                     )}
                   </div>
-                  {!selectedEvent.isPaid && (
-                    <div className="flex gap-1.5 mt-1">
-                      {["cash", "bank transfer", "card", "other"].map((method) => (
-                        <Button key={method} variant="outline" size="sm" className="text-[10px] h-7 gap-1 capitalize"
-                          onClick={async () => {
-                            await supabase.from("sessions").update({ is_paid: true, payment_method: method } as any).eq("id", selectedEvent.id);
-                            setSelectedEvent({ ...selectedEvent, isPaid: true, paymentMethod: method });
-                            qc.invalidateQueries({ queryKey: ["team_sessions"] });
-                            toast.success(`Payment marked as received (${method})`);
-                          }}
+
+                  {/* Status change */}
+                  {selectedEvent.status && (
+                    <div className="grid grid-cols-4 gap-1">
+                      {["scheduled", "completed", "cancelled", "no-show"].map((s) => (
+                        <Button
+                          key={s}
+                          variant={selectedEvent.status === s ? "default" : "outline"}
+                          size="sm"
+                          className="text-[10px] h-7 capitalize"
+                          onClick={() => { handleStatusChange(selectedEvent.id, s); setSelectedEvent({ ...selectedEvent, status: s }); }}
                         >
-                          <Banknote size={10} /> {method}
+                          {s}
                         </Button>
                       ))}
                     </div>
                   )}
-                  {selectedEvent.isPaid && (
-                    <Button variant="ghost" size="sm" className="text-[10px] h-6 text-muted-foreground"
-                      onClick={async () => {
-                        await supabase.from("sessions").update({ is_paid: false, payment_method: "" } as any).eq("id", selectedEvent.id);
-                        setSelectedEvent({ ...selectedEvent, isPaid: false, paymentMethod: "" });
-                        qc.invalidateQueries({ queryKey: ["team_sessions"] });
-                        toast.success("Payment status reset");
-                      }}
-                    >
-                      Undo payment
-                    </Button>
+
+                  {/* Attendees */}
+                  {selectedEvent.attendeeIds && selectedEvent.attendeeIds.length > 0 && (
+                    <div className="flex flex-wrap gap-1 items-center">
+                      <UserPlus size={12} className="text-muted-foreground" />
+                      {selectedEvent.attendeeIds.map((id) => (
+                        <Badge key={id} variant="secondary" className="text-[10px]">{nameMap.get(id) || "Unknown"}</Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedEvent.description && <p className="text-xs text-muted-foreground">{selectedEvent.description}</p>}
+
+                  {/* Payment Status - Admin Only */}
+                  {isAdmin && selectedEvent.type === "session" && (
+                    <div className="border border-border/50 rounded-lg p-2.5 space-y-2 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs flex items-center gap-1"><DollarSign size={12} /> Payment</Label>
+                        {selectedEvent.isPaid ? (
+                          <Badge className="bg-green-500/10 text-green-600 border-green-500/30 gap-1 text-[10px]">
+                            <CheckCircle2 size={9} /> Paid{selectedEvent.paymentMethod && ` (${selectedEvent.paymentMethod})`}
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="gap-1 text-[10px]"><AlertCircle size={9} /> Unpaid</Badge>
+                        )}
+                      </div>
+                      {!selectedEvent.isPaid && (
+                        <div className="flex gap-1">
+                          {["cash", "bank transfer", "card", "other"].map((method) => (
+                            <Button key={method} variant="outline" size="sm" className="text-[9px] h-6 gap-0.5 capitalize flex-1"
+                              onClick={async () => {
+                                await supabase.from("sessions").update({ is_paid: true, payment_method: method } as any).eq("id", selectedEvent.id);
+                                setSelectedEvent({ ...selectedEvent, isPaid: true, paymentMethod: method });
+                                qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                                toast.success(`Paid (${method})`);
+                              }}
+                            >
+                              <Banknote size={9} /> {method}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                      {selectedEvent.isPaid && (
+                        <Button variant="ghost" size="sm" className="text-[10px] h-5 text-muted-foreground p-0"
+                          onClick={async () => {
+                            await supabase.from("sessions").update({ is_paid: false, payment_method: "" } as any).eq("id", selectedEvent.id);
+                            setSelectedEvent({ ...selectedEvent, isPaid: false, paymentMethod: "" });
+                            qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                            toast.success("Payment reset");
+                          }}
+                        >
+                          Undo payment
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Unpaid warning for staff */}
+                  {!isAdmin && selectedEvent.type === "session" && !selectedEvent.isPaid && (
+                    <div className="flex items-center gap-2 text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2">
+                      <AlertCircle size={12} className="shrink-0" />
+                      <span>Not yet marked as paid.</span>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {selectedEvent.notes && (
+                    <div className="border-t border-border pt-2">
+                      <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
+                        {selectedEvent.plaudRecordingId ? <><Sparkles size={10} className="text-primary" /> AI Summary</> : <>📝 Notes</>}
+                      </Label>
+                      <div className="bg-muted/50 rounded p-2.5 text-xs whitespace-pre-wrap max-h-32 overflow-y-auto font-light leading-relaxed">
+                        {selectedEvent.notes}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add notes section */}
+                  {selectedEvent.type === "session" && (
+                    <div className="border-t border-border pt-2 space-y-2">
+                      <Label className="text-xs text-muted-foreground flex items-center gap-1">📋 Add Notes</Label>
+                      <NoteTemplateManager
+                        mode="select"
+                        onApplyTemplate={(content) => setPasteNotes((prev) => prev ? prev + "\n\n" + content : content)}
+                      />
+                      <VoiceRecorder onTranscript={(text) => setPasteNotes(text)} />
+                      <Textarea
+                        value={pasteNotes}
+                        onChange={(e) => setPasteNotes(e.target.value)}
+                        placeholder="Speak, apply a template, or type..."
+                        rows={3}
+                        className="text-xs"
+                      />
+                      <Button size="sm" className="gap-1 h-7 text-xs" onClick={handleSaveNotes} disabled={!pasteNotes.trim() || savingNotes}>
+                        {savingNotes ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                        Save Notes
+                      </Button>
+                    </div>
                   )}
                 </div>
-              )}
-              {/* Unpaid warning for non-admin staff */}
-              {!isAdmin && selectedEvent.type === "session" && !selectedEvent.isPaid && (
-                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
-                  <AlertCircle size={14} className="shrink-0" />
-                  <span>This session has not been marked as paid yet.</span>
-                </div>
-              )}
-              {selectedEvent.notes && (
-                <div className="mt-2 border-t border-border pt-3">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
-                    {selectedEvent.plaudRecordingId ? (
-                      <><Sparkles size={12} className="text-primary" /> Plaud AI Summary / Notes</>
-                    ) : (
-                      <>📝 Session Notes</>
-                    )}
-                  </Label>
-                  <div className="bg-muted/50 rounded p-3 text-sm whitespace-pre-wrap max-h-48 overflow-y-auto font-light leading-relaxed">
-                    {selectedEvent.notes}
-                  </div>
-                </div>
-              )}
-              {selectedEvent.type === "session" && (
-                <div className="mt-2 border-t border-border pt-3 space-y-3">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📋 Add Notes (voice, template, or type)</Label>
-                  <NoteTemplateManager
-                    mode="select"
-                    onApplyTemplate={(content) => setPasteNotes((prev) => prev ? prev + "\n\n" + content : content)}
-                  />
-                  <VoiceRecorder
-                    onTranscript={(text) => setPasteNotes(text)}
-                  />
-                  <Textarea
-                    value={pasteNotes}
-                    onChange={(e) => setPasteNotes(e.target.value)}
-                    placeholder="Speak, apply a template, or type session notes..."
-                    rows={4}
-                    className="text-sm"
-                  />
-                  <Button
-                    size="sm"
-                    className="gap-1"
-                    onClick={handleSaveNotes}
-                    disabled={!pasteNotes.trim() || savingNotes}
-                  >
-                    {savingNotes ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                    Save Notes
-                  </Button>
-                </div>
-              )}
-              <div className="flex gap-2 pt-2">
+              </ScrollArea>
+
+              {/* Sticky footer */}
+              <div className="border-t border-border px-6 py-3 bg-background flex gap-2">
                 {selectedEvent.type === "session" && (
-                  <Button variant="outline" size="sm" className="gap-1" onClick={() => openEdit(selectedEvent)}>
-                    <Edit size={14} /> Edit
+                  <Button variant="outline" size="sm" className="gap-1 text-xs flex-1" onClick={() => openEdit(selectedEvent)}>
+                    <Edit size={12} /> Edit
                   </Button>
                 )}
-                <Button variant="destructive" size="sm" className="gap-1" onClick={() => handleDelete(selectedEvent)}>
-                  <Trash2 size={14} /> Delete
+                <Button variant="destructive" size="sm" className="gap-1 text-xs flex-1" onClick={() => handleDelete(selectedEvent)}>
+                  <Trash2 size={12} /> Delete
                 </Button>
               </div>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
