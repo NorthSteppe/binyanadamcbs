@@ -676,13 +676,15 @@ const AdminCalendar = () => {
                 ))}
               </div>
               <div className="grid grid-cols-7">
-                {days.map((day) => {
+              {days.map((day) => {
                   const key = format(day, "yyyy-MM-dd");
                   const dayEvents = eventsByDay.get(key) || [];
                   const isT = isSameDay(day, today);
                   const isCur = isSameMonth(day, currentDate);
                   const isOver = dropTarget === `month-${key}`;
                   const maxEv = isFullscreen ? 5 : 3;
+                  const hebDay = getHebrewDay(day);
+                  const dayHolidays = getAllHolidays(day);
                   return (
                     <div
                       key={key}
@@ -693,9 +695,23 @@ const AdminCalendar = () => {
                       className={`min-h-[90px] border-b border-r border-border/20 p-1.5 cursor-pointer transition-colors
                         ${isT ? "bg-primary/5" : "hover:bg-muted/30"}
                         ${!isCur ? "opacity-40" : ""}
-                        ${isOver ? "bg-primary/10" : ""}`}
+                        ${isOver ? "bg-primary/10" : ""}
+                        ${dayHolidays.some(h => h.isYomTov) ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}`}
                     >
-                      <span className={`text-[11px] font-medium ${isT ? "text-primary" : "text-muted-foreground"}`}>{format(day, "d")}</span>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[11px] font-medium ${isT ? "text-primary" : "text-muted-foreground"}`}>{format(day, "d")}</span>
+                        <span className="text-[9px] text-muted-foreground/60 font-light" dir="rtl">{hebDay}</span>
+                      </div>
+                      {dayHolidays.length > 0 && (
+                        <div className="space-y-0.5 mb-0.5">
+                          {dayHolidays.slice(0, 2).map((h, i) => (
+                            <div key={i} className={`text-[8px] px-1 py-0.5 rounded truncate ${h.type === "bank" ? "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300" : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300"}`}>
+                              {h.emoji} {h.name}
+                            </div>
+                          ))}
+                          {dayHolidays.length > 2 && <span className="text-[7px] text-muted-foreground">+{dayHolidays.length - 2}</span>}
+                        </div>
+                      )}
                       <div className="mt-0.5 space-y-0.5">
                         {dayEvents.slice(0, maxEv).map((ev) => (
                           <div
