@@ -946,7 +946,24 @@ const AdminCalendar = () => {
                   <Label>Client</Label>
                   <Select value={newSession.client_id} onValueChange={(v) => setNewSession({ ...newSession, client_id: v })}>
                     <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-                    <SelectContent>{clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}</SelectContent>
+                    <SelectContent>
+                      {clients.length > 0 && (
+                        <>
+                          <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Registered Users</div>
+                          {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
+                        </>
+                      )}
+                      {manualClients.length > 0 && (
+                        <>
+                          <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/50 mt-1">Manual Clients (no account)</div>
+                          {manualClients.map((c) => (
+                            <SelectItem key={`manual:${c.id}`} value={`manual:${c.id}`}>
+                              {c.full_name} <span className="text-muted-foreground text-[10px] ml-1">({c.client_type})</span>
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
