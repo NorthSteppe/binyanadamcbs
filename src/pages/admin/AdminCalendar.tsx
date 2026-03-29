@@ -138,6 +138,15 @@ const AdminCalendar = () => {
     },
   });
 
+  // Fetch manual clients
+  const { data: manualClients = [] } = useQuery({
+    queryKey: ["manual_clients"],
+    queryFn: async () => {
+      const { data } = await supabase.from("manual_clients" as any).select("id, full_name, client_type").order("full_name");
+      return (data as unknown as Array<{ id: string; full_name: string; client_type: string }>) || [];
+    },
+  });
+
   const { data: staffMembers = [] } = useQuery({
     queryKey: ["staff_profiles"],
     queryFn: async () => {
@@ -220,8 +229,9 @@ const AdminCalendar = () => {
   const nameMap = useMemo(() => {
     const m = new Map<string, string>();
     clients.forEach((c) => m.set(c.id, c.full_name || "Unknown"));
+    manualClients.forEach((c) => m.set(c.id, c.full_name || "Unknown"));
     return m;
-  }, [clients]);
+  }, [clients, manualClients]);
 
   // Build unified events
   const events = useMemo(() => {
@@ -229,13 +239,14 @@ const AdminCalendar = () => {
     if (showSessions) {
       sessions.forEach((s: any) => {
         const start = parseISO(s.session_date);
+        const clientId = s.manual_client_id || s.client_id;
         result.push({
           id: s.id, title: s.title, start,
           end: new Date(start.getTime() + (s.duration_minutes || 60) * 60000),
           type: "session", color: statusColors[s.status] || statusColors.scheduled,
           status: s.status, description: s.description,
-          clientName: nameMap.get(s.client_id) || "Unknown",
-          clientId: s.client_id,
+          clientName: nameMap.get(clientId) || "Unknown",
+          clientId: clientId,
           meetingUrl: s.meeting_url || "",
           meetingPlatform: s.meeting_platform || "",
           attendeeIds: s.attendee_ids || [],
@@ -339,9 +350,13 @@ const AdminCalendar = () => {
   // CRUD
   const handleCreateSession = async () => {
     if (!newSession.title || !newSession.client_id || !selectedDate) return;
+    const isManualClient = newSession.client_id.startsWith("manual:");
+    const actualClientId = isManualClient ? newSession.client_id.replace("manual:", "") : newSession.client_id;
     const baseDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${newSession.time}:00`;
     const basePayload = {
-      title: newSession.title, client_id: newSession.client_id,
+      title: newSession.title,
+      client_id: isManualClient ? user!.id : actualClientId,
+      manual_client_id: isManualClient ? actualClientId : null,
       duration_minutes: newSession.duration_minutes, description: newSession.description || null,
       meeting_platform: newSession.meeting_platform || null,
       meeting_url: newSession.meeting_url || null,
@@ -931,7 +946,24 @@ const AdminCalendar = () => {
                   <Label>Client</Label>
                   <Select value={newSession.client_id} onValueChange={(v) => setNewSession({ ...newSession, client_id: v })}>
                     <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-                    <SelectContent>{clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}</SelectContent>
+                    <SelectContent>
+                      {clients.length > 0 && (
+                        <>
+                          <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Registered Users</div>
+                          {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
+                        </>
+                      )}
+                      {manualClients.length > 0 && (
+                        <>
+                          <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/50 mt-1">Manual Clients (no account)</div>
+                          {manualClients.map((c) => (
+                            <SelectItem key={`manual:${c.id}`} value={`manual:${c.id}`}>
+                              {c.full_name} <span className="text-muted-foreground text-[10px] ml-1">({c.client_type})</span>
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">

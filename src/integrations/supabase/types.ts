@@ -900,6 +900,42 @@ export type Database = {
         }
         Relationships: []
       }
+      manual_clients: {
+        Row: {
+          client_type: string
+          created_at: string
+          created_by: string
+          email: string
+          full_name: string
+          id: string
+          notes: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          client_type?: string
+          created_at?: string
+          created_by: string
+          email?: string
+          full_name: string
+          id?: string
+          notes?: string
+          phone?: string
+          updated_at?: string
+        }
+        Update: {
+          client_type?: string
+          created_at?: string
+          created_by?: string
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -1155,6 +1191,7 @@ export type Database = {
           duration_minutes: number
           id: string
           is_paid: boolean
+          manual_client_id: string | null
           meeting_platform: string | null
           meeting_url: string | null
           notes: string | null
@@ -1173,6 +1210,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           is_paid?: boolean
+          manual_client_id?: string | null
           meeting_platform?: string | null
           meeting_url?: string | null
           notes?: string | null
@@ -1191,6 +1229,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           is_paid?: boolean
+          manual_client_id?: string | null
           meeting_platform?: string | null
           meeting_url?: string | null
           notes?: string | null
@@ -1202,6 +1241,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sessions_manual_client_id_fkey"
+            columns: ["manual_client_id"]
+            isOneToOne: false
+            referencedRelation: "manual_clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sessions_recurrence_parent_id_fkey"
             columns: ["recurrence_parent_id"]

@@ -90,6 +90,7 @@ import AuthorPage from "./pages/insights/AuthorPage";
 import BlogManager from "./pages/admin/BlogManager";
 import BadgeManager from "./pages/admin/BadgeManager";
 import NoteTemplates from "./pages/admin/NoteTemplates";
+import ManualClients from "./pages/admin/ManualClients";
 
 const queryClient = new QueryClient();
 
@@ -177,6 +178,7 @@ const App = () => (
                   <Route path="/admin/blog" element={<AdminRoute><BlogManager /></AdminRoute>} />
                   <Route path="/admin/badges" element={<AdminRoute><BadgeManager /></AdminRoute>} />
                   <Route path="/admin/note-templates" element={<AdminRoute><NoteTemplates /></AdminRoute>} />
+                  <Route path="/admin/manual-clients" element={<AdminRoute><ManualClients /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
