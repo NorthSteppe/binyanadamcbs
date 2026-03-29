@@ -17,7 +17,10 @@ import {
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
   ListTodo, User, Edit, X, Sparkles, Loader2, Check,
   Video, Link2, UserPlus, ExternalLink, CalendarPlus, Copy, RefreshCw, CheckCircle2,
+  Mic, FileText,
 } from "lucide-react";
+import VoiceRecorder from "@/components/VoiceRecorder";
+import NoteTemplateManager from "@/components/NoteTemplateManager";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay,
@@ -987,18 +990,25 @@ const AdminCalendar = () => {
                 </div>
               )}
               {selectedEvent.type === "session" && (
-                <div className="mt-2 border-t border-border pt-3">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📋 Add Notes (paste Plaud summary or type)</Label>
+                <div className="mt-2 border-t border-border pt-3 space-y-3">
+                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📋 Add Notes (voice, template, or type)</Label>
+                  <NoteTemplateManager
+                    mode="select"
+                    onApplyTemplate={(content) => setPasteNotes((prev) => prev ? prev + "\n\n" + content : content)}
+                  />
+                  <VoiceRecorder
+                    onTranscript={(text) => setPasteNotes(text)}
+                  />
                   <Textarea
                     value={pasteNotes}
                     onChange={(e) => setPasteNotes(e.target.value)}
-                    placeholder="Paste session notes or Plaud.ai summary here..."
-                    rows={3}
+                    placeholder="Speak, apply a template, or type session notes..."
+                    rows={4}
                     className="text-sm"
                   />
                   <Button
                     size="sm"
-                    className="mt-2 gap-1"
+                    className="gap-1"
                     onClick={handleSaveNotes}
                     disabled={!pasteNotes.trim() || savingNotes}
                   >
