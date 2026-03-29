@@ -1154,10 +1154,13 @@ export type Database = {
           description: string | null
           duration_minutes: number
           id: string
+          is_paid: boolean
           meeting_platform: string | null
           meeting_url: string | null
           notes: string | null
+          payment_method: string
           plaud_recording_id: string | null
+          recurrence_parent_id: string | null
           session_date: string
           status: string
           title: string
@@ -1169,10 +1172,13 @@ export type Database = {
           description?: string | null
           duration_minutes?: number
           id?: string
+          is_paid?: boolean
           meeting_platform?: string | null
           meeting_url?: string | null
           notes?: string | null
+          payment_method?: string
           plaud_recording_id?: string | null
+          recurrence_parent_id?: string | null
           session_date: string
           status?: string
           title: string
@@ -1184,15 +1190,26 @@ export type Database = {
           description?: string | null
           duration_minutes?: number
           id?: string
+          is_paid?: boolean
           meeting_platform?: string | null
           meeting_url?: string | null
           notes?: string | null
+          payment_method?: string
           plaud_recording_id?: string | null
+          recurrence_parent_id?: string | null
           session_date?: string
           status?: string
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sessions_recurrence_parent_id_fkey"
+            columns: ["recurrence_parent_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_content: {
         Row: {

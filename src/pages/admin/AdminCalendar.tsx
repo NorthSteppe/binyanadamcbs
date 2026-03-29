@@ -17,7 +17,7 @@ import {
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
   ListTodo, User, Edit, X, Sparkles, Loader2, Check,
   Video, Link2, UserPlus, ExternalLink, CalendarPlus, Copy, RefreshCw, CheckCircle2,
-  Mic, FileText,
+  Mic, FileText, Repeat, DollarSign, CreditCard, Banknote, AlertCircle,
 } from "lucide-react";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import NoteTemplateManager from "@/components/NoteTemplateManager";
@@ -50,6 +50,8 @@ type CalendarEvent = {
   attendeeIds?: string[];
   notes?: string;
   plaudRecordingId?: string;
+  isPaid?: boolean;
+  paymentMethod?: string;
 };
 
 type ViewMode = "month" | "week" | "day";
@@ -66,7 +68,7 @@ const statusColors: Record<string, string> = {
 };
 
 const AdminCalendar = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const qc = useQueryClient();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("week");
@@ -85,7 +87,7 @@ const AdminCalendar = () => {
   const [editOpen, setEditOpen] = useState(false);
 
   // New session form
-  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
+  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], recurrence: "none" as string, recurrence_count: 4 });
   // New task form
   const [newTask, setNewTask] = useState({ title: "", assigned_to: "", description: "" });
   // Edit session form
@@ -237,6 +239,8 @@ const AdminCalendar = () => {
           attendeeIds: s.attendee_ids || [],
           notes: s.notes || "",
           plaudRecordingId: s.plaud_recording_id || "",
+          isPaid: s.is_paid || false,
+          paymentMethod: s.payment_method || "",
         });
       });
     }
@@ -333,29 +337,59 @@ const AdminCalendar = () => {
   // CRUD
   const handleCreateSession = async () => {
     if (!newSession.title || !newSession.client_id || !selectedDate) return;
-    const dateTime = `${format(selectedDate, "yyyy-MM-dd")}T${newSession.time}:00`;
-    const { error } = await supabase.from("sessions").insert({
-      title: newSession.title, client_id: newSession.client_id, session_date: dateTime,
+    const baseDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${newSession.time}:00`;
+    const basePayload = {
+      title: newSession.title, client_id: newSession.client_id,
       duration_minutes: newSession.duration_minutes, description: newSession.description || null,
       meeting_platform: newSession.meeting_platform || null,
       meeting_url: newSession.meeting_url || null,
       attendee_ids: newSession.attendee_ids,
-    } as any);
-    if (error) toast.error("Failed to create session");
-    else {
-      // Send invite notifications to attendees
-      for (const aid of newSession.attendee_ids) {
-        await supabase.rpc("create_notification", {
-          _user_id: aid, _type: "session", _title: "Session Invite",
-          _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}`,
-          _link: "/admin/calendar",
-        });
+      is_paid: false,
+    } as any;
+
+    // Calculate dates for recurring sessions
+    const dates: Date[] = [new Date(baseDateTime)];
+    if (newSession.recurrence !== "none") {
+      const count = newSession.recurrence_count || 4;
+      for (let i = 1; i < count; i++) {
+        const base = dates[0];
+        const next = new Date(base);
+        if (newSession.recurrence === "weekly") next.setDate(base.getDate() + 7 * i);
+        else if (newSession.recurrence === "biweekly") next.setDate(base.getDate() + 14 * i);
+        else if (newSession.recurrence === "monthly") next.setMonth(base.getMonth() + i);
+        dates.push(next);
       }
-      toast.success("Session created");
-      setCreateOpen(false);
-      setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] });
-      qc.invalidateQueries({ queryKey: ["team_sessions"] });
     }
+
+    // Insert first session
+    const { data: firstSession, error } = await supabase.from("sessions").insert({
+      ...basePayload, session_date: dates[0].toISOString(),
+    } as any).select("id").single();
+
+    if (error) { toast.error("Failed to create session"); return; }
+
+    // Insert remaining recurring sessions with parent reference
+    if (dates.length > 1 && firstSession) {
+      const remaining = dates.slice(1).map((d) => ({
+        ...basePayload, session_date: d.toISOString(),
+        recurrence_parent_id: firstSession.id,
+      }));
+      const { error: recErr } = await supabase.from("sessions").insert(remaining as any);
+      if (recErr) toast.error("Some recurring sessions failed to create");
+    }
+
+    // Send invite notifications to attendees
+    for (const aid of newSession.attendee_ids) {
+      await supabase.rpc("create_notification", {
+        _user_id: aid, _type: "session", _title: "Session Invite",
+        _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}${dates.length > 1 ? ` (recurring × ${dates.length})` : ""}`,
+        _link: "/admin/calendar",
+      });
+    }
+    toast.success(dates.length > 1 ? `${dates.length} recurring sessions created` : "Session created");
+    setCreateOpen(false);
+    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4 });
+    qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
   const handleCreateTask = async () => {
@@ -672,7 +706,10 @@ const AdminCalendar = () => {
                             style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
                           >
                             <span className="truncate">{ev.type === "session" && format(ev.start, "HH:mm") + " "}{ev.clientName || ev.title}</span>
-                            {ev.plaudRecordingId && <Sparkles size={8} className="shrink-0 ml-0.5 text-primary opacity-80" />}
+                            <span className="flex items-center gap-0.5 shrink-0">
+                              {isAdmin && ev.type === "session" && !ev.isPaid && <DollarSign size={7} className="text-destructive" />}
+                              {ev.plaudRecordingId && <Sparkles size={8} className="ml-0.5 text-primary opacity-80" />}
+                            </span>
                           </div>
                         ))}
                         {dayEvents.length > maxEv && (
@@ -890,7 +927,35 @@ const AdminCalendar = () => {
                   </div>
                 </div>
                 <div><Label>Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} /></div>
-                <Button className="w-full" onClick={handleCreateSession}>Create Session</Button>
+                {/* Recurring Sessions */}
+                <div className="border border-border/50 rounded-lg p-3 space-y-3 bg-muted/30">
+                  <Label className="flex items-center gap-1.5 text-sm"><Repeat size={14} /> Recurring Sessions</Label>
+                  <Select value={newSession.recurrence} onValueChange={(v) => setNewSession({ ...newSession, recurrence: v })}>
+                    <SelectTrigger className="text-xs h-8"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">One-off (no repeat)</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="biweekly">Every 2 weeks</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {newSession.recurrence !== "none" && (
+                    <div>
+                      <Label className="text-xs">Number of sessions</Label>
+                      <Input type="number" min={2} max={52} value={newSession.recurrence_count} onChange={(e) => setNewSession({ ...newSession, recurrence_count: parseInt(e.target.value) || 4 })} className="h-8 text-xs" />
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Will create {newSession.recurrence_count} sessions ({newSession.recurrence === "weekly" ? "every week" : newSession.recurrence === "biweekly" ? "every 2 weeks" : "every month"})
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
+                  <AlertCircle size={14} className="shrink-0" />
+                  <span>Sessions are created as unpaid. Admin can mark payment once received.</span>
+                </div>
+                <Button className="w-full" onClick={handleCreateSession}>
+                  {newSession.recurrence !== "none" ? `Create ${newSession.recurrence_count} Sessions` : "Create Session"}
+                </Button>
               </>
             ) : (
               <>
@@ -975,6 +1040,61 @@ const AdminCalendar = () => {
                 </div>
               )}
               {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
+              {/* Payment Status - Admin Only */}
+              {isAdmin && selectedEvent.type === "session" && (
+                <div className="border border-border/50 rounded-lg p-3 space-y-2 bg-muted/30">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <DollarSign size={14} /> Payment Status
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    {selectedEvent.isPaid ? (
+                      <Badge className="bg-green-500/10 text-green-600 border-green-500/30 gap-1">
+                        <CheckCircle2 size={10} /> Paid
+                        {selectedEvent.paymentMethod && ` (${selectedEvent.paymentMethod})`}
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="gap-1">
+                        <AlertCircle size={10} /> Not Paid
+                      </Badge>
+                    )}
+                  </div>
+                  {!selectedEvent.isPaid && (
+                    <div className="flex gap-1.5 mt-1">
+                      {["cash", "bank transfer", "card", "other"].map((method) => (
+                        <Button key={method} variant="outline" size="sm" className="text-[10px] h-7 gap-1 capitalize"
+                          onClick={async () => {
+                            await supabase.from("sessions").update({ is_paid: true, payment_method: method } as any).eq("id", selectedEvent.id);
+                            setSelectedEvent({ ...selectedEvent, isPaid: true, paymentMethod: method });
+                            qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                            toast.success(`Payment marked as received (${method})`);
+                          }}
+                        >
+                          <Banknote size={10} /> {method}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                  {selectedEvent.isPaid && (
+                    <Button variant="ghost" size="sm" className="text-[10px] h-6 text-muted-foreground"
+                      onClick={async () => {
+                        await supabase.from("sessions").update({ is_paid: false, payment_method: "" } as any).eq("id", selectedEvent.id);
+                        setSelectedEvent({ ...selectedEvent, isPaid: false, paymentMethod: "" });
+                        qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                        toast.success("Payment status reset");
+                      }}
+                    >
+                      Undo payment
+                    </Button>
+                  )}
+                </div>
+              )}
+              {/* Unpaid warning for non-admin staff */}
+              {!isAdmin && selectedEvent.type === "session" && !selectedEvent.isPaid && (
+                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
+                  <AlertCircle size={14} className="shrink-0" />
+                  <span>This session has not been marked as paid yet.</span>
+                </div>
+              )}
               {selectedEvent.notes && (
                 <div className="mt-2 border-t border-border pt-3">
                   <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
