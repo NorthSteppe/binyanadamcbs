@@ -117,10 +117,10 @@ const AdminCalendar = () => {
     if (viewMode === "month") {
       const ms = startOfMonth(currentDate);
       const me = endOfMonth(currentDate);
-      return { rangeStart: startOfWeek(ms, { weekStartsOn: 1 }), rangeEnd: endOfWeek(me, { weekStartsOn: 1 }) };
+      return { rangeStart: startOfWeek(ms, { weekStartsOn: 0 }), rangeEnd: endOfWeek(me, { weekStartsOn: 0 }) };
     }
     if (viewMode === "week") {
-      return { rangeStart: startOfWeek(currentDate, { weekStartsOn: 1 }), rangeEnd: endOfWeek(currentDate, { weekStartsOn: 1 }) };
+      return { rangeStart: startOfWeek(currentDate, { weekStartsOn: 0 }), rangeEnd: endOfWeek(currentDate, { weekStartsOn: 0 }) };
     }
     return { rangeStart: startOfDay(currentDate), rangeEnd: endOfDay(currentDate) };
   }, [currentDate, viewMode]);
@@ -670,7 +670,7 @@ const AdminCalendar = () => {
           {viewMode === "month" && (
             <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
               <div className="grid grid-cols-7 border-b border-border/30">
-                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                   <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-2">{d}</div>
                 ))}
               </div>

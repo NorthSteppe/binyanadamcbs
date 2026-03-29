@@ -88,10 +88,10 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
     if (viewMode === "month") {
       const ms = startOfMonth(currentDate);
       const me = endOfMonth(currentDate);
-      return { rangeStart: startOfWeek(ms, { weekStartsOn: 1 }), rangeEnd: endOfWeek(me, { weekStartsOn: 1 }) };
+      return { rangeStart: startOfWeek(ms, { weekStartsOn: 0 }), rangeEnd: endOfWeek(me, { weekStartsOn: 0 }) };
     }
     if (viewMode === "week") {
-      return { rangeStart: startOfWeek(currentDate, { weekStartsOn: 1 }), rangeEnd: endOfWeek(currentDate, { weekStartsOn: 1 }) };
+      return { rangeStart: startOfWeek(currentDate, { weekStartsOn: 0 }), rangeEnd: endOfWeek(currentDate, { weekStartsOn: 0 }) };
     }
     return { rangeStart: startOfDay(currentDate), rangeEnd: endOfDay(currentDate) };
   }, [currentDate, viewMode]);
@@ -629,7 +629,7 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
           {/* Month View */}
           {viewMode === "month" && (
             <div className="grid grid-cols-7 gap-1">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                 <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-1">{d}</div>
               ))}
               {days.map((day) => {
