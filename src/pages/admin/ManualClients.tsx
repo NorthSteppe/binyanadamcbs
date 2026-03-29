@@ -44,7 +44,7 @@ const ManualClients = () => {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as ManualClient[];
+      return (data as unknown as ManualClient[]) || [];
     },
   });
 
