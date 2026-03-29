@@ -927,75 +927,74 @@ const AdminCalendar = () => {
 
       {/* ===== CREATE DIALOG ===== */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle className="flex items-center gap-2 text-base">
               <Plus size={16} /> New — {selectedDate && format(selectedDate, "MMM d, yyyy")}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Button variant={createType === "session" ? "default" : "outline"} size="sm" onClick={() => setCreateType("session")} className="text-xs gap-1"><Clock size={12} /> Session</Button>
-              <Button variant={createType === "task" ? "default" : "outline"} size="sm" onClick={() => setCreateType("task")} className="text-xs gap-1"><ListTodo size={12} /> Task</Button>
-            </div>
+          <div className="flex gap-2 px-6">
+            <Button variant={createType === "session" ? "default" : "outline"} size="sm" onClick={() => setCreateType("session")} className="text-xs gap-1 h-7"><Clock size={12} /> Session</Button>
+            <Button variant={createType === "task" ? "default" : "outline"} size="sm" onClick={() => setCreateType("task")} className="text-xs gap-1 h-7"><ListTodo size={12} /> Task</Button>
+          </div>
 
+          <ScrollArea className="flex-1 px-6 pb-2">
+            <div className="space-y-3 pr-2">
             {createType === "session" ? (
               <>
-                <div><Label>Title</Label><Input value={newSession.title} onChange={(e) => setNewSession({ ...newSession, title: e.target.value })} placeholder="Session title" /></div>
-                <div>
-                  <Label>Client</Label>
-                  <Select value={newSession.client_id} onValueChange={(v) => setNewSession({ ...newSession, client_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-                    <SelectContent>
-                      {clients.length > 0 && (
-                        <>
-                          <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Registered Users</div>
-                          {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
-                        </>
-                      )}
-                      {manualClients.length > 0 && (
-                        <>
-                          <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/50 mt-1">Manual Clients (no account)</div>
-                          {manualClients.map((c) => (
-                            <SelectItem key={`manual:${c.id}`} value={`manual:${c.id}`}>
-                              {c.full_name} <span className="text-muted-foreground text-[10px] ml-1">({c.client_type})</span>
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label>Time</Label><Input type="time" value={newSession.time} onChange={(e) => setNewSession({ ...newSession, time: e.target.value })} /></div>
-                  <div><Label>Duration (min)</Label><Input type="number" value={newSession.duration_minutes} onChange={(e) => setNewSession({ ...newSession, duration_minutes: parseInt(e.target.value) || 60 })} /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2"><Label className="text-xs">Title</Label><Input value={newSession.title} onChange={(e) => setNewSession({ ...newSession, title: e.target.value })} placeholder="Session title" className="h-8 text-sm" /></div>
+                  <div className="col-span-2">
+                    <Label className="text-xs">Client</Label>
+                    <Select value={newSession.client_id} onValueChange={(v) => setNewSession({ ...newSession, client_id: v })}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select client" /></SelectTrigger>
+                      <SelectContent>
+                        {clients.length > 0 && (
+                          <>
+                            <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Registered Users</div>
+                            {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
+                          </>
+                        )}
+                        {manualClients.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/50 mt-1">Manual Clients (no account)</div>
+                            {manualClients.map((c) => (
+                              <SelectItem key={`manual:${c.id}`} value={`manual:${c.id}`}>
+                                {c.full_name} <span className="text-muted-foreground text-[10px] ml-1">({c.client_type})</span>
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label className="text-xs">Time</Label><Input type="time" value={newSession.time} onChange={(e) => setNewSession({ ...newSession, time: e.target.value })} className="h-8 text-sm" /></div>
+                  <div><Label className="text-xs">Duration (min)</Label><Input type="number" value={newSession.duration_minutes} onChange={(e) => setNewSession({ ...newSession, duration_minutes: parseInt(e.target.value) || 60 })} className="h-8 text-sm" /></div>
                   <div>
-                    <Label className="flex items-center gap-1"><Video size={12} /> Meeting Platform</Label>
+                    <Label className="text-xs flex items-center gap-1"><Video size={10} /> Platform</Label>
                     <Select value={newSession.meeting_platform || "none"} onValueChange={(v) => setNewSession({ ...newSession, meeting_platform: v === "none" ? "" : v })}>
-                      <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         <SelectItem value="zoom">Zoom</SelectItem>
-                        <SelectItem value="teams">Microsoft Teams</SelectItem>
+                        <SelectItem value="teams">MS Teams</SelectItem>
                         <SelectItem value="google-meet">Google Meet</SelectItem>
                         <SelectItem value="in-person">In Person</SelectItem>
-                        <SelectItem value="phone">Phone Call</SelectItem>
+                        <SelectItem value="phone">Phone</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label className="flex items-center gap-1"><Link2 size={12} /> Meeting Link</Label>
-                    <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." />
+                    <Label className="text-xs flex items-center gap-1"><Link2 size={10} /> Link</Label>
+                    <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." className="h-8 text-sm" />
                   </div>
                 </div>
                 <div>
-                  <Label className="flex items-center gap-1 mb-1.5"><UserPlus size={12} /> Invite Therapists</Label>
-                  <div className="grid grid-cols-2 gap-1.5 max-h-[120px] overflow-y-auto border border-border/50 rounded-lg p-2">
+                  <Label className="text-xs flex items-center gap-1 mb-1"><UserPlus size={10} /> Invite Therapists</Label>
+                  <div className="grid grid-cols-2 gap-1 max-h-[80px] overflow-y-auto border border-border/50 rounded-lg p-1.5">
                     {staffMembers.map((s) => (
-                      <label key={s.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                      <label key={s.id} className="flex items-center gap-1.5 text-[11px] cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
                         <Checkbox
                           checked={newSession.attendee_ids.includes(s.id)}
                           onCheckedChange={(checked) => {
@@ -1006,234 +1005,236 @@ const AdminCalendar = () => {
                                 : prev.attendee_ids.filter((id) => id !== s.id),
                             }));
                           }}
+                          className="h-3.5 w-3.5"
                         />
                         {s.full_name}
                       </label>
                     ))}
                   </div>
                 </div>
-                <div><Label>Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} /></div>
-                {/* Recurring Sessions */}
-                <div className="border border-border/50 rounded-lg p-3 space-y-3 bg-muted/30">
-                  <Label className="flex items-center gap-1.5 text-sm"><Repeat size={14} /> Recurring Sessions</Label>
-                  <Select value={newSession.recurrence} onValueChange={(v) => setNewSession({ ...newSession, recurrence: v })}>
-                    <SelectTrigger className="text-xs h-8"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">One-off (no repeat)</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="biweekly">Every 2 weeks</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div><Label className="text-xs">Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} className="text-sm" /></div>
+                {/* Recurring */}
+                <div className="border border-border/50 rounded-lg p-2.5 space-y-2 bg-muted/30">
+                  <Label className="flex items-center gap-1.5 text-xs"><Repeat size={12} /> Recurrence</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select value={newSession.recurrence} onValueChange={(v) => setNewSession({ ...newSession, recurrence: v })}>
+                      <SelectTrigger className="text-xs h-7"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">One-off</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="biweekly">Biweekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {newSession.recurrence !== "none" && (
+                      <Input type="number" min={2} max={52} value={newSession.recurrence_count} onChange={(e) => setNewSession({ ...newSession, recurrence_count: parseInt(e.target.value) || 4 })} className="h-7 text-xs" placeholder="# sessions" />
+                    )}
+                  </div>
                   {newSession.recurrence !== "none" && (
-                    <div>
-                      <Label className="text-xs">Number of sessions</Label>
-                      <Input type="number" min={2} max={52} value={newSession.recurrence_count} onChange={(e) => setNewSession({ ...newSession, recurrence_count: parseInt(e.target.value) || 4 })} className="h-8 text-xs" />
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        Will create {newSession.recurrence_count} sessions ({newSession.recurrence === "weekly" ? "every week" : newSession.recurrence === "biweekly" ? "every 2 weeks" : "every month"})
-                      </p>
-                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      Creates {newSession.recurrence_count} sessions ({newSession.recurrence === "weekly" ? "every week" : newSession.recurrence === "biweekly" ? "every 2 weeks" : "monthly"})
+                    </p>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
-                  <AlertCircle size={14} className="shrink-0" />
-                  <span>Sessions are created as unpaid. Admin can mark payment once received.</span>
-                </div>
-                <Button className="w-full" onClick={handleCreateSession}>
-                  {newSession.recurrence !== "none" ? `Create ${newSession.recurrence_count} Sessions` : "Create Session"}
-                </Button>
               </>
             ) : (
               <>
-                <div><Label>Title</Label><Input value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} placeholder="Task title" /></div>
+                <div><Label className="text-xs">Title</Label><Input value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} placeholder="Task title" className="h-8 text-sm" /></div>
                 <div>
-                  <Label>Assign To</Label>
+                  <Label className="text-xs">Assign To</Label>
                   <Select value={newTask.assigned_to} onValueChange={(v) => setNewTask({ ...newTask, assigned_to: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select staff" /></SelectTrigger>
                     <SelectContent>{staffMembers.map((s) => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div><Label>Description</Label><Textarea value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} placeholder="Optional" rows={2} /></div>
-                <Button className="w-full" onClick={handleCreateTask}>Create Task</Button>
+                <div><Label className="text-xs">Description</Label><Textarea value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} placeholder="Optional" rows={2} className="text-sm" /></div>
               </>
             )}
+            </div>
+          </ScrollArea>
+
+          {/* Sticky footer */}
+          <div className="border-t border-border px-6 py-3 bg-background">
+            {createType === "session" && (
+              <div className="flex items-center gap-2 text-[10px] text-amber-600 mb-2">
+                <AlertCircle size={12} className="shrink-0" />
+                Sessions created as unpaid. Mark payment once received.
+              </div>
+            )}
+            <Button className="w-full h-9" onClick={createType === "session" ? handleCreateSession : handleCreateTask}>
+              {createType === "session"
+                ? (newSession.recurrence !== "none" ? `Create ${newSession.recurrence_count} Sessions` : "Create Session")
+                : "Create Task"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* ===== EVENT DETAIL DIALOG ===== */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2" style={{ color: selectedEvent?.color }}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle className="flex items-center gap-2 text-base" style={{ color: selectedEvent?.color }}>
               {selectedEvent?.type === "session" ? "📅" : "✅"} {selectedEvent?.title}
             </DialogTitle>
           </DialogHeader>
           {selectedEvent && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock size={14} />
-                {format(selectedEvent.start, "HH:mm")} – {format(selectedEvent.end, "HH:mm")}
-                <span className="text-xs">({differenceInMinutes(selectedEvent.end, selectedEvent.start)} min)</span>
-              </div>
-              {selectedEvent.clientName && (
-                <div className="flex items-center gap-2 text-sm">
-                  <User size={14} className="text-muted-foreground" /> {selectedEvent.clientName}
-                </div>
-              )}
-              {selectedEvent.assignedName && (
-                <div className="flex items-center gap-2 text-sm">
-                  <User size={14} className="text-muted-foreground" /> Assigned to: {selectedEvent.assignedName}
-                </div>
-              )}
-              <Badge variant="outline" className="capitalize">{selectedEvent.type}</Badge>
-              {selectedEvent.status && (
-                <>
-                  <Badge variant="secondary" className="capitalize ml-1">{selectedEvent.status}</Badge>
-                  <div className="mt-2">
-                    <Label className="text-xs">Change Status</Label>
-                    <Select value={selectedEvent.status} onValueChange={(v) => { handleStatusChange(selectedEvent.id, v); setSelectedEvent({ ...selectedEvent, status: v }); }}>
-                      <SelectTrigger className="w-full text-xs h-8"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                        <SelectItem value="no-show">No Show</SelectItem>
-                      </SelectContent>
-                    </Select>
+            <>
+              <ScrollArea className="flex-1 px-6 pb-2">
+                <div className="space-y-3 pr-2">
+                  {/* Key info row */}
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock size={12} />{format(selectedEvent.start, "HH:mm")}–{format(selectedEvent.end, "HH:mm")} ({differenceInMinutes(selectedEvent.end, selectedEvent.start)}min)</span>
+                    {selectedEvent.clientName && <span className="flex items-center gap-1"><User size={12} />{selectedEvent.clientName}</span>}
+                    {selectedEvent.assignedName && <span className="flex items-center gap-1"><User size={12} />{selectedEvent.assignedName}</span>}
                   </div>
-                </>
-              )}
-              {selectedEvent.meetingPlatform && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Video size={14} className="text-muted-foreground" />
-                  <span className="capitalize">{selectedEvent.meetingPlatform.replace("-", " ")}</span>
-                  {selectedEvent.meetingUrl && (
-                    <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs">
-                      <ExternalLink size={10} /> Join
-                    </a>
-                  )}
-                </div>
-              )}
-              {selectedEvent.attendeeIds && selectedEvent.attendeeIds.length > 0 && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground flex items-center gap-1 mb-1"><UserPlus size={14} /> Attendees:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedEvent.attendeeIds.map((id) => (
-                      <Badge key={id} variant="secondary" className="text-xs">{nameMap.get(id) || "Unknown"}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
-              {/* Payment Status - Admin Only */}
-              {isAdmin && selectedEvent.type === "session" && (
-                <div className="border border-border/50 rounded-lg p-3 space-y-2 bg-muted/30">
-                  <Label className="text-xs flex items-center gap-1.5">
-                    <DollarSign size={14} /> Payment Status
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    {selectedEvent.isPaid ? (
-                      <Badge className="bg-green-500/10 text-green-600 border-green-500/30 gap-1">
-                        <CheckCircle2 size={10} /> Paid
-                        {selectedEvent.paymentMethod && ` (${selectedEvent.paymentMethod})`}
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive" className="gap-1">
-                        <AlertCircle size={10} /> Not Paid
+
+                  {/* Status + badges */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Badge variant="outline" className="capitalize text-[10px]">{selectedEvent.type}</Badge>
+                    {selectedEvent.status && <Badge variant="secondary" className="capitalize text-[10px]">{selectedEvent.status}</Badge>}
+                    {selectedEvent.meetingPlatform && (
+                      <Badge variant="outline" className="text-[10px] gap-1 capitalize">
+                        <Video size={9} />{selectedEvent.meetingPlatform.replace("-", " ")}
+                        {selectedEvent.meetingUrl && (
+                          <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-primary ml-1" onClick={(e) => e.stopPropagation()}>
+                            <ExternalLink size={9} />
+                          </a>
+                        )}
                       </Badge>
                     )}
                   </div>
-                  {!selectedEvent.isPaid && (
-                    <div className="flex gap-1.5 mt-1">
-                      {["cash", "bank transfer", "card", "other"].map((method) => (
-                        <Button key={method} variant="outline" size="sm" className="text-[10px] h-7 gap-1 capitalize"
-                          onClick={async () => {
-                            await supabase.from("sessions").update({ is_paid: true, payment_method: method } as any).eq("id", selectedEvent.id);
-                            setSelectedEvent({ ...selectedEvent, isPaid: true, paymentMethod: method });
-                            qc.invalidateQueries({ queryKey: ["team_sessions"] });
-                            toast.success(`Payment marked as received (${method})`);
-                          }}
+
+                  {/* Status change */}
+                  {selectedEvent.status && (
+                    <div className="grid grid-cols-4 gap-1">
+                      {["scheduled", "completed", "cancelled", "no-show"].map((s) => (
+                        <Button
+                          key={s}
+                          variant={selectedEvent.status === s ? "default" : "outline"}
+                          size="sm"
+                          className="text-[10px] h-7 capitalize"
+                          onClick={() => { handleStatusChange(selectedEvent.id, s); setSelectedEvent({ ...selectedEvent, status: s }); }}
                         >
-                          <Banknote size={10} /> {method}
+                          {s}
                         </Button>
                       ))}
                     </div>
                   )}
-                  {selectedEvent.isPaid && (
-                    <Button variant="ghost" size="sm" className="text-[10px] h-6 text-muted-foreground"
-                      onClick={async () => {
-                        await supabase.from("sessions").update({ is_paid: false, payment_method: "" } as any).eq("id", selectedEvent.id);
-                        setSelectedEvent({ ...selectedEvent, isPaid: false, paymentMethod: "" });
-                        qc.invalidateQueries({ queryKey: ["team_sessions"] });
-                        toast.success("Payment status reset");
-                      }}
-                    >
-                      Undo payment
-                    </Button>
+
+                  {/* Attendees */}
+                  {selectedEvent.attendeeIds && selectedEvent.attendeeIds.length > 0 && (
+                    <div className="flex flex-wrap gap-1 items-center">
+                      <UserPlus size={12} className="text-muted-foreground" />
+                      {selectedEvent.attendeeIds.map((id) => (
+                        <Badge key={id} variant="secondary" className="text-[10px]">{nameMap.get(id) || "Unknown"}</Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedEvent.description && <p className="text-xs text-muted-foreground">{selectedEvent.description}</p>}
+
+                  {/* Payment Status - Admin Only */}
+                  {isAdmin && selectedEvent.type === "session" && (
+                    <div className="border border-border/50 rounded-lg p-2.5 space-y-2 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs flex items-center gap-1"><DollarSign size={12} /> Payment</Label>
+                        {selectedEvent.isPaid ? (
+                          <Badge className="bg-green-500/10 text-green-600 border-green-500/30 gap-1 text-[10px]">
+                            <CheckCircle2 size={9} /> Paid{selectedEvent.paymentMethod && ` (${selectedEvent.paymentMethod})`}
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="gap-1 text-[10px]"><AlertCircle size={9} /> Unpaid</Badge>
+                        )}
+                      </div>
+                      {!selectedEvent.isPaid && (
+                        <div className="flex gap-1">
+                          {["cash", "bank transfer", "card", "other"].map((method) => (
+                            <Button key={method} variant="outline" size="sm" className="text-[9px] h-6 gap-0.5 capitalize flex-1"
+                              onClick={async () => {
+                                await supabase.from("sessions").update({ is_paid: true, payment_method: method } as any).eq("id", selectedEvent.id);
+                                setSelectedEvent({ ...selectedEvent, isPaid: true, paymentMethod: method });
+                                qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                                toast.success(`Paid (${method})`);
+                              }}
+                            >
+                              <Banknote size={9} /> {method}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                      {selectedEvent.isPaid && (
+                        <Button variant="ghost" size="sm" className="text-[10px] h-5 text-muted-foreground p-0"
+                          onClick={async () => {
+                            await supabase.from("sessions").update({ is_paid: false, payment_method: "" } as any).eq("id", selectedEvent.id);
+                            setSelectedEvent({ ...selectedEvent, isPaid: false, paymentMethod: "" });
+                            qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                            toast.success("Payment reset");
+                          }}
+                        >
+                          Undo payment
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Unpaid warning for staff */}
+                  {!isAdmin && selectedEvent.type === "session" && !selectedEvent.isPaid && (
+                    <div className="flex items-center gap-2 text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2">
+                      <AlertCircle size={12} className="shrink-0" />
+                      <span>Not yet marked as paid.</span>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {selectedEvent.notes && (
+                    <div className="border-t border-border pt-2">
+                      <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
+                        {selectedEvent.plaudRecordingId ? <><Sparkles size={10} className="text-primary" /> AI Summary</> : <>📝 Notes</>}
+                      </Label>
+                      <div className="bg-muted/50 rounded p-2.5 text-xs whitespace-pre-wrap max-h-32 overflow-y-auto font-light leading-relaxed">
+                        {selectedEvent.notes}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add notes section */}
+                  {selectedEvent.type === "session" && (
+                    <div className="border-t border-border pt-2 space-y-2">
+                      <Label className="text-xs text-muted-foreground flex items-center gap-1">📋 Add Notes</Label>
+                      <NoteTemplateManager
+                        mode="select"
+                        onApplyTemplate={(content) => setPasteNotes((prev) => prev ? prev + "\n\n" + content : content)}
+                      />
+                      <VoiceRecorder onTranscript={(text) => setPasteNotes(text)} />
+                      <Textarea
+                        value={pasteNotes}
+                        onChange={(e) => setPasteNotes(e.target.value)}
+                        placeholder="Speak, apply a template, or type..."
+                        rows={3}
+                        className="text-xs"
+                      />
+                      <Button size="sm" className="gap-1 h-7 text-xs" onClick={handleSaveNotes} disabled={!pasteNotes.trim() || savingNotes}>
+                        {savingNotes ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                        Save Notes
+                      </Button>
+                    </div>
                   )}
                 </div>
-              )}
-              {/* Unpaid warning for non-admin staff */}
-              {!isAdmin && selectedEvent.type === "session" && !selectedEvent.isPaid && (
-                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
-                  <AlertCircle size={14} className="shrink-0" />
-                  <span>This session has not been marked as paid yet.</span>
-                </div>
-              )}
-              {selectedEvent.notes && (
-                <div className="mt-2 border-t border-border pt-3">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
-                    {selectedEvent.plaudRecordingId ? (
-                      <><Sparkles size={12} className="text-primary" /> Plaud AI Summary / Notes</>
-                    ) : (
-                      <>📝 Session Notes</>
-                    )}
-                  </Label>
-                  <div className="bg-muted/50 rounded p-3 text-sm whitespace-pre-wrap max-h-48 overflow-y-auto font-light leading-relaxed">
-                    {selectedEvent.notes}
-                  </div>
-                </div>
-              )}
-              {selectedEvent.type === "session" && (
-                <div className="mt-2 border-t border-border pt-3 space-y-3">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">📋 Add Notes (voice, template, or type)</Label>
-                  <NoteTemplateManager
-                    mode="select"
-                    onApplyTemplate={(content) => setPasteNotes((prev) => prev ? prev + "\n\n" + content : content)}
-                  />
-                  <VoiceRecorder
-                    onTranscript={(text) => setPasteNotes(text)}
-                  />
-                  <Textarea
-                    value={pasteNotes}
-                    onChange={(e) => setPasteNotes(e.target.value)}
-                    placeholder="Speak, apply a template, or type session notes..."
-                    rows={4}
-                    className="text-sm"
-                  />
-                  <Button
-                    size="sm"
-                    className="gap-1"
-                    onClick={handleSaveNotes}
-                    disabled={!pasteNotes.trim() || savingNotes}
-                  >
-                    {savingNotes ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                    Save Notes
-                  </Button>
-                </div>
-              )}
-              <div className="flex gap-2 pt-2">
+              </ScrollArea>
+
+              {/* Sticky footer */}
+              <div className="border-t border-border px-6 py-3 bg-background flex gap-2">
                 {selectedEvent.type === "session" && (
-                  <Button variant="outline" size="sm" className="gap-1" onClick={() => openEdit(selectedEvent)}>
-                    <Edit size={14} /> Edit
+                  <Button variant="outline" size="sm" className="gap-1 text-xs flex-1" onClick={() => openEdit(selectedEvent)}>
+                    <Edit size={12} /> Edit
                   </Button>
                 )}
-                <Button variant="destructive" size="sm" className="gap-1" onClick={() => handleDelete(selectedEvent)}>
-                  <Trash2 size={14} /> Delete
+                <Button variant="destructive" size="sm" className="gap-1 text-xs flex-1" onClick={() => handleDelete(selectedEvent)}>
+                  <Trash2 size={12} /> Delete
                 </Button>
               </div>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
