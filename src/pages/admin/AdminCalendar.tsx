@@ -745,7 +745,9 @@ const AdminCalendar = () => {
             <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
               <div className="grid grid-cols-[50px_repeat(7,1fr)] border-b border-border bg-muted/30">
                 <div className="p-1" />
-                {days.map((day) => (
+                {days.map((day) => {
+                  const dayHolidays = getAllHolidays(day);
+                  return (
                   <div
                     key={day.toISOString()}
                     className={`text-center py-2 text-xs font-medium cursor-pointer hover:bg-muted/50 transition-colors
@@ -754,8 +756,15 @@ const AdminCalendar = () => {
                   >
                     <div>{format(day, "EEE")}</div>
                     <div className={`text-lg font-bold ${isSameDay(day, today) ? "text-primary" : ""}`}>{format(day, "d")}</div>
+                    <div className="text-[9px] text-muted-foreground/60 font-light" dir="rtl">{getHebrewDay(day)}</div>
+                    {dayHolidays.length > 0 && (
+                      <div className="text-[8px] text-amber-600 dark:text-amber-400 truncate px-1" title={dayHolidays.map(h => h.name).join(", ")}>
+                        {dayHolidays[0].emoji} {dayHolidays[0].name.length > 10 ? dayHolidays[0].name.slice(0, 10) + "…" : dayHolidays[0].name}
+                      </div>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div ref={scrollRef} className={`overflow-y-auto ${calendarHeight}`}>
                 <div className="grid grid-cols-[50px_repeat(7,1fr)] relative">
