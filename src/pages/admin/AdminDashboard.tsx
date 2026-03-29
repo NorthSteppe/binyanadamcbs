@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
-  UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen,
+  UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen, FileText,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -61,6 +61,7 @@ const categories: ToolCategory[] = [
     tools: [
       { label: "Service Options", path: "/admin/service-options", icon: Settings, description: "Define session types, durations, and pricing" },
       { label: "Calendar", path: "/admin/calendar", icon: Calendar, description: "View and manage all scheduled sessions" },
+      { label: "Note Templates", path: "/admin/note-templates", icon: FileText, description: "Design session note templates for voice transcription summaries" },
       { label: "Course Manager", path: "/admin/courses", icon: GraduationCap, description: "Create and manage online courses, lessons, and videos" },
     ],
   },
