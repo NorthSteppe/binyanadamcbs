@@ -39,6 +39,7 @@ import Chat from "./pages/portal/Chat";
 import Toolkit from "./pages/portal/Toolkit";
 import ToolkitACTMatrix from "./pages/portal/ToolkitACTMatrix";
 import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
+import MindfulnessSounds from "./pages/portal/MindfulnessSounds";
 import Productivity from "./pages/portal/Productivity";
 // Admin portal
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -88,6 +89,7 @@ import TagPage from "./pages/insights/TagPage";
 import AuthorPage from "./pages/insights/AuthorPage";
 import BlogManager from "./pages/admin/BlogManager";
 import BadgeManager from "./pages/admin/BadgeManager";
+import NoteTemplates from "./pages/admin/NoteTemplates";
 
 const queryClient = new QueryClient();
 
@@ -151,6 +153,7 @@ const App = () => (
                   <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
+                  <Route path="/portal/toolkit/mindfulness" element={<ProtectedRoute><MindfulnessSounds /></ProtectedRoute>} />
                   <Route path="/portal/productivity" element={<ProtectedRoute><Productivity /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
@@ -173,6 +176,7 @@ const App = () => (
                   <Route path="/admin/business" element={<AdminRoute><BusinessDashboard /></AdminRoute>} />
                   <Route path="/admin/blog" element={<AdminRoute><BlogManager /></AdminRoute>} />
                   <Route path="/admin/badges" element={<AdminRoute><BadgeManager /></AdminRoute>} />
+                  <Route path="/admin/note-templates" element={<AdminRoute><NoteTemplates /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
@@ -186,6 +190,8 @@ const App = () => (
                   <Route path="/staff/toolkit" element={<StaffRoute><Toolkit /></StaffRoute>} />
                   <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
                   <Route path="/staff/toolkit/pomodoro" element={<StaffRoute><ToolkitPomodoro /></StaffRoute>} />
+                  <Route path="/staff/toolkit/mindfulness" element={<StaffRoute><MindfulnessSounds /></StaffRoute>} />
+                  <Route path="/staff/note-templates" element={<StaffRoute><NoteTemplates /></StaffRoute>} />
                   <Route path="/staff/clinical-tools" element={<StaffRoute><ClinicalTools /></StaffRoute>} />
                   <Route path="/staff/clinical/abc" element={<StaffRoute><ABCDataSheet /></StaffRoute>} />
                   <Route path="/staff/clinical/functional-assessment" element={<StaffRoute><FunctionalAssessment /></StaffRoute>} />
