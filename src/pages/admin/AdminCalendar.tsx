@@ -68,7 +68,7 @@ const statusColors: Record<string, string> = {
 };
 
 const AdminCalendar = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const qc = useQueryClient();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("week");
@@ -87,7 +87,7 @@ const AdminCalendar = () => {
   const [editOpen, setEditOpen] = useState(false);
 
   // New session form
-  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
+  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], recurrence: "none" as string, recurrence_count: 4 });
   // New task form
   const [newTask, setNewTask] = useState({ title: "", assigned_to: "", description: "" });
   // Edit session form
