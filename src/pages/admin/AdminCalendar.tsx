@@ -580,8 +580,17 @@ const AdminCalendar = () => {
     setSelectedDate(day);
     if (hour !== undefined) {
       setNewSession((p) => ({ ...p, time: `${hour.toString().padStart(2, "0")}:00` }));
+      setCreateType("session");
+      setCreateOpen(true);
+    } else {
+      // Month view — open day detail popup
+      setDayDetailOpen(true);
     }
-    setCreateType("session");
+  };
+
+  const handleDayDetailCreate = (type: "session" | "task") => {
+    setCreateType(type);
+    setDayDetailOpen(false);
     setCreateOpen(true);
   };
 
