@@ -924,7 +924,35 @@ const AdminCalendar = () => {
                   </div>
                 </div>
                 <div><Label>Notes</Label><Textarea value={newSession.description} onChange={(e) => setNewSession({ ...newSession, description: e.target.value })} placeholder="Optional" rows={2} /></div>
-                <Button className="w-full" onClick={handleCreateSession}>Create Session</Button>
+                {/* Recurring Sessions */}
+                <div className="border border-border/50 rounded-lg p-3 space-y-3 bg-muted/30">
+                  <Label className="flex items-center gap-1.5 text-sm"><Repeat size={14} /> Recurring Sessions</Label>
+                  <Select value={newSession.recurrence} onValueChange={(v) => setNewSession({ ...newSession, recurrence: v })}>
+                    <SelectTrigger className="text-xs h-8"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">One-off (no repeat)</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="biweekly">Every 2 weeks</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {newSession.recurrence !== "none" && (
+                    <div>
+                      <Label className="text-xs">Number of sessions</Label>
+                      <Input type="number" min={2} max={52} value={newSession.recurrence_count} onChange={(e) => setNewSession({ ...newSession, recurrence_count: parseInt(e.target.value) || 4 })} className="h-8 text-xs" />
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Will create {newSession.recurrence_count} sessions ({newSession.recurrence === "weekly" ? "every week" : newSession.recurrence === "biweekly" ? "every 2 weeks" : "every month"})
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
+                  <AlertCircle size={14} className="shrink-0" />
+                  <span>Sessions are created as unpaid. Admin can mark payment once received.</span>
+                </div>
+                <Button className="w-full" onClick={handleCreateSession}>
+                  {newSession.recurrence !== "none" ? `Create ${newSession.recurrence_count} Sessions` : "Create Session"}
+                </Button>
               </>
             ) : (
               <>
