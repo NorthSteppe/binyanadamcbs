@@ -44,7 +44,8 @@ const ArticlePage = () => {
   // Increment view count
   useEffect(() => {
     if (!post?.id) return;
-    supabase.rpc("increment_blog_view" as any, { post_id: post.id }).catch(() => {});
+    // View count increment is best-effort
+    supabase.from("blog_posts").update({ view_count: (post.view_count || 0) + 1 }).eq("id", post.id).then(() => {});
   }, [post?.id]);
 
   if (isLoading) {
