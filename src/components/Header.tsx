@@ -30,6 +30,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const navLinks = [
     { label: t.nav.services, path: "/services", children: serviceSubLinks },
     { label: "Courses", path: "/courses" },
+    { label: "Insights", path: "/insights" },
     { label: (t as any).about?.tagline || "About Us", path: "/about" },
   ];
 
