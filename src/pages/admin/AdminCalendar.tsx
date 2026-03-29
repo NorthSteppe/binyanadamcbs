@@ -138,6 +138,15 @@ const AdminCalendar = () => {
     },
   });
 
+  // Fetch manual clients
+  const { data: manualClients = [] } = useQuery({
+    queryKey: ["manual_clients"],
+    queryFn: async () => {
+      const { data } = await supabase.from("manual_clients" as any).select("id, full_name, client_type").order("full_name");
+      return (data as unknown as Array<{ id: string; full_name: string; client_type: string }>) || [];
+    },
+  });
+
   const { data: staffMembers = [] } = useQuery({
     queryKey: ["staff_profiles"],
     queryFn: async () => {

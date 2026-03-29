@@ -90,6 +90,7 @@ import AuthorPage from "./pages/insights/AuthorPage";
 import BlogManager from "./pages/admin/BlogManager";
 import BadgeManager from "./pages/admin/BadgeManager";
 import NoteTemplates from "./pages/admin/NoteTemplates";
+import ManualClients from "./pages/admin/ManualClients";
 
 const queryClient = new QueryClient();
 
