@@ -50,6 +50,207 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_authors: {
+        Row: {
+          avatar_url: string | null
+          bio: string
+          created_at: string
+          id: string
+          name: string
+          role: string
+          slug: string
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          id?: string
+          name: string
+          role?: string
+          slug: string
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          id?: string
+          name?: string
+          role?: string
+          slug?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      blog_categories: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      blog_post_tags: {
+        Row: {
+          id: string
+          post_id: string
+          tag_id: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          tag_id: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_tags_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_post_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "blog_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          abstract: string
+          audience: string
+          author_id: string | null
+          category_id: string | null
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          is_featured: boolean
+          is_practical_priority: boolean
+          meta_description: string
+          meta_title: string
+          og_image_url: string | null
+          published_at: string | null
+          reading_time_minutes: number
+          scheduled_at: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          abstract?: string
+          audience?: string
+          author_id?: string | null
+          category_id?: string | null
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          is_practical_priority?: boolean
+          meta_description?: string
+          meta_title?: string
+          og_image_url?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number
+          scheduled_at?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          abstract?: string
+          audience?: string
+          author_id?: string | null
+          category_id?: string | null
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          is_practical_priority?: boolean
+          meta_description?: string
+          meta_title?: string
+          og_image_url?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number
+          scheduled_at?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "blog_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       business_entries: {
         Row: {
           amount_cents: number
@@ -1335,6 +1536,7 @@ export type Database = {
         }
         Returns: number
       }
+      publish_scheduled_posts: { Args: never; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
