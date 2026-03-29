@@ -190,8 +190,83 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
           <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-muted-foreground rounded-full">
             <Globe size={18} />
           </Button>
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)} className="text-muted-foreground rounded-full">
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          </Button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="lg:hidden glass border-t border-border/30 shadow-apple-lg animate-in slide-in-from-top-2 duration-200">
+          <nav className="container py-4 flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <div key={link.path}>
+                <Link
+                  to={link.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={`block px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                    location.pathname === link.path ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+                {link.children && (
+                  <div className="ml-4">
+                    {link.children.map((sub) => (
+                      <Link
+                        key={sub.path}
+                        to={sub.path}
+                        onClick={() => setMobileOpen(false)}
+                        className={`block px-4 py-2 text-[13px] font-medium rounded-lg transition-colors ${
+                          location.pathname === sub.path ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            <div className="border-t border-border/30 mt-2 pt-2">
+              {user ? (
+                <>
+                  {portalLinks.map((p) => (
+                    <Link
+                      key={p.path}
+                      to={p.path}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                    >
+                      <p.icon size={16} />
+                      {p.label}
+                    </Link>
+                  ))}
+                  <button
+                    onClick={() => { signOut(); setMobileOpen(false); }}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors w-full text-left"
+                  >
+                    <LogOut size={16} />
+                    {portalT.logOut || "Log Out"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
+                    <LogIn size={16} />
+                    Log In
+                  </Link>
+                  <Link to="/signup" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                    <UserPlus2 size={16} />
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };

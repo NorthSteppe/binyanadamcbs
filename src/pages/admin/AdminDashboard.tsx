@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
-  UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3,
+  UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -41,6 +41,7 @@ const categories: ToolCategory[] = [
       { label: "Hero Images", path: "/admin/hero-images", icon: ImageIcon, description: "Manage the landing page slideshow images, quotes, and timing" },
       { label: "Site Content", path: "/admin/site-content", icon: FileEdit, description: "Edit page images, quotes, and text across all service pages" },
       { label: "Therapist Profiles", path: "/admin/team-members", icon: Users, description: "Add, edit, or remove therapist bios shown on the About page" },
+      { label: "Blog Manager", path: "/admin/blog", icon: BookOpen, description: "Create, schedule, and manage Insights articles, categories, and authors" },
     ],
   },
   {
