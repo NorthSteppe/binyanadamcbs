@@ -1037,6 +1037,61 @@ const AdminCalendar = () => {
                 </div>
               )}
               {selectedEvent.description && <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>}
+              {/* Payment Status - Admin Only */}
+              {isAdmin && selectedEvent.type === "session" && (
+                <div className="border border-border/50 rounded-lg p-3 space-y-2 bg-muted/30">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <DollarSign size={14} /> Payment Status
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    {selectedEvent.isPaid ? (
+                      <Badge className="bg-green-500/10 text-green-600 border-green-500/30 gap-1">
+                        <CheckCircle2 size={10} /> Paid
+                        {selectedEvent.paymentMethod && ` (${selectedEvent.paymentMethod})`}
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="gap-1">
+                        <AlertCircle size={10} /> Not Paid
+                      </Badge>
+                    )}
+                  </div>
+                  {!selectedEvent.isPaid && (
+                    <div className="flex gap-1.5 mt-1">
+                      {["cash", "bank transfer", "card", "other"].map((method) => (
+                        <Button key={method} variant="outline" size="sm" className="text-[10px] h-7 gap-1 capitalize"
+                          onClick={async () => {
+                            await supabase.from("sessions").update({ is_paid: true, payment_method: method } as any).eq("id", selectedEvent.id);
+                            setSelectedEvent({ ...selectedEvent, isPaid: true, paymentMethod: method });
+                            qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                            toast.success(`Payment marked as received (${method})`);
+                          }}
+                        >
+                          <Banknote size={10} /> {method}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                  {selectedEvent.isPaid && (
+                    <Button variant="ghost" size="sm" className="text-[10px] h-6 text-muted-foreground"
+                      onClick={async () => {
+                        await supabase.from("sessions").update({ is_paid: false, payment_method: "" } as any).eq("id", selectedEvent.id);
+                        setSelectedEvent({ ...selectedEvent, isPaid: false, paymentMethod: "" });
+                        qc.invalidateQueries({ queryKey: ["team_sessions"] });
+                        toast.success("Payment status reset");
+                      }}
+                    >
+                      Undo payment
+                    </Button>
+                  )}
+                </div>
+              )}
+              {/* Unpaid warning for non-admin staff */}
+              {!isAdmin && selectedEvent.type === "session" && !selectedEvent.isPaid && (
+                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
+                  <AlertCircle size={14} className="shrink-0" />
+                  <span>This session has not been marked as paid yet.</span>
+                </div>
+              )}
               {selectedEvent.notes && (
                 <div className="mt-2 border-t border-border pt-3">
                   <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
