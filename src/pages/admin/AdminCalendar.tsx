@@ -239,13 +239,14 @@ const AdminCalendar = () => {
     if (showSessions) {
       sessions.forEach((s: any) => {
         const start = parseISO(s.session_date);
+        const clientId = s.manual_client_id || s.client_id;
         result.push({
           id: s.id, title: s.title, start,
           end: new Date(start.getTime() + (s.duration_minutes || 60) * 60000),
           type: "session", color: statusColors[s.status] || statusColors.scheduled,
           status: s.status, description: s.description,
-          clientName: nameMap.get(s.client_id) || "Unknown",
-          clientId: s.client_id,
+          clientName: nameMap.get(clientId) || "Unknown",
+          clientId: clientId,
           meetingUrl: s.meeting_url || "",
           meetingPlatform: s.meeting_platform || "",
           attendeeIds: s.attendee_ids || [],
