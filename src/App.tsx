@@ -176,6 +176,7 @@ const App = () => (
                   <Route path="/admin/business" element={<AdminRoute><BusinessDashboard /></AdminRoute>} />
                   <Route path="/admin/blog" element={<AdminRoute><BlogManager /></AdminRoute>} />
                   <Route path="/admin/badges" element={<AdminRoute><BadgeManager /></AdminRoute>} />
+                  <Route path="/admin/note-templates" element={<AdminRoute><NoteTemplates /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
@@ -190,6 +191,7 @@ const App = () => (
                   <Route path="/staff/toolkit/act-matrix" element={<StaffRoute><StaffACTMatrix /></StaffRoute>} />
                   <Route path="/staff/toolkit/pomodoro" element={<StaffRoute><ToolkitPomodoro /></StaffRoute>} />
                   <Route path="/staff/toolkit/mindfulness" element={<StaffRoute><MindfulnessSounds /></StaffRoute>} />
+                  <Route path="/staff/note-templates" element={<StaffRoute><NoteTemplates /></StaffRoute>} />
                   <Route path="/staff/clinical-tools" element={<StaffRoute><ClinicalTools /></StaffRoute>} />
                   <Route path="/staff/clinical/abc" element={<StaffRoute><ABCDataSheet /></StaffRoute>} />
                   <Route path="/staff/clinical/functional-assessment" element={<StaffRoute><FunctionalAssessment /></StaffRoute>} />
