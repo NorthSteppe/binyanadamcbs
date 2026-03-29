@@ -17,7 +17,7 @@ import {
   LayoutGrid, List, Clock, Trash2, Maximize2, Minimize2,
   ListTodo, User, Edit, X, Sparkles, Loader2, Check,
   Video, Link2, UserPlus, ExternalLink, CalendarPlus, Copy, RefreshCw, CheckCircle2,
-  Mic, FileText,
+  Mic, FileText, Repeat, DollarSign, CreditCard, Banknote, AlertCircle,
 } from "lucide-react";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import NoteTemplateManager from "@/components/NoteTemplateManager";
@@ -50,6 +50,8 @@ type CalendarEvent = {
   attendeeIds?: string[];
   notes?: string;
   plaudRecordingId?: string;
+  isPaid?: boolean;
+  paymentMethod?: string;
 };
 
 type ViewMode = "month" | "week" | "day";
