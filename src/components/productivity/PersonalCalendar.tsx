@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { getHebrewDay, getAllHolidays } from "@/utils/hebrewCalendar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -652,9 +653,24 @@ const PersonalCalendar = ({ isFullscreen = false, onToggleFullscreen }: Personal
                       ${!isCurrentMonth ? "opacity-40" : ""}
                       ${isOver ? "bg-primary/10 border-primary" : ""}`}
                   >
-                    <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
-                      {format(day, "d")}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
+                        {format(day, "d")}
+                      </span>
+                      <span className="text-[8px] text-muted-foreground/60 font-light" dir="rtl">{getHebrewDay(day)}</span>
+                    </div>
+                    {(() => {
+                      const dayHolidays = getAllHolidays(day);
+                      return dayHolidays.length > 0 ? (
+                        <div className="mb-0.5">
+                          {dayHolidays.slice(0, 1).map((h, i) => (
+                            <div key={i} className={`text-[7px] px-0.5 py-0 rounded truncate ${h.type === "bank" ? "text-blue-600 dark:text-blue-400" : "text-amber-600 dark:text-amber-400"}`}>
+                              {h.emoji} {h.name.length > 12 ? h.name.slice(0, 12) + "…" : h.name}
+                            </div>
+                          ))}
+                        </div>
+                      ) : null;
+                    })()}
                     <div className="space-y-0.5 mt-0.5">
                       {dayEvents.slice(0, maxEvents).map((ev) => (
                         <div
