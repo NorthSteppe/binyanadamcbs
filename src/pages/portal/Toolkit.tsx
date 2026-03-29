@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Wrench, Timer, Grid3x3 } from "lucide-react";
+import { Wrench, Timer, Grid3x3, Headphones } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingAIChat from "@/components/FloatingAIChat";
@@ -8,6 +8,7 @@ import FloatingAIChat from "@/components/FloatingAIChat";
 const clientTools = [
   { label: "ACT Matrix", path: "/portal/toolkit/act-matrix", icon: Grid3x3, description: "Map your values, obstacles, and committed actions using the ACT framework." },
   { label: "Pomodoro Timer", path: "/portal/toolkit/pomodoro", icon: Timer, description: "Stay focused with timed work and break intervals." },
+  { label: "Mindfulness Sounds", path: "/portal/toolkit/mindfulness", icon: Headphones, description: "Ambient nature sounds for relaxation and mindful breathing exercises." },
 ];
 
 const Toolkit = () => {
