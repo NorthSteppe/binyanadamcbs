@@ -155,7 +155,7 @@ const BusinessDashboard = () => {
   }, [monthlyData]);
 
   const thisWeekSessions = useMemo(() => {
-    const now = new Date(); const wStart = startOfWeek(now, { weekStartsOn: 1 }); const wEnd = endOfWeek(now, { weekStartsOn: 1 });
+    const now = new Date(); const wStart = startOfWeek(now, { weekStartsOn: 0 }); const wEnd = endOfWeek(now, { weekStartsOn: 0 });
     return sessions.filter((s) => isWithinInterval(new Date(s.session_date), { start: wStart, end: wEnd }));
   }, [sessions]);
 
