@@ -927,6 +927,39 @@ export type Database = {
         }
         Relationships: []
       }
+      note_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          is_shared: boolean
+          template_content: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string
+          id?: string
+          is_shared?: boolean
+          template_content?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          is_shared?: boolean
+          template_content?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
