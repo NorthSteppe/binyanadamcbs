@@ -1096,14 +1096,20 @@ const AdminCalendar = () => {
                     {selectedEvent.meetingPlatform && (
                       <Badge variant="outline" className="text-[10px] gap-1 capitalize">
                         <Video size={9} />{selectedEvent.meetingPlatform.replace("-", " ")}
-                        {selectedEvent.meetingUrl && (
-                          <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-primary ml-1" onClick={(e) => e.stopPropagation()}>
-                            <ExternalLink size={9} />
-                          </a>
-                        )}
                       </Badge>
                     )}
                   </div>
+
+                  {/* Join Meeting Button */}
+                  {selectedEvent.meetingUrl && selectedEvent.meetingUrl.trim() && (
+                    <a href={selectedEvent.meetingUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="default" className="w-full gap-2 h-9 text-sm font-medium">
+                        <Video size={16} />
+                        Join {selectedEvent.meetingPlatform ? selectedEvent.meetingPlatform.replace("-", " ").replace(/\b\w/g, c => c.toUpperCase()) : "Meeting"}
+                        <ExternalLink size={12} className="ml-auto opacity-60" />
+                      </Button>
+                    </a>
+                  )}
 
                   {/* Status change */}
                   {selectedEvent.status && (
