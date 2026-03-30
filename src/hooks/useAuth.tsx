@@ -50,6 +50,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let mounted = true;
     let initialDone = false;
 
+    // Detect OAuth callback tokens in URL hash (e.g. after Google login redirect)
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token=")) {
+      // Let Supabase pick up the tokens, then clean the URL
+      supabase.auth.getSession().then(() => {
+        // Remove tokens from URL without triggering a reload
+        if (window.history.replaceState) {
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+      });
+    }
+
     // onAuthStateChange fires INITIAL_SESSION first, then getSession resolves.
     // We must NOT await inside the listener to avoid blocking Supabase internals.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
