@@ -42,61 +42,84 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       supabase.from("profiles").select("full_name, avatar_url").eq("id", userId).single(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
-    if (profileRes.data) setProfile(profileRes.data);
-    if (rolesRes.data) setRoles(rolesRes.data.map((r) => r.role));
+
+    return {
+      profile: profileRes.data ?? null,
+      roles: rolesRes.data?.map((r) => r.role) ?? [],
+    };
   };
 
   useEffect(() => {
     let mounted = true;
-    let initialDone = false;
 
-    // Detect OAuth callback tokens in URL hash (e.g. after Google login redirect)
-    const hash = window.location.hash;
-    if (hash && hash.includes("access_token=")) {
-      // Let Supabase pick up the tokens, then clean the URL
-      supabase.auth.getSession().then(() => {
-        // Remove tokens from URL without triggering a reload
-        if (window.history.replaceState) {
-          window.history.replaceState(null, "", window.location.pathname + window.location.search);
-        }
-      });
-    }
-
-    // onAuthStateChange fires INITIAL_SESSION first, then getSession resolves.
-    // We must NOT await inside the listener to avoid blocking Supabase internals.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const applySession = async (nextSession: Session | null) => {
       if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        // Fire-and-forget: fetch user data without blocking the callback
-        fetchUserData(session.user.id).then(() => {
-          if (mounted && !initialDone) {
-            initialDone = true;
-            setLoading(false);
-          }
-        });
-      } else {
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (!nextSession?.user) {
         setProfile(null);
         setRoles([]);
-        if (!initialDone) {
-          initialDone = true;
-          setLoading(false);
-        }
+        return;
       }
+
+      try {
+        const userData = await fetchUserData(nextSession.user.id);
+        if (!mounted) return;
+        setProfile(userData.profile);
+        setRoles(userData.roles);
+      } catch (error) {
+        console.error("Failed to load authenticated user data", error);
+        if (!mounted) return;
+        setProfile(null);
+        setRoles([]);
+      }
+    };
+
+    const bootstrapAuth = async () => {
+      try {
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error("Failed to restore OAuth session from URL", error);
+          }
+
+          if (window.history.replaceState) {
+            window.history.replaceState(null, "", window.location.pathname + window.location.search);
+          }
+        }
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Failed to load initial auth session", error);
+        }
+
+        await applySession(session);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      void applySession(nextSession).finally(() => {
+        if (mounted) setLoading(false);
+      });
     });
 
-    // Fallback: if onAuthStateChange never fires (edge case), resolve loading
-    const timeout = setTimeout(() => {
-      if (mounted && !initialDone) {
-        initialDone = true;
-        setLoading(false);
-      }
-    }, 3000);
+    void bootstrapAuth();
 
     return () => {
       mounted = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
