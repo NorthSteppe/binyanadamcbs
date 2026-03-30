@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
 import { MessageSquare, Send, Search, ArrowLeft, Users, Circle, Check, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
