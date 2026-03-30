@@ -1503,6 +1503,30 @@ export type Database = {
         }
         Relationships: []
       }
+      typing_status: {
+        Row: {
+          conversation_with: string
+          id: string
+          is_typing: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_with: string
+          id?: string
+          is_typing?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_with?: string
+          id?: string
+          is_typing?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_projects: {
         Row: {
           color: string
