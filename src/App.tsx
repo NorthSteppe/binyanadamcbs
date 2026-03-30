@@ -92,6 +92,13 @@ import BadgeManager from "./pages/admin/BadgeManager";
 import NoteTemplates from "./pages/admin/NoteTemplates";
 import ManualClients from "./pages/admin/ManualClients";
 
+// Business Planner
+import PlannerLayout from "./components/planner/PlannerLayout";
+import IlanaDashboard from "./pages/planner/dashboard/IlanaDashboard";
+import TMEMatrix from "./pages/planner/matrix/TMEMatrix";
+import ComplianceRoadmap from "./pages/planner/roadmap/ComplianceRoadmap";
+import AdminOperations from "./pages/planner/admin/AdminOperations";
+
 const queryClient = new QueryClient();
 
 const AppLoader = ({ children }: { children: React.ReactNode }) => {
@@ -216,6 +223,14 @@ const App = () => (
                   <Route path="/supervisee/clinical/hexaflex" element={<SuperviseeRoute><HexaflexTracker /></SuperviseeRoute>} />
                   <Route path="/supervisee/clinical/behaviour-log" element={<SuperviseeRoute><BehaviourLog /></SuperviseeRoute>} />
                   <Route path="/supervisee/clinical/case-formulation" element={<SuperviseeRoute><CaseFormulation /></SuperviseeRoute>} />
+
+                  {/* Business Planner */}
+                  <Route path="/planner" element={<ProtectedRoute><PlannerLayout /></ProtectedRoute>}>
+                    <Route index element={<IlanaDashboard />} />
+                    <Route path="tme-matrix" element={<TMEMatrix />} />
+                    <Route path="roadmap" element={<ComplianceRoadmap />} />
+                    <Route path="admin" element={<AdminOperations />} />
+                  </Route>
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

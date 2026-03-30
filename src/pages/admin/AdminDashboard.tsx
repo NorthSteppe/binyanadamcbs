@@ -1,9 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
   UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen, FileText,
+  ListTodo, Wrench, LayoutDashboard, Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, Briefcase, Activity
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,6 +87,29 @@ const AdminDashboard = () => {
   const { profile } = useAuth();
   const { setEditMode } = useEditMode();
   const navigate = useNavigate();
+  const [stats, setStats] = useState({ activeClients: 0, upcomingSessions: 0, pendingTodos: 0, loading: true });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [clientsRes, sessionsRes, todosRes] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact" }).eq("role", "client"),
+          supabase.from("sessions").select("id", { count: "exact" }).gte("session_date", new Date().toISOString()),
+          supabase.from("client_todos").select("id", { count: "exact" }).eq("is_completed", false)
+        ]);
+        setStats({
+          activeClients: clientsRes.count || 0,
+          upcomingSessions: sessionsRes.count || 0,
+          pendingTodos: todosRes.count || 0,
+          loading: false,
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+        setStats(prev => ({ ...prev, loading: false }));
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleEnterEditMode = () => {
     setEditMode(true);
@@ -115,6 +142,42 @@ const AdminDashboard = () => {
               Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}. Manage your practice website and users.
             </p>
           </motion.div>
+
+          {/* Quick Stats */}
+          {!stats.loading && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+              <Card className="bg-card border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
+                  <Users className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.activeClients}</div>
+                  <p className="text-xs text-muted-foreground">Registered in portal</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-card border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Upcoming Sessions</CardTitle>
+                  <Calendar className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.upcomingSessions}</div>
+                  <p className="text-xs text-muted-foreground">Scheduled in future</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-card border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Pending Client Tasks</CardTitle>
+                  <ListTodo className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.pendingTodos}</div>
+                  <p className="text-xs text-muted-foreground">Incomplete client to-dos</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Categories */}
           <div className="space-y-12">

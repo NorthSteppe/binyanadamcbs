@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Calendar, MessageSquare, BookOpen, Clock, Upload, FileText, CheckCircle2, Circle, Phone, Mail, ListTodo, Timer, LayoutDashboard } from "lucide-react";
+import { Calendar, MessageSquare, BookOpen, Clock, Upload, FileText, CheckCircle2, Circle, Phone, Mail, ListTodo, Timer, LayoutDashboard, Sparkles, Files } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,6 +104,10 @@ const Dashboard = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const completedTasks = todos.filter(t => t.is_completed).length;
+  const totalTasks = todos.length;
+  const taskProgress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -189,7 +194,11 @@ const Dashboard = () => {
                 {portalT.upcoming || "Upcoming Sessions"}
               </h2>
               {upcomingSessions.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{portalT.noSessions || "No upcoming sessions."}</p>
+                <div className="text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60">
+                  <Calendar className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
+                  <p className="text-sm font-medium text-foreground">{portalT.noSessions || "No upcoming sessions."}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Book a new session to get started.</p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {upcomingSessions.map((s) => (
@@ -209,20 +218,34 @@ const Dashboard = () => {
             </div>
 
             {/* To-Do List */}
-            <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h2 className="text-lg mb-4 flex items-center gap-2 font-semibold">
-                <ListTodo size={18} className="text-primary" />
-                To-Do List
-              </h2>
+            <div className="bg-card rounded-2xl border border-border/50 p-6 flex flex-col h-full">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg flex items-center gap-2 font-semibold">
+                  <ListTodo size={18} className="text-primary" />
+                  To-Do List
+                </h2>
+                {totalTasks > 0 && (
+                  <span className="text-xs font-medium text-muted-foreground">{completedTasks} of {totalTasks} completed</span>
+                )}
+              </div>
+              
+              {totalTasks > 0 && (
+                <Progress value={taskProgress} className="h-1.5 mb-5" />
+              )}
+
               {todos.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No tasks assigned yet.</p>
+                <div className="text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60 my-auto">
+                  <Sparkles className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
+                  <p className="text-sm font-medium text-foreground">You're all caught up!</p>
+                  <p className="text-xs text-muted-foreground mt-1">Any homework assigned will appear here.</p>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {todos.map((todo) => (
                     <button
                       key={todo.id}
                       onClick={() => toggleTodo(todo)}
-                      className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border transition-all ${todo.is_completed ? "bg-muted/50 border-border/20" : "bg-background border-border/30 hover:border-primary/20"}`}
+                      className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border transition-all ${todo.is_completed ? "bg-muted/50 border-border/20 opacity-70" : "bg-card border-border/50 hover:border-primary/30"}`}
                     >
                       {todo.is_completed ? (
                         <CheckCircle2 size={18} className="text-primary mt-0.5 shrink-0" />
@@ -256,7 +279,11 @@ const Dashboard = () => {
                 </Button>
               </div>
               {documents.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
+                <div className="text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60">
+                  <Files className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
+                  <p className="text-sm font-medium text-foreground">No documents uploaded.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Upload files to share with your therapist securely.</p>
+                </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {documents.slice(0, 6).map((doc) => (
