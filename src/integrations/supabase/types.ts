@@ -908,6 +908,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          linked_user_id: string | null
           notes: string
           phone: string
           updated_at: string
@@ -919,6 +920,7 @@ export type Database = {
           email?: string
           full_name: string
           id?: string
+          linked_user_id?: string | null
           notes?: string
           phone?: string
           updated_at?: string
@@ -930,6 +932,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          linked_user_id?: string | null
           notes?: string
           phone?: string
           updated_at?: string
@@ -1655,6 +1658,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      link_manual_client_to_user: {
+        Args: { _manual_client_id: string; _target_user_id: string }
+        Returns: undefined
       }
       move_to_dlq: {
         Args: {
