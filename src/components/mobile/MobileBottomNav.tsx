@@ -12,6 +12,10 @@ const MobileBottomNav = () => {
 
   if (!isMobile) return null;
 
+  // Hide bottom nav on messages/chat pages to avoid overlapping input
+  const hideOnRoutes = ["/portal/messages", "/staff/messages", "/portal/chat"];
+  if (hideOnRoutes.some((r) => location.pathname === r)) return null;
+
   const getNavItems = () => {
     if (location.pathname.startsWith("/admin")) {
       return [

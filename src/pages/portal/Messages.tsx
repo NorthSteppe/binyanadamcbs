@@ -378,7 +378,8 @@ const Messages = () => {
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-border bg-card px-4 py-3 flex gap-2 shrink-0">
+                <div className="border-t border-border bg-card px-4 py-3 flex gap-2 shrink-0"
+                  style={{ paddingBottom: isMobile ? "calc(env(safe-area-inset-bottom, 0px) + 12px)" : undefined }}>
                   <Input
                     value={newMsg}
                     onChange={(e) => { setNewMsg(e.target.value); handleTyping(); }}
