@@ -107,10 +107,7 @@ const IlanaDashboard = () => {
           <CardContent>
             <Progress 
               value={progressPercentage} 
-              className="h-3"
-              indicatorColor={
-                progressPercentage >= 100 ? "bg-emerald-500" : progressPercentage >= 50 ? "bg-amber-500" : "bg-red-500"
-              }
+              className={`h-3 [&>div]:${progressPercentage >= 100 ? "bg-emerald-500" : progressPercentage >= 50 ? "bg-amber-500" : "bg-red-500"}`}
             />
             <p className="text-xs text-muted-foreground mt-2">
               Currently forecasting {progressPercentage.toFixed(0)}% of your secure baseline.
