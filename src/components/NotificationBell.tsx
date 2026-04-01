@@ -125,7 +125,7 @@ const NotificationBell = () => {
             )}
           </div>
         </div>
-        <ScrollArea className="max-h-[400px]">
+        <ScrollArea className="h-[min(400px,60vh)] overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">No notifications yet</div>
           ) : (
