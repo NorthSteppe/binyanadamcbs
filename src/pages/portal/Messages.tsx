@@ -103,15 +103,24 @@ const Messages = () => {
   useEffect(() => { if (allUsers.length > 0) fetchMessages(); }, [allUsers, fetchMessages]);
 
   // Auto-select conversation from ?user= query param (e.g. from notification link)
+  const pendingUserRef = useRef<string | null>(null);
+  
   useEffect(() => {
     const targetUserId = searchParams.get("user");
-    if (!targetUserId || !allUsers.length || selectedUser) return;
-    const targetProfile = allUsers.find((u) => u.id === targetUserId);
-    if (targetProfile) {
-      setSelectedUser(targetProfile);
+    if (targetUserId) {
+      pendingUserRef.current = targetUserId;
       setSearchParams({}, { replace: true });
     }
-  }, [allUsers, searchParams, selectedUser, setSearchParams]);
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (!pendingUserRef.current || !allUsers.length || conversations === undefined) return;
+    const targetProfile = allUsers.find((u) => u.id === pendingUserRef.current);
+    if (targetProfile) {
+      selectConversation(targetProfile);
+      pendingUserRef.current = null;
+    }
+  }, [allUsers, conversations]);
 
   // Realtime messages
   useEffect(() => {
