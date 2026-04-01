@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
 
 interface Notification {
