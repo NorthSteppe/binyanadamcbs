@@ -63,8 +63,6 @@ const NotificationBell = () => {
         (payload) => {
           const n = payload.new as Notification;
           setNotifications((prev) => [n, ...prev]);
-          // Gentle toast
-          toast(n.title, { description: n.message, duration: 4000 });
         }
       )
       .subscribe();
