@@ -138,11 +138,7 @@ const Messages = () => {
         if (payload.eventType === "INSERT") {
           const msg = payload.new as Message;
           if (msg.sender_id === user.id || msg.recipient_id === user.id) {
-            setMessages((prev) => {
-              const updated = [...prev, msg];
-              buildConversations(updated);
-              return updated;
-            });
+            setMessages((prev) => [...prev, msg]);
             if (msg.recipient_id === user.id && selectedUser?.id === msg.sender_id) {
               supabase.from("messages").update({ read: true }).eq("id", msg.id).then();
             }
