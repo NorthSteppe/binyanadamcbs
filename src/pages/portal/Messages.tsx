@@ -70,13 +70,13 @@ const Messages = () => {
       .order("created_at", { ascending: true });
     if (data) {
       setMessages(data);
-      buildConversations(data);
     }
   }, [user]);
 
+  // Build conversations whenever messages or allUsers change
   const buildConversations = useCallback(
     (msgs: Message[]) => {
-      if (!user) return;
+      if (!user || !allUsers.length) return;
       const convMap = new Map<string, { messages: Message[]; unread: number }>();
       msgs.forEach((msg) => {
         const otherId = msg.sender_id === user.id ? msg.recipient_id : msg.sender_id;
@@ -98,6 +98,13 @@ const Messages = () => {
     },
     [user, allUsers]
   );
+
+  // Rebuild conversations whenever messages or users change
+  useEffect(() => {
+    if (messages.length > 0 && allUsers.length > 0) {
+      buildConversations(messages);
+    }
+  }, [messages, buildConversations]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
   useEffect(() => { if (allUsers.length > 0) fetchMessages(); }, [allUsers, fetchMessages]);
