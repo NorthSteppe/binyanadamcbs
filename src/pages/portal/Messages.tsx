@@ -70,13 +70,13 @@ const Messages = () => {
       .order("created_at", { ascending: true });
     if (data) {
       setMessages(data);
-      buildConversations(data);
     }
   }, [user]);
 
+  // Build conversations whenever messages or allUsers change
   const buildConversations = useCallback(
     (msgs: Message[]) => {
-      if (!user) return;
+      if (!user || !allUsers.length) return;
       const convMap = new Map<string, { messages: Message[]; unread: number }>();
       msgs.forEach((msg) => {
         const otherId = msg.sender_id === user.id ? msg.recipient_id : msg.sender_id;
@@ -99,19 +99,35 @@ const Messages = () => {
     [user, allUsers]
   );
 
+  // Rebuild conversations whenever messages or users change
+  useEffect(() => {
+    if (messages.length > 0 && allUsers.length > 0) {
+      buildConversations(messages);
+    }
+  }, [messages, buildConversations]);
+
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
   useEffect(() => { if (allUsers.length > 0) fetchMessages(); }, [allUsers, fetchMessages]);
 
   // Auto-select conversation from ?user= query param (e.g. from notification link)
+  const pendingUserRef = useRef<string | null>(null);
+  
   useEffect(() => {
     const targetUserId = searchParams.get("user");
-    if (!targetUserId || !allUsers.length || selectedUser) return;
-    const targetProfile = allUsers.find((u) => u.id === targetUserId);
-    if (targetProfile) {
-      setSelectedUser(targetProfile);
+    if (targetUserId) {
+      pendingUserRef.current = targetUserId;
       setSearchParams({}, { replace: true });
     }
-  }, [allUsers, searchParams, selectedUser, setSearchParams]);
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (!pendingUserRef.current || !allUsers.length || conversations === undefined) return;
+    const targetProfile = allUsers.find((u) => u.id === pendingUserRef.current);
+    if (targetProfile) {
+      selectConversation(targetProfile);
+      pendingUserRef.current = null;
+    }
+  }, [allUsers, conversations]);
 
   // Realtime messages
   useEffect(() => {
@@ -122,11 +138,7 @@ const Messages = () => {
         if (payload.eventType === "INSERT") {
           const msg = payload.new as Message;
           if (msg.sender_id === user.id || msg.recipient_id === user.id) {
-            setMessages((prev) => {
-              const updated = [...prev, msg];
-              buildConversations(updated);
-              return updated;
-            });
+            setMessages((prev) => [...prev, msg]);
             if (msg.recipient_id === user.id && selectedUser?.id === msg.sender_id) {
               supabase.from("messages").update({ read: true }).eq("id", msg.id).then();
             }
@@ -138,7 +150,7 @@ const Messages = () => {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, selectedUser, buildConversations]);
+  }, [user, selectedUser]);
 
   // Realtime typing indicator
   useEffect(() => {
