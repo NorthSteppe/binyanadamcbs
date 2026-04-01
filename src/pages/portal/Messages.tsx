@@ -35,6 +35,7 @@ const Messages = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const [searchParams, setSearchParams] = useSearchParams();
   const portalT = (t as any).portal || {};
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
