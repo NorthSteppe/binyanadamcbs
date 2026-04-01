@@ -150,7 +150,7 @@ const Messages = () => {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, selectedUser, buildConversations]);
+  }, [user, selectedUser]);
 
   // Realtime typing indicator
   useEffect(() => {
