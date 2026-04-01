@@ -93,7 +93,7 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const [clientsRes, sessionsRes, todosRes] = await Promise.all([
-          supabase.from("profiles").select("id", { count: "exact" }).eq("role", "client"),
+          supabase.from("user_roles").select("id", { count: "exact" }).eq("role", "client"),
           supabase.from("sessions").select("id", { count: "exact" }).gte("session_date", new Date().toISOString()),
           supabase.from("client_todos").select("id", { count: "exact" }).eq("is_completed", false)
         ]);
