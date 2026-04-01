@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Bell, Check, CheckCheck, Calendar, MessageSquare, ListTodo, Shield, Trash2 } from "lucide-react";
+import { Bell, CheckCheck, Calendar, MessageSquare, ListTodo, Shield, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
 interface Notification {
@@ -63,8 +62,6 @@ const NotificationBell = () => {
         (payload) => {
           const n = payload.new as Notification;
           setNotifications((prev) => [n, ...prev]);
-          // Gentle toast
-          toast(n.title, { description: n.message, duration: 4000 });
         }
       )
       .subscribe();
@@ -127,7 +124,7 @@ const NotificationBell = () => {
             )}
           </div>
         </div>
-        <ScrollArea className="max-h-[400px]">
+        <ScrollArea className="h-[min(400px,60vh)] overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">No notifications yet</div>
           ) : (

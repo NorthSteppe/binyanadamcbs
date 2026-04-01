@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { MessageSquare, Send, Search, ArrowLeft, Users, Circle, Check, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ const Messages = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const [searchParams, setSearchParams] = useSearchParams();
   const portalT = (t as any).portal || {};
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -99,6 +101,17 @@ const Messages = () => {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
   useEffect(() => { if (allUsers.length > 0) fetchMessages(); }, [allUsers, fetchMessages]);
+
+  // Auto-select conversation from ?user= query param (e.g. from notification link)
+  useEffect(() => {
+    const targetUserId = searchParams.get("user");
+    if (!targetUserId || !allUsers.length || selectedUser) return;
+    const targetProfile = allUsers.find((u) => u.id === targetUserId);
+    if (targetProfile) {
+      setSelectedUser(targetProfile);
+      setSearchParams({}, { replace: true });
+    }
+  }, [allUsers, searchParams, selectedUser, setSearchParams]);
 
   // Realtime messages
   useEffect(() => {
