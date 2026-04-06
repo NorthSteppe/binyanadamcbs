@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { useTeamMembers, useUpsertTeamMember, useDeleteTeamMember, TeamMember } from "@/hooks/useTeamMembers";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -13,16 +13,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, Save, Plus, Trash2, Linkedin, Globe, Twitter, Award, PenLine, UserCircle, Image } from "lucide-react";
 import { toast } from "sonner";
 
-const TeamMemberRow = ({ member }: { member: TeamMember }) => {
+interface UserOption {
+  id: string;
+  full_name: string;
+}
+
+const TeamMemberRow = ({ member, users }: { member: TeamMember; users: UserOption[] }) => {
   const upsert = useUpsertTeamMember();
   const remove = useDeleteTeamMember();
   const avatarRef = useRef<HTMLInputElement>(null);
   const sigRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState<"avatar" | "signature" | null>(null);
+  const profileImgRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState<"avatar" | "signature" | "profile" | null>(null);
   const [form, setForm] = useState({
     name: member.name,
     role: member.role,
     bio: member.bio,
+    long_bio: member.long_bio || "",
     initials: member.initials,
     slug: member.slug || "",
     display_order: member.display_order,
@@ -31,11 +38,12 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
     social_linkedin: member.social_linkedin,
     social_twitter: member.social_twitter,
     social_website: member.social_website,
+    user_id: member.user_id || "",
   });
 
   const set = (key: string, value: any) => setForm((f) => ({ ...f, [key]: value }));
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "signature") => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "signature" | "profile") => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(type);
@@ -45,20 +53,18 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
       const { error: uploadError } = await supabase.storage.from("hero-images").upload(path, file);
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("hero-images").getPublicUrl(path);
-      const field = type === "avatar" ? "avatar_url" : "signature_url";
-      upsert.mutate({ id: member.id, [field]: urlData.publicUrl });
-      toast.success(`${type === "avatar" ? "Photo" : "Signature"} updated`);
+      const fieldMap = { avatar: "avatar_url", signature: "signature_url", profile: "profile_image_url" };
+      upsert.mutate({ id: member.id, [fieldMap[type]]: urlData.publicUrl });
+      toast.success(`${type === "avatar" ? "Photo" : type === "signature" ? "Signature" : "Profile image"} updated`);
     } catch (err: any) {
       toast.error(err.message);
     } finally {
       setUploading(null);
-      if (avatarRef.current) avatarRef.current.value = "";
-      if (sigRef.current) sigRef.current.value = "";
     }
   };
 
   const save = () => {
-    upsert.mutate({ id: member.id, ...form });
+    upsert.mutate({ id: member.id, ...form, user_id: form.user_id || null });
     toast.success("Saved");
   };
 
@@ -69,7 +75,7 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
   };
 
   return (
-    <div className="p-6 border border-border bg-card space-y-5">
+    <div className="p-6 border border-border bg-card space-y-5 rounded-lg">
       {/* Top row: avatar + basic fields */}
       <div className="flex flex-col md:flex-row items-start gap-5">
         <div className="shrink-0 w-full md:w-32 text-center space-y-2">
@@ -92,12 +98,58 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
             <Input value={form.initials} placeholder="Initials" onChange={(e) => set("initials", e.target.value)} />
           </div>
           <Input value={form.role} placeholder="Role / Title" onChange={(e) => set("role", e.target.value)} />
-          <Textarea value={form.bio} placeholder="Bio" rows={3} onChange={(e) => set("bio", e.target.value)} />
+          <Textarea value={form.bio} placeholder="Short bio (shown on About page)" rows={3} onChange={(e) => set("bio", e.target.value)} />
           <div className="grid grid-cols-2 gap-2">
-            <Input value={form.slug} placeholder="URL slug (optional)" onChange={(e) => set("slug", e.target.value)} />
+            <Input value={form.slug} placeholder="URL slug (e.g. adam-dayan)" onChange={(e) => set("slug", e.target.value)} />
             <Input type="number" value={form.display_order} placeholder="Order" onChange={(e) => set("display_order", Number(e.target.value))} />
           </div>
         </div>
+      </div>
+
+      {/* Linked User */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium flex items-center gap-2"><UserCircle size={14} className="text-primary" /> Linked User Account</Label>
+        <Select value={form.user_id} onValueChange={(v) => set("user_id", v === "none" ? "" : v)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a user account…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">— No linked user —</SelectItem>
+            {users.map((u) => (
+              <SelectItem key={u.id} value={u.id}>{u.full_name || u.id}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">Link this profile to a user account to connect their login with this team page.</p>
+      </div>
+
+      {/* Profile Page Image */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium flex items-center gap-2"><Image size={14} className="text-primary" /> Profile Page Image</Label>
+        <div className="flex items-center gap-4">
+          {member.profile_image_url ? (
+            <img src={member.profile_image_url} alt="Profile" className="h-20 w-16 object-cover rounded bg-muted" />
+          ) : (
+            <div className="h-20 w-16 bg-muted rounded flex items-center text-xs text-muted-foreground justify-center">None</div>
+          )}
+          <Button variant="outline" size="sm" className="gap-1" onClick={() => profileImgRef.current?.click()} disabled={uploading === "profile"}>
+            <Upload size={14} /> {uploading === "profile" ? "Uploading…" : "Upload Image"}
+          </Button>
+          <input ref={profileImgRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "profile")} />
+        </div>
+        <p className="text-xs text-muted-foreground">Large image shown on the individual profile page (3:4 aspect ratio recommended).</p>
+      </div>
+
+      {/* Long Bio */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Extended Biography (Profile Page)</Label>
+        <Textarea
+          value={form.long_bio}
+          placeholder="Full biography shown on the individual profile page. Separate paragraphs with blank lines."
+          rows={6}
+          onChange={(e) => set("long_bio", e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">This is the detailed bio shown on /team/{form.slug || "slug"}. Leave empty to use the short bio.</p>
       </div>
 
       {/* Credentials */}
@@ -109,7 +161,7 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
           rows={3}
           onChange={(e) => set("credentials", e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">Enter each credential on a new line. These will be displayed on the therapist's profile.</p>
+        <p className="text-xs text-muted-foreground">Enter each credential on a new line.</p>
       </div>
 
       {/* Signature */}
@@ -126,7 +178,6 @@ const TeamMemberRow = ({ member }: { member: TeamMember }) => {
           </Button>
           <input ref={sigRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "signature")} />
         </div>
-        <p className="text-xs text-muted-foreground">Upload a transparent PNG of the therapist's signature.</p>
       </div>
 
       {/* Social Media */}
@@ -170,6 +221,15 @@ const TeamMemberManager = () => {
   const { data: members, isLoading } = useTeamMembers();
   const upsert = useUpsertTeamMember();
 
+  const { data: users = [] } = useQuery({
+    queryKey: ["all-profiles-for-linking"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_safe_profiles");
+      if (error) throw error;
+      return (data as UserOption[]) || [];
+    },
+  });
+
   const addNew = () => {
     upsert.mutate({
       name: "New Therapist",
@@ -189,7 +249,7 @@ const TeamMemberManager = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-1">Therapist Profiles</h1>
-            <p className="text-muted-foreground font-light">Manage therapist bios, credentials, signatures, and social links.</p>
+            <p className="text-muted-foreground font-light">Manage therapist bios, credentials, profile pages, and user links.</p>
           </div>
           <Button onClick={addNew} className="gap-1">
             <Plus size={16} /> Add Therapist
@@ -200,7 +260,7 @@ const TeamMemberManager = () => {
 
         <div className="grid gap-6">
           {members?.map((m) => (
-            <TeamMemberRow key={m.id} member={m} />
+            <TeamMemberRow key={m.id} member={m} users={users} />
           ))}
         </div>
       </div>
