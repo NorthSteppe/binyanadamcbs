@@ -16,6 +16,9 @@ export interface TeamMember {
   social_linkedin: string;
   social_twitter: string;
   social_website: string;
+  user_id: string | null;
+  long_bio: string;
+  profile_image_url: string | null;
 }
 
 export const useTeamMembers = () =>
