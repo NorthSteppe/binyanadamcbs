@@ -1429,7 +1429,9 @@ export type Database = {
           id: string
           initials: string
           is_active: boolean
+          long_bio: string
           name: string
+          profile_image_url: string | null
           role: string
           signature_url: string | null
           slug: string | null
@@ -1437,6 +1439,7 @@ export type Database = {
           social_twitter: string
           social_website: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -1447,7 +1450,9 @@ export type Database = {
           id?: string
           initials?: string
           is_active?: boolean
+          long_bio?: string
           name: string
+          profile_image_url?: string | null
           role?: string
           signature_url?: string | null
           slug?: string | null
@@ -1455,6 +1460,7 @@ export type Database = {
           social_twitter?: string
           social_website?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -1465,7 +1471,9 @@ export type Database = {
           id?: string
           initials?: string
           is_active?: boolean
+          long_bio?: string
           name?: string
+          profile_image_url?: string | null
           role?: string
           signature_url?: string | null
           slug?: string | null
@@ -1473,6 +1481,7 @@ export type Database = {
           social_twitter?: string
           social_website?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
