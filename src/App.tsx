@@ -23,8 +23,7 @@ import Supervision from "./pages/Supervision";
 import OfferDetail from "./pages/OfferDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import TeamAdam from "./pages/TeamAdam";
-import TeamBrionny from "./pages/TeamBrionny";
+import TeamMemberProfile from "./pages/TeamMemberProfile";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -137,8 +136,7 @@ const App = () => (
                   <Route path="/supervision" element={<Supervision />} />
                   <Route path="/:serviceArea/:offerSlug" element={<OfferDetail />} />
                   <Route path="/about" element={<About />} />
-                  <Route path="/team/adam-dayan" element={<TeamAdam />} />
-                  <Route path="/team/brionny-pearson" element={<TeamBrionny />} />
+                  <Route path="/team/:slug" element={<TeamMemberProfile />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/courses" element={<Courses />} />
                   <Route path="/courses/:slug" element={<CourseDetail />} />
