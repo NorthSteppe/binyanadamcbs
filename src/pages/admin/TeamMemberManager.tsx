@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useTeamMembers, useUpsertTeamMember, useDeleteTeamMember, TeamMember } from "@/hooks/useTeamMembers";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Upload, Save, Plus, Trash2, Linkedin, Globe, Twitter, Award, PenLine } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Upload, Save, Plus, Trash2, Linkedin, Globe, Twitter, Award, PenLine, UserCircle, Image } from "lucide-react";
 import { toast } from "sonner";
 
 const TeamMemberRow = ({ member }: { member: TeamMember }) => {
