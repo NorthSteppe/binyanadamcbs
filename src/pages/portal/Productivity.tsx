@@ -4,7 +4,6 @@ import { LayoutDashboard, Calendar, ListTodo, Maximize2, FolderOpen } from "luci
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingAIChat from "@/components/FloatingAIChat";
 import TaskBoard from "@/components/productivity/TaskBoard";
 import PersonalCalendar from "@/components/productivity/PersonalCalendar";
 import ProjectManager from "@/components/productivity/ProjectManager";
@@ -92,7 +91,6 @@ const Productivity = () => {
         </div>
       </section>
       <Footer />
-      <FloatingAIChat />
     </div>
   );
 };
