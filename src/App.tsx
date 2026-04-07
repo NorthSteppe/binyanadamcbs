@@ -184,6 +184,7 @@ const App = () => (
                   <Route path="/admin/badges" element={<AdminRoute><BadgeManager /></AdminRoute>} />
                   <Route path="/admin/note-templates" element={<AdminRoute><NoteTemplates /></AdminRoute>} />
                   <Route path="/admin/manual-clients" element={<AdminRoute><ManualClients /></AdminRoute>} />
+                  <Route path="/admin/assistant" element={<AdminRoute><AssistantManager /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
