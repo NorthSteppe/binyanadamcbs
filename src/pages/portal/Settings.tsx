@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings as SettingsIcon, Moon, Sun, Monitor, Bell, Globe, LayoutDashboard } from "lucide-react";
+import { Settings as SettingsIcon, Moon, Sun, Monitor, Bell, Globe, LayoutDashboard, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
 
 const WIDGET_OPTIONS = [
@@ -126,6 +126,28 @@ const Settings = () => {
 
             {/* Telegram Setup (only if enabled) */}
             {prefs.notifyTelegram && isStaff && <NotificationSettings />}
+
+            {/* Mobile */}
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Smartphone size={18} />
+                  Mobile
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm">Bottom Navigation Bar</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">Show a floating nav bar at the bottom of the screen.</p>
+                  </div>
+                  <Switch
+                    checked={prefs.mobileBottomNav}
+                    onCheckedChange={(v) => updatePrefs({ mobileBottomNav: v })}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Dashboard Widgets */}
             <Card className="border-border/50">

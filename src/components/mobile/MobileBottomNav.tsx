@@ -6,14 +6,17 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePreferences } from "@/hooks/usePreferences";
 
 const MobileBottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, isTeamMember } = useAuth();
   const isMobile = useIsMobile();
+  const { prefs } = usePreferences();
 
   if (!isMobile) return null;
+  if (!prefs.mobileBottomNav) return null;
 
   // Hide on messaging/chat pages to avoid covering the input
   const hideOnRoutes = ["/portal/messages", "/staff/messages", "/portal/chat"];

@@ -8,6 +8,7 @@ export interface UserPreferences {
   notifyPush: boolean;
   notifyInApp: boolean;
   dashboardWidgets: string[];
+  mobileBottomNav: boolean;
 }
 
 const COOKIE_KEY = "ba_prefs";
@@ -19,6 +20,7 @@ const DEFAULT_PREFS: UserPreferences = {
   notifyInApp: true,
   notifyPush: false,
   dashboardWidgets: ["tasks", "calendar", "messages", "linear"],
+  mobileBottomNav: false,
 };
 
 function readCookie(): UserPreferences {

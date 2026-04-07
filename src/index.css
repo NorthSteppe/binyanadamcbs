@@ -224,10 +224,3 @@
   }
 }
 
-/* Ensure content doesn't hide behind bottom nav on mobile */
-@media (max-width: 1023px) {
-  main,
-  .main-content {
-    padding-bottom: 4.5rem;
-  }
-}
