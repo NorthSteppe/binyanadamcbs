@@ -156,7 +156,6 @@ const App = () => (
                   <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                   <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
                   <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
-                  <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/mindfulness" element={<ProtectedRoute><MindfulnessSounds /></ProtectedRoute>} />
