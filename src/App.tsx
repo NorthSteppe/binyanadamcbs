@@ -34,6 +34,7 @@ import Dashboard from "./pages/portal/Dashboard";
 import Resources from "./pages/portal/Resources";
 import Messages from "./pages/portal/Messages";
 import Booking from "./pages/portal/Booking";
+import Toolkit from "./pages/portal/Toolkit";
 import ProactiveAssistant from "./components/ProactiveAssistant";
 import ToolkitACTMatrix from "./pages/portal/ToolkitACTMatrix";
 import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
