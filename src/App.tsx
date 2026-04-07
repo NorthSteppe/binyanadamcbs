@@ -90,6 +90,7 @@ import BlogManager from "./pages/admin/BlogManager";
 import BadgeManager from "./pages/admin/BadgeManager";
 import NoteTemplates from "./pages/admin/NoteTemplates";
 import ManualClients from "./pages/admin/ManualClients";
+import AssistantManager from "./pages/admin/AssistantManager";
 
 // Business Planner
 import PlannerLayout from "./components/planner/PlannerLayout";
