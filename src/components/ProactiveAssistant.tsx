@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Bot, Send, X, Sparkles, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Bot, Send, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,7 +13,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 const ASSISTANT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/assistant`;
 const STORAGE_KEY = "binyan_assistant_dismissed";
-const SESSION_KEY = "binyan_assistant_session";
+
 
 const ProactiveAssistant = () => {
   const { session, user } = useAuth();
@@ -75,6 +75,7 @@ const ProactiveAssistant = () => {
       // Create conversation record
       createConversation();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, hasGreeted, messages.length, greeting]);
 
   const createConversation = async () => {
@@ -142,7 +143,7 @@ const ProactiveAssistant = () => {
         method: "POST",
         headers,
         body: JSON.stringify({
-          messages: newMessages.filter(m => m.role !== "system"),
+          messages: newMessages,
           conversation_id: conversationId,
           source_page: location.pathname,
           context_type: user ? "user" : "visitor",

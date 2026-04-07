@@ -14,7 +14,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { messages, conversation_id, source_page, context_type } = body;
+    const { messages, conversation_id } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length > MAX_MESSAGES) {
       return new Response(JSON.stringify({ error: "Invalid messages" }), {
