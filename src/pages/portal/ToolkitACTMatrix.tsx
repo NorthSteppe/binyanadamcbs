@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingAIChat from "@/components/FloatingAIChat";
 import ACTMatrix from "@/components/portal/ACTMatrix";
 
 const ToolkitACTMatrix = () => {
@@ -25,7 +24,6 @@ const ToolkitACTMatrix = () => {
         </div>
       </section>
       <Footer />
-      <FloatingAIChat />
     </div>
   );
 };

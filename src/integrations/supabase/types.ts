@@ -50,6 +50,196 @@ export type Database = {
         }
         Relationships: []
       }
+      assistant_collected_data: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          field_name: string
+          field_value: string
+          id: string
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          field_name: string
+          field_value?: string
+          id?: string
+          source?: string
+          user_id?: string | null
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          field_name?: string
+          field_value?: string
+          id?: string
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_collected_data_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assistant_config: {
+        Row: {
+          auto_popup_delay_seconds: number
+          collect_data_fields: Json
+          created_at: string
+          id: string
+          is_enabled: boolean
+          system_prompt: string
+          updated_at: string
+          user_greeting: string
+          visitor_greeting: string
+        }
+        Insert: {
+          auto_popup_delay_seconds?: number
+          collect_data_fields?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          system_prompt?: string
+          updated_at?: string
+          user_greeting?: string
+          visitor_greeting?: string
+        }
+        Update: {
+          auto_popup_delay_seconds?: number
+          collect_data_fields?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          system_prompt?: string
+          updated_at?: string
+          user_greeting?: string
+          visitor_greeting?: string
+        }
+        Relationships: []
+      }
+      assistant_conversations: {
+        Row: {
+          created_at: string
+          flow_id: string | null
+          id: string
+          messages: Json
+          source_page: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          visitor_fingerprint: string | null
+        }
+        Insert: {
+          created_at?: string
+          flow_id?: string | null
+          id?: string
+          messages?: Json
+          source_page?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_fingerprint?: string | null
+        }
+        Update: {
+          created_at?: string
+          flow_id?: string | null
+          id?: string
+          messages?: Json
+          source_page?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_fingerprint?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_conversations_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_flows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assistant_flows: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          display_order: number
+          flow_steps: Json
+          id: string
+          is_active: boolean
+          name: string
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string
+          display_order?: number
+          flow_steps?: Json
+          id?: string
+          is_active?: boolean
+          name: string
+          trigger_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          display_order?: number
+          flow_steps?: Json
+          id?: string
+          is_active?: boolean
+          name?: string
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      assistant_knowledge: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_authors: {
         Row: {
           avatar_url: string | null

@@ -34,8 +34,8 @@ import Dashboard from "./pages/portal/Dashboard";
 import Resources from "./pages/portal/Resources";
 import Messages from "./pages/portal/Messages";
 import Booking from "./pages/portal/Booking";
-import Chat from "./pages/portal/Chat";
 import Toolkit from "./pages/portal/Toolkit";
+import ProactiveAssistant from "./components/ProactiveAssistant";
 import ToolkitACTMatrix from "./pages/portal/ToolkitACTMatrix";
 import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
 import MindfulnessSounds from "./pages/portal/MindfulnessSounds";
@@ -90,6 +90,7 @@ import BlogManager from "./pages/admin/BlogManager";
 import BadgeManager from "./pages/admin/BadgeManager";
 import NoteTemplates from "./pages/admin/NoteTemplates";
 import ManualClients from "./pages/admin/ManualClients";
+import AssistantManager from "./pages/admin/AssistantManager";
 
 // Business Planner
 import PlannerLayout from "./components/planner/PlannerLayout";
@@ -155,7 +156,6 @@ const App = () => (
                   <Route path="/portal/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
                   <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                   <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
-                  <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
                   <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
@@ -184,6 +184,7 @@ const App = () => (
                   <Route path="/admin/badges" element={<AdminRoute><BadgeManager /></AdminRoute>} />
                   <Route path="/admin/note-templates" element={<AdminRoute><NoteTemplates /></AdminRoute>} />
                   <Route path="/admin/manual-clients" element={<AdminRoute><ManualClients /></AdminRoute>} />
+                  <Route path="/admin/assistant" element={<AdminRoute><AssistantManager /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
@@ -232,6 +233,7 @@ const App = () => (
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <ProactiveAssistant />
                 <WhatsAppButton />
                 <MobileBottomNav />
                 <SwipeBackDetector />

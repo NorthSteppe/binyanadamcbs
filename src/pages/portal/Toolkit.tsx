@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Wrench, Timer, Grid3x3, Headphones } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingAIChat from "@/components/FloatingAIChat";
 
 const clientTools = [
   { label: "ACT Matrix", path: "/portal/toolkit/act-matrix", icon: Grid3x3, description: "Map your values, obstacles, and committed actions using the ACT framework." },
@@ -45,7 +44,6 @@ const Toolkit = () => {
         </div>
       </section>
       <Footer />
-      <FloatingAIChat />
     </div>
   );
 };
