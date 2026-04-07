@@ -288,7 +288,7 @@ const ProactiveAssistant = () => {
                 <div>
                   <p className="text-sm font-semibold text-foreground">Binyan Assistant</p>
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block" />
                     Online — here to help
                   </p>
                 </div>

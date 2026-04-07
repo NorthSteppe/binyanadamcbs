@@ -34,8 +34,7 @@ import Dashboard from "./pages/portal/Dashboard";
 import Resources from "./pages/portal/Resources";
 import Messages from "./pages/portal/Messages";
 import Booking from "./pages/portal/Booking";
-import Chat from "./pages/portal/Chat";
-import Toolkit from "./pages/portal/Toolkit";
+import ProactiveAssistant from "./components/ProactiveAssistant";
 import ToolkitACTMatrix from "./pages/portal/ToolkitACTMatrix";
 import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
 import MindfulnessSounds from "./pages/portal/MindfulnessSounds";
@@ -155,7 +154,7 @@ const App = () => (
                   <Route path="/portal/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
                   <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                   <Route path="/portal/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
-                  <Route path="/portal/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+                  <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
                   <Route path="/portal/toolkit" element={<ProtectedRoute><Toolkit /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/act-matrix" element={<ProtectedRoute><ToolkitACTMatrix /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
@@ -232,6 +231,7 @@ const App = () => (
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <ProactiveAssistant />
                 <WhatsAppButton />
                 <MobileBottomNav />
                 <SwipeBackDetector />
