@@ -60,7 +60,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
       scrolled
         ? "glass shadow-apple"
-        : "bg-transparent"
+        : "bg-background/60 backdrop-blur-md"
     }`}>
       <div className={`container flex items-center justify-between transition-all duration-500 ${scrolled ? "h-14" : "h-16 md:h-20"}`}>
         <Link to="/" className="flex items-center gap-3">

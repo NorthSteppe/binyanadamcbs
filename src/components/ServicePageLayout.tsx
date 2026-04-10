@@ -92,8 +92,8 @@ const ServicePageLayout = ({
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-3xl"
           >
-            <EditableText contentKey={`${pageKey}.subtitle`} defaultValue={subtitle} as="p" className="text-[12px] font-medium uppercase tracking-widest mb-4 text-muted-foreground" />
-            <EditableText contentKey={`${pageKey}.title`} defaultValue={title} as="h1" className="text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 text-glass-hero font-display tracking-tight" />
+            <EditableText contentKey={`${pageKey}.subtitle`} defaultValue={subtitle} as="p" className="label-eyebrow mb-4" />
+            <EditableText contentKey={`${pageKey}.title`} defaultValue={title} as="h1" className="text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 text-foreground font-display tracking-tight" />
             <EditableText contentKey={`${pageKey}.tagline`} defaultValue={tagline} as="p" className="text-lg md:text-xl leading-relaxed text-muted-foreground max-w-2xl" />
             {content?.quote_text && (
               <blockquote className="mt-8 border-l border-primary/30 pl-4 text-foreground/50 italic">
@@ -125,7 +125,7 @@ const ServicePageLayout = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${accentColorClass}`} />
-                      <EditableText contentKey={`${pageKey}.service.${i}`} defaultValue={getServiceName(service)} as="p" className="text-sm text-card-foreground font-light" />
+                      <EditableText contentKey={`${pageKey}.service.${i}`} defaultValue={getServiceName(service)} as="p" className="text-sm text-card-foreground" />
                     </div>
                     <ArrowRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>

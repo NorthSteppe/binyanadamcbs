@@ -37,9 +37,9 @@
     --radius: 1rem;
 
     /* Glass tokens */
-    --glass-bg: 0 0% 100% / 0.72;
-    --glass-border: 0 0% 100% / 0.2;
-    --glass-blur: 24px;
+    --glass-bg: 0 0% 100% / 0.88;
+    --glass-border: 0 0% 100% / 0.3;
+    --glass-blur: 20px;
 
     /* Service mode tokens */
     --education: 220 65% 54%;
@@ -101,8 +101,8 @@
     --input: 0 0% 16%;
     --ring: 0 0% 85%;
 
-    --glass-bg: 0 0% 8% / 0.72;
-    --glass-border: 0 0% 100% / 0.08;
+    --glass-bg: 0 0% 8% / 0.88;
+    --glass-border: 0 0% 100% / 0.1;
 
     --education: 220 65% 60%;
     --education-light: 220 30% 12%;
@@ -213,7 +213,12 @@
   }
   .card-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px -12px hsl(var(--foreground) / 0.08);
+    box-shadow: 0 8px 30px -12px hsl(var(--foreground) / 0.12);
+  }
+
+  /* Consistent eyebrow/tagline label style */
+  .label-eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-[0.12em] text-primary;
   }
 }
 

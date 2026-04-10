@@ -62,14 +62,14 @@ const Index = () => {
               contentKey="landing.title"
               defaultValue={t.landing.title}
               as="h1"
-              className="text-5xl md:text-6xl lg:text-7xl text-glass-hero leading-[1.05] mb-6 font-display tracking-tight"
+              className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6 font-display tracking-tight"
             />
 
             <EditableText
               contentKey="landing.subtitle"
               defaultValue={t.landing.subtitle}
               as="p"
-              className="text-base md:text-lg text-muted-foreground leading-relaxed mb-10 max-w-lg font-light"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed mb-10 max-w-lg"
             />
 
             <div className="flex flex-col sm:flex-row gap-3">

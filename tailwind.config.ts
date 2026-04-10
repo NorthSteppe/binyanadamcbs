@@ -94,9 +94,9 @@ export default {
         sm: "calc(var(--radius) - 8px)",
       },
       boxShadow: {
-        "apple": "0 2px 8px -2px rgba(0,0,0,0.05), 0 4px 20px -4px rgba(0,0,0,0.05)",
-        "apple-lg": "0 4px 14px -4px rgba(0,0,0,0.06), 0 8px 40px -8px rgba(0,0,0,0.08)",
-        "apple-xl": "0 8px 30px -8px rgba(0,0,0,0.08), 0 16px 60px -16px rgba(0,0,0,0.1)",
+        "apple": "0 2px 12px -2px rgba(0,0,0,0.08), 0 4px 20px -4px rgba(0,0,0,0.06)",
+        "apple-lg": "0 4px 20px -4px rgba(0,0,0,0.1), 0 8px 40px -8px rgba(0,0,0,0.12)",
+        "apple-xl": "0 8px 30px -8px rgba(0,0,0,0.12), 0 16px 60px -16px rgba(0,0,0,0.14)",
       },
       keyframes: {
         "accordion-down": {

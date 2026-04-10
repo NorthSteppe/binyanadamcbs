@@ -34,21 +34,21 @@ const Contact = () => {
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-20">
             <ScrollReveal direction="left">
-              <EditableText contentKey="contact.tagline" defaultValue={t.contact.tagline} as="p" className="text-[11px] font-sans uppercase tracking-[0.25em] text-primary mb-4" />
-              <EditableText contentKey="contact.title" defaultValue={t.contact.title} as="h1" className="text-5xl md:text-6xl font-serif mb-6" />
-              <EditableText contentKey="contact.subtitle" defaultValue={t.contact.subtitle} as="p" className="text-foreground/60 leading-relaxed mb-12 max-w-md font-light" />
+              <EditableText contentKey="contact.tagline" defaultValue={t.contact.tagline} as="p" className="label-eyebrow mb-4" />
+              <EditableText contentKey="contact.title" defaultValue={t.contact.title} as="h1" className="text-5xl md:text-6xl font-display tracking-tight mb-6" />
+              <EditableText contentKey="contact.subtitle" defaultValue={t.contact.subtitle} as="p" className="text-foreground/60 leading-relaxed mb-12 max-w-md" />
 
               <div className="space-y-4">
                 <ScrollReveal delay={0.1} distance={12}>
                   <div className="flex items-center gap-3 text-sm">
                     <MapPin size={16} className="text-primary" />
-                    <EditableText contentKey="contact.location" defaultValue={t.contact.location} as="span" className="text-foreground/50 font-light" />
+                    <EditableText contentKey="contact.location" defaultValue={t.contact.location} as="span" className="text-foreground/50" />
                   </div>
                 </ScrollReveal>
                 <ScrollReveal delay={0.15} distance={12}>
                   <div className="flex items-center gap-3 text-sm">
                     <Mail size={16} className="text-primary" />
-                    <a href="mailto:adamdayan@bacbs.com" className="text-foreground/50 hover:text-primary transition-colors duration-300 font-light">
+                    <a href="mailto:adamdayan@bacbs.com" className="text-foreground/50 hover:text-primary transition-colors duration-300">
                       <EditableText contentKey="contact.email" defaultValue="adamdayan@bacbs.com" as="span" />
                     </a>
                   </div>
@@ -59,22 +59,22 @@ const Contact = () => {
             <ScrollReveal direction="right" delay={0.1}>
               <form
                 onSubmit={handleSubmit}
-                className="bg-card border border-border p-8 space-y-5"
+                className="bg-card border border-border rounded-2xl p-8 space-y-5"
               >
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <EditableText contentKey="contact.nameLabel" defaultValue={t.contact.nameLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
-                    <Input required placeholder={t.contact.namePlaceholder} className="rounded-none bg-background border-border h-11" />
+                    <Input required placeholder={t.contact.namePlaceholder} className="rounded-lg bg-background border-border h-11" />
                   </div>
                   <div>
                     <EditableText contentKey="contact.emailLabel" defaultValue={t.contact.emailLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
-                    <Input required type="email" placeholder={t.contact.emailPlaceholder} className="rounded-none bg-background border-border h-11" />
+                    <Input required type="email" placeholder={t.contact.emailPlaceholder} className="rounded-lg bg-background border-border h-11" />
                   </div>
                 </div>
                 <div>
                   <EditableText contentKey="contact.interestedLabel" defaultValue={t.contact.interestedLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
                   <select
-                    className="w-full border border-border bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="w-full border border-border bg-background rounded-lg px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     defaultValue=""
                   >
                     <option value="" disabled>{t.contact.selectService}</option>
@@ -85,9 +85,9 @@ const Contact = () => {
                 </div>
                 <div>
                   <EditableText contentKey="contact.messageLabel" defaultValue={t.contact.messageLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
-                  <Textarea required rows={5} placeholder={t.contact.messagePlaceholder} className="rounded-none bg-background border-border" />
+                  <Textarea required rows={5} placeholder={t.contact.messagePlaceholder} className="rounded-lg bg-background border-border" />
                 </div>
-                <Button type="submit" className="w-full rounded-none bg-foreground text-background hover:bg-foreground/90 h-11 text-[13px] uppercase tracking-wider" size="lg" disabled={submitting}>
+                <Button type="submit" className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-[14px] font-medium shadow-apple" size="lg" disabled={submitting}>
                   {submitting ? t.contact.sending : t.contact.sendButton}
                 </Button>
               </form>
