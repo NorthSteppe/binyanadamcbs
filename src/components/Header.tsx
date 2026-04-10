@@ -34,6 +34,12 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
     { label: (t as any).about?.tagline || "About Us", path: "/about" },
   ];
 
+  const portalEntries = [
+    { label: "Client Portal", path: "/portal", desc: "Sessions, tasks & resources", icon: LayoutDashboard },
+    { label: "Therapist Portal", path: "/staff", desc: "Clinical tools & client management", icon: Users },
+    { label: "Supervisee Portal", path: "/supervisee", desc: "Case logs & supervision", icon: Shield },
+  ];
+
   const portalT = (t as any).portal || {};
   const toggleLanguage = () => setLanguage(language === "en" ? "he" : "en");
 
@@ -73,6 +79,37 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-1">
+          {/* Portals dropdown — visible to all visitors */}
+          {!user && (
+            <div className="relative group">
+              <button
+                className={`px-4 py-2 text-[13px] font-medium tracking-tight transition-colors duration-300 inline-flex items-center gap-1.5 rounded-full text-muted-foreground hover:text-foreground`}
+              >
+                Portals
+                <svg className="w-3 h-3 opacity-40 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <div className="absolute left-0 top-full pt-2 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out z-50">
+                <div className="glass rounded-2xl py-2 min-w-[240px] shadow-apple-lg">
+                  {portalEntries.map((p) => (
+                    <Link
+                      key={p.path}
+                      to={p.path}
+                      className="flex items-start gap-3 px-4 py-3 mx-1 rounded-xl transition-all duration-200 hover:bg-accent group/item"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <p.icon size={13} className="text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-semibold text-foreground leading-none">{p.label}</p>
+                        <p className="text-[11px] text-muted-foreground mt-1 leading-snug">{p.desc}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {navLinks.map((link) =>
             link.children ? (
               <div key={link.path} className="relative group">
@@ -253,14 +290,28 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
                 </>
               ) : (
                 <>
-                  <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
-                    <LogIn size={16} />
-                    Log In
-                  </Link>
-                  <Link to="/signup" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                    <UserPlus2 size={16} />
-                    Get Started
-                  </Link>
+                  <p className="px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">Portals</p>
+                  {portalEntries.map((p) => (
+                    <Link
+                      key={p.path}
+                      to={p.path}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                    >
+                      <p.icon size={15} />
+                      {p.label}
+                    </Link>
+                  ))}
+                  <div className="border-t border-border/30 mt-2 pt-2">
+                    <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
+                      <LogIn size={16} />
+                      Log In
+                    </Link>
+                    <Link to="/signup" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                      <UserPlus2 size={16} />
+                      Get Started
+                    </Link>
+                  </div>
                 </>
               )}
             </div>
