@@ -94,7 +94,7 @@ const TaskBoard = () => {
     } else {
       updates = { is_completed: false, description: todo.description.replace("[IN_PROGRESS]", "").trim() };
     }
-    await supabase.from("staff_todos").update(updates).eq("id", todo.id);
+    await supabase.from("staff_todos").update(updates as any).eq("id", todo.id);
     fetchTodos();
   };
 
