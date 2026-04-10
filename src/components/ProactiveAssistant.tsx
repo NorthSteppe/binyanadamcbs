@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -85,8 +85,9 @@ const formatSessionDate = (isoDate: string) => {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 const ProactiveAssistant = () => {
-  const { session, user, profile } = useAuth();
+  const { session, user, profile, isAdmin, isTeamMember } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -136,6 +137,40 @@ const ProactiveAssistant = () => {
       .order("created_at", { ascending: true })
       .then(({ data }) => { if (data) setPendingTasks(data); });
   }, [user]);
+
+  // Pages the AI can link to, based on the user's role
+  const getAvailablePages = () => {
+    if (!user) return [
+      { path: "/services", label: "Our Services" },
+      { path: "/contact", label: "Book a Consultation" },
+      { path: "/about", label: "About Us" },
+    ];
+    if (isAdmin) return [
+      { path: "/admin", label: "Admin Dashboard" },
+      { path: "/admin/calendar", label: "Calendar" },
+      { path: "/admin/users", label: "User Management" },
+      { path: "/admin/business", label: "Business Dashboard" },
+      { path: "/admin/blog", label: "Blog Manager" },
+      { path: "/admin/assistant", label: "Assistant Manager" },
+      { path: "/staff", label: "Therapist Portal" },
+    ];
+    if (isTeamMember) return [
+      { path: "/staff", label: "Therapist Dashboard" },
+      { path: "/staff/calendar", label: "Calendar" },
+      { path: "/staff/messages", label: "Messages" },
+      { path: "/staff/clinical-tools", label: "Clinical Tools" },
+      { path: "/staff/toolkit", label: "Toolkit" },
+      { path: "/staff/booking", label: "Bookings" },
+    ];
+    return [
+      { path: "/portal", label: "My Dashboard" },
+      { path: "/portal/resources", label: "Session Notes & Resources" },
+      { path: "/portal/messages", label: "Messages" },
+      { path: "/portal/booking", label: "Book a Session" },
+      { path: "/portal/toolkit", label: "Toolkit & Exercises" },
+      { path: "/portal/productivity", label: "Goals & To-Dos" },
+    ];
+  };
 
   const isEnabled = config?.is_enabled !== false;
   const delay = (config?.auto_popup_delay_seconds ?? 5) * 1000;
@@ -272,6 +307,8 @@ const ProactiveAssistant = () => {
             })),
             pending_tasks: pendingTasks.map(t => t.title),
           } : undefined,
+          // Pages the AI can reference as markdown links in its responses
+          available_pages: getAvailablePages(),
         }),
       });
 
@@ -444,7 +481,35 @@ const ProactiveAssistant = () => {
                     }`}>
                     {msg.role === "assistant" ? (
                       <div className="prose prose-sm max-w-none dark:prose-invert [&>p]:mb-2 [&>p:last-child]:mb-0">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        <ReactMarkdown
+                          components={{
+                            a: ({ href, children }) => {
+                              const isInternal = href?.startsWith("/");
+                              if (isInternal) {
+                                return (
+                                  <button
+                                    onClick={() => navigate(href)}
+                                    className="text-primary underline underline-offset-2 font-medium hover:text-primary/75 transition-colors"
+                                  >
+                                    {children}
+                                  </button>
+                                );
+                              }
+                              return (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary underline underline-offset-2 font-medium hover:text-primary/75 transition-colors"
+                                >
+                                  {children}
+                                </a>
+                              );
+                            },
+                          }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
                       </div>
                     ) : msg.content}
                   </div>

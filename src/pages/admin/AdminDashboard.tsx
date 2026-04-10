@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, Calendar, Users, UserPlus, Settings, ImageIcon, FileEdit,
   UserCog, ArrowRight, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen, FileText,
-  ListTodo, Wrench, LayoutDashboard, Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, Briefcase, Activity
+  ListTodo, Wrench, LayoutDashboard, Palette, Globe, Type, Megaphone, CreditCard, ClipboardList, Briefcase, Activity, Bot
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
@@ -29,6 +29,14 @@ interface ToolCategory {
 }
 
 const categories: ToolCategory[] = [
+  {
+    title: "AI Assistant",
+    description: "Configure and monitor the Binyan AI assistant that appears on the site",
+    iconBgClass: "bg-primary/10 text-primary",
+    tools: [
+      { label: "Assistant Manager", path: "/admin/assistant", icon: Bot, description: "Configure greetings, toggle the assistant on/off, review conversations, and view collected data" },
+    ],
+  },
   {
     title: "Business & Finance",
     description: "Track revenue, expenses, profit, and business growth",
