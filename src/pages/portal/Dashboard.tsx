@@ -107,181 +107,182 @@ const Dashboard = () => {
   const totalTasks = todos.length;
   const taskProgress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
 
+  const firstName = profile?.full_name?.split(" ")[0];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <section className="pt-28 pb-20">
-        <div className="container">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-3xl md:text-4xl font-display tracking-tight mb-2">
-              {portalT.welcome || "Welcome back"}{profile?.full_name ? `, ${profile.full_name}` : ""}
+        <div className="container max-w-5xl">
+
+          {/* Welcome */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
+            <h1 className="text-3xl md:text-4xl font-display tracking-tight mb-1">
+              {portalT.welcome || "Welcome back"}{firstName ? `, ${firstName}` : ""}
             </h1>
-            <p className="text-muted-foreground mb-10">{portalT.dashboardSubtitle || "Your client portal"}</p>
+            <p className="text-muted-foreground text-sm">{portalT.dashboardSubtitle || "Here's your schedule and tasks for today."}</p>
           </motion.div>
 
-          {/* Big Book a Session Button */}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Link to="/portal/booking">
-              <div className="relative bg-primary text-primary-foreground rounded-2xl p-8 mb-8 flex items-center gap-5 hover:shadow-apple-lg transition-all cursor-pointer group">
-                <div className="bg-primary-foreground/20 rounded-xl p-4">
-                  <Calendar size={32} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-display tracking-tight">{portalT.bookSession || "Book a Session"}</h2>
-                  <p className="text-primary-foreground/70 text-sm mt-1">Choose from available services and pick a time that works for you</p>
-                </div>
-                <div className="ms-auto text-primary-foreground/60 group-hover:translate-x-1 transition-transform text-2xl">→</div>
-              </div>
-            </Link>
-          </motion.div>
+          {/* ── PRIMARY: Sessions + Tasks ── */}
+          <div className="grid lg:grid-cols-2 gap-5 mb-6">
 
-          {/* Quick links row */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-              <Link to="/portal/productivity" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-primary/10 text-primary rounded-xl p-3"><Calendar size={20} /></div>
-                <div>
-                  <p className="text-sm font-semibold text-card-foreground">My Calendar</p>
-                  <p className="text-[11px] text-muted-foreground">View sessions, tasks & sync to other calendars</p>
-                </div>
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <Link to="/portal/messages" className="relative bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-accent text-accent-foreground rounded-xl p-3"><MessageSquare size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">{portalT.messages || "Messages"}</p>
-                {unreadCount > 0 && (
-                  <span className="absolute top-3 end-3 bg-destructive text-destructive-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">{unreadCount}</span>
-                )}
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-              <Link to="/portal/resources" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-family text-family-foreground rounded-xl p-3"><BookOpen size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">{portalT.resources || "Resource Library"}</p>
-              </Link>
-            </motion.div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Link to="/portal/toolkit" className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-3 hover:border-primary/30 hover:shadow-sm transition-all block">
-                <div className="bg-primary/10 text-primary rounded-xl p-3"><Timer size={20} /></div>
-                <p className="text-sm font-semibold text-card-foreground">Toolkit</p>
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
-              <div className="bg-card border border-border/50 rounded-2xl p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Contact Us</p>
-                <div className="space-y-2">
-                  <a href="tel:+447715460054" className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors">
-                    <Phone size={14} className="text-primary" /> +44 7715 460054
-                  </a>
-                  <a href="mailto:adamdayan@bacbs.com" className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors">
-                    <Mail size={14} className="text-primary" /> adamdayan@bacbs.com
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-6">
             {/* Upcoming sessions */}
-            <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h2 className="text-lg mb-4 flex items-center gap-2 font-semibold">
-                <Clock size={18} className="text-primary" />
-                {portalT.upcoming || "Upcoming Sessions"}
-              </h2>
-              {upcomingSessions.length === 0 ? (
-                <div className="text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60">
-                  <Calendar className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
-                  <p className="text-sm font-medium text-foreground">{portalT.noSessions || "No upcoming sessions."}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Book a new session to get started.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {upcomingSessions.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between bg-background rounded-xl p-4 border border-border/30">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{s.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(s.session_date).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                          {" · "}{s.duration_minutes} min
-                        </p>
-                      </div>
-                      <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-medium capitalize">{s.status}</span>
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+              <div className="bg-card rounded-2xl border border-border/50 p-6 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-base font-semibold flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Clock size={14} className="text-primary" />
                     </div>
-                  ))}
+                    {portalT.upcoming || "Upcoming Sessions"}
+                  </h2>
+                  <Link
+                    to="/portal/productivity?tab=calendar"
+                    className="text-[11px] font-medium text-primary hover:underline"
+                  >
+                    View calendar →
+                  </Link>
                 </div>
-              )}
-            </div>
+
+                {upcomingSessions.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60">
+                    <Calendar className="h-8 w-8 text-muted-foreground/40 mb-3" />
+                    <p className="text-sm font-medium text-foreground mb-1">{portalT.noSessions || "No upcoming sessions."}</p>
+                    <p className="text-xs text-muted-foreground mb-4">Ready to book your next one?</p>
+                    <Link to="/portal/booking">
+                      <Button size="sm" className="rounded-full h-8 px-5 text-xs">Book a Session</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3 flex-1">
+                    {upcomingSessions.map((s) => (
+                      <div key={s.id} className="flex items-center gap-3 bg-background rounded-xl p-4 border border-border/30">
+                        <div className="shrink-0 text-center bg-primary/8 rounded-lg px-3 py-2 min-w-[52px]">
+                          <p className="text-[10px] text-primary font-medium uppercase">
+                            {new Date(s.session_date).toLocaleDateString(undefined, { month: "short" })}
+                          </p>
+                          <p className="text-xl font-bold text-primary leading-none">
+                            {new Date(s.session_date).getDate()}
+                          </p>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{s.title || "Session"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(s.session_date).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                            {s.duration_minutes ? ` · ${s.duration_minutes} min` : ""}
+                          </p>
+                        </div>
+                        <span className="text-[11px] px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium capitalize shrink-0">{s.status || "scheduled"}</span>
+                      </div>
+                    ))}
+                    <Link to="/portal/booking" className="block text-center text-xs text-muted-foreground hover:text-primary transition-colors pt-1">
+                      + Book another session
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
 
             {/* To-Do List */}
-            <div className="bg-card rounded-2xl border border-border/50 p-6 flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg flex items-center gap-2 font-semibold">
-                  <ListTodo size={18} className="text-primary" />
-                  To-Do List
-                </h2>
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+              <div className="bg-card rounded-2xl border border-border/50 p-6 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-semibold flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <ListTodo size={14} className="text-primary" />
+                    </div>
+                    My Tasks
+                  </h2>
+                  {totalTasks > 0 && (
+                    <span className="text-[11px] font-medium text-muted-foreground">{completedTasks}/{totalTasks} done</span>
+                  )}
+                </div>
+
                 {totalTasks > 0 && (
-                  <span className="text-xs font-medium text-muted-foreground">{completedTasks} of {totalTasks} completed</span>
+                  <Progress value={taskProgress} className="h-1 mb-4" />
+                )}
+
+                {todos.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60">
+                    <Sparkles className="h-8 w-8 text-muted-foreground/40 mb-3" />
+                    <p className="text-sm font-medium text-foreground">You're all caught up!</p>
+                    <p className="text-xs text-muted-foreground mt-1">Tasks assigned by your therapist will appear here.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 flex-1 overflow-y-auto max-h-72">
+                    {todos.map((todo) => (
+                      <button
+                        key={todo.id}
+                        onClick={() => toggleTodo(todo)}
+                        className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border transition-all ${todo.is_completed ? "bg-muted/40 border-border/20 opacity-60" : "bg-background border-border/40 hover:border-primary/30"}`}
+                      >
+                        {todo.is_completed ? (
+                          <CheckCircle2 size={17} className="text-primary mt-0.5 shrink-0" />
+                        ) : (
+                          <Circle size={17} className="text-muted-foreground mt-0.5 shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <p className={`text-sm font-medium truncate ${todo.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}>{todo.title}</p>
+                          {todo.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{todo.description}</p>}
+                          {todo.due_date && <p className="text-[10px] text-muted-foreground mt-0.5">Due {new Date(todo.due_date).toLocaleDateString()}</p>}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
-              
-              {totalTasks > 0 && (
-                <Progress value={taskProgress} className="h-1.5 mb-5" />
-              )}
-
-              {todos.length === 0 ? (
-                <div className="text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60 my-auto">
-                  <Sparkles className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
-                  <p className="text-sm font-medium text-foreground">You're all caught up!</p>
-                  <p className="text-xs text-muted-foreground mt-1">Any homework assigned will appear here.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {todos.map((todo) => (
-                    <button
-                      key={todo.id}
-                      onClick={() => toggleTodo(todo)}
-                      className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border transition-all ${todo.is_completed ? "bg-muted/50 border-border/20 opacity-70" : "bg-card border-border/50 hover:border-primary/30"}`}
-                    >
-                      {todo.is_completed ? (
-                        <CheckCircle2 size={18} className="text-primary mt-0.5 shrink-0" />
-                      ) : (
-                        <Circle size={18} className="text-muted-foreground mt-0.5 shrink-0" />
-                      )}
-                      <div>
-                        <p className={`text-sm font-medium ${todo.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}>{todo.title}</p>
-                        {todo.description && <p className="text-xs text-muted-foreground mt-0.5">{todo.description}</p>}
-                        {todo.due_date && <p className="text-[10px] text-muted-foreground mt-1">Due: {new Date(todo.due_date).toLocaleDateString()}</p>}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            </motion.div>
           </div>
 
-          {/* Document Upload */}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-6">
+          {/* ── SECONDARY: Quick Actions ── */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-3">Quick access</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              <Link to="/portal/booking" className="bg-primary text-primary-foreground rounded-2xl p-4 flex flex-col items-center gap-2 hover:bg-primary/90 transition-colors text-center">
+                <Calendar size={20} />
+                <span className="text-xs font-semibold">{portalT.bookSession || "Book Session"}</span>
+              </Link>
+              <Link to="/portal/messages" className="relative bg-card border border-border/50 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-primary/30 transition-all text-center">
+                <MessageSquare size={20} className="text-primary" />
+                <span className="text-xs font-semibold text-card-foreground">{portalT.messages || "Messages"}</span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">{unreadCount}</span>
+                )}
+              </Link>
+              <Link to="/portal/resources" className="bg-card border border-border/50 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-primary/30 transition-all text-center">
+                <BookOpen size={20} className="text-primary" />
+                <span className="text-xs font-semibold text-card-foreground">{portalT.resources || "Resources"}</span>
+              </Link>
+              <Link to="/portal/toolkit" className="bg-card border border-border/50 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-primary/30 transition-all text-center">
+                <Timer size={20} className="text-primary" />
+                <span className="text-xs font-semibold text-card-foreground">Toolkit</span>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* ── Document Upload ── */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
             <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h2 className="text-lg mb-4 flex items-center gap-2 font-semibold">
-                <Upload size={18} className="text-primary" />
-                Documents
-              </h2>
-              <div className="flex items-center gap-3 mb-4">
-                <input ref={fileInputRef} type="file" multiple onChange={handleFileUpload} className="hidden" id="doc-upload" />
-                <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                  <Upload size={14} />
-                  {uploading ? "Uploading..." : "Upload Documents"}
-                </Button>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-semibold flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Upload size={14} className="text-primary" />
+                  </div>
+                  Documents
+                </h2>
+                <div>
+                  <input ref={fileInputRef} type="file" multiple onChange={handleFileUpload} className="hidden" id="doc-upload" />
+                  <Button variant="outline" size="sm" className="rounded-full gap-2 h-8 text-xs" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                    <Upload size={12} />
+                    {uploading ? "Uploading…" : "Upload"}
+                  </Button>
+                </div>
               </div>
               {documents.length === 0 ? (
-                <div className="text-center py-8 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60">
-                  <Files className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
-                  <p className="text-sm font-medium text-foreground">No documents uploaded.</p>
-                  <p className="text-xs text-muted-foreground mt-1">Upload files to share with your therapist securely.</p>
+                <div className="text-center py-6 px-4 bg-muted/30 rounded-xl border border-dashed border-border/60">
+                  <Files className="mx-auto h-7 w-7 text-muted-foreground/40 mb-2" />
+                  <p className="text-sm font-medium text-foreground">No documents yet.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Upload files to share with your therapist securely.</p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -306,6 +307,18 @@ const Dashboard = () => {
               )}
             </div>
           </motion.div>
+
+          {/* Contact strip */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <span className="font-medium">Need help?</span>
+            <a href="tel:+447715460054" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Phone size={12} /> +44 7715 460054
+            </a>
+            <a href="mailto:adamdayan@bacbs.com" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Mail size={12} /> adamdayan@bacbs.com
+            </a>
+          </motion.div>
+
         </div>
       </section>
       <Footer />

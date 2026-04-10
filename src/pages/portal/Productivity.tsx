@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, Calendar, ListTodo, Maximize2, FolderOpen } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TaskBoard from "@/components/productivity/TaskBoard";
@@ -10,8 +11,9 @@ import ProjectManager from "@/components/productivity/ProjectManager";
 import AISuggestionsPanel from "@/components/productivity/AISuggestionsPanel";
 
 const Productivity = () => {
+  const [searchParams] = useSearchParams();
   const [calendarFullscreen, setCalendarFullscreen] = useState(false);
-  const [activeTab, setActiveTab] = useState("board");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "board");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   return (
