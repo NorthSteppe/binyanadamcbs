@@ -60,7 +60,6 @@ import TodoManager from "./pages/admin/TodoManager";
 import StaffTodoManager from "./pages/admin/StaffTodoManager";
 import TaskBoardPage from "./pages/admin/TaskBoard";
 import SettingsPage from "./pages/portal/Settings";
-import WhatsAppButton from "./components/WhatsAppButton";
 import MobileBottomNav from "./components/mobile/MobileBottomNav";
 import SwipeBackDetector from "./components/mobile/SwipeBackDetector";
 // Clinical tools
@@ -234,7 +233,6 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <ProactiveAssistant />
-                <WhatsAppButton />
                 <MobileBottomNav />
                 <SwipeBackDetector />
                 <EditModeToggle />
