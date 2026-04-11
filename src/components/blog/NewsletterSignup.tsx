@@ -3,15 +3,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const NewsletterSignup = ({ variant = "default" }: { variant?: "default" | "inline" }) => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    toast.success("Thank you! You'll receive practical insights, not theory.");
-    setEmail("");
+    setLoading(true);
+    try {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "notification",
+          recipientEmail: "adamdayan@bacbs.com",
+          templateData: {
+            subject: "New Newsletter Subscriber",
+            title: "New Newsletter Signup",
+            message: `${email} has subscribed to the Binyan Adam CBS newsletter.`,
+          },
+        },
+      });
+      toast.success("Thank you! You'll receive practical insights, not theory.");
+      setEmail("");
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (variant === "inline") {
@@ -22,7 +42,7 @@ const NewsletterSignup = ({ variant = "default" }: { variant?: "default" | "inli
           onChange={(e) => setEmail(e.target.value)}
           className="max-w-xs"
         />
-        <Button type="submit" size="sm">Subscribe</Button>
+        <Button type="submit" size="sm" disabled={loading}>{loading ? "Sending..." : "Subscribe"}</Button>
       </form>
     );
   }
@@ -41,7 +61,7 @@ const NewsletterSignup = ({ variant = "default" }: { variant?: "default" | "inli
           type="email" placeholder="your@email.com" value={email}
           onChange={(e) => setEmail(e.target.value)} className="flex-1"
         />
-        <Button type="submit">Subscribe</Button>
+        <Button type="submit" disabled={loading}>{loading ? "Sending..." : "Subscribe"}</Button>
       </form>
     </div>
   );

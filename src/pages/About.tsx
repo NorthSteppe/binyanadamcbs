@@ -179,10 +179,10 @@ const About = () => {
                 </motion.div>
               );
 
-              return member.slug ? (
-                <Link key={member.id} to={`/team/${member.slug}`} className="no-underline">{cardContent}</Link>
-              ) : (
-                <div key={member.id}>{cardContent}</div>
+              return (
+                <Link key={member.id} to={member.slug ? `/team/${member.slug}` : "/contact"} className="no-underline">
+                  {cardContent}
+                </Link>
               );
             })}
           </div>

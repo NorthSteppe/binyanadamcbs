@@ -45,7 +45,7 @@ const MobileBottomNav = () => {
         { icon: Home, label: "Portal", path: "/portal" },
         { icon: BookOpen, label: "Resources", path: "/portal/resources" },
         { icon: Briefcase, label: "Toolkit", path: "/portal/toolkit" },
-        { icon: User, label: "Profile", path: "/portal" },
+        { icon: User, label: "Settings", path: "/settings" },
       ];
     }
     const items: NavItem[] = [

@@ -10,20 +10,44 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import EditableText from "@/components/editable/EditableText";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    const form = e.target as HTMLFormElement;
+    const data = new FormData(form);
+    const name = data.get("name") as string;
+    const email = data.get("email") as string;
+    const service = data.get("service") as string;
+    const message = data.get("message") as string;
+
+    try {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "notification",
+          recipientEmail: "adamdayan@bacbs.com",
+          templateData: {
+            subject: `New contact form message from ${name}`,
+            title: "New Contact Form Submission",
+            message: `**From:** ${name} (${email})\n**Interested in:** ${service || "Not specified"}\n\n${message}`,
+            ctaUrl: `mailto:${email}`,
+            ctaLabel: `Reply to ${name}`,
+          },
+        },
+      });
       toast({ title: t.contact.successTitle, description: t.contact.successDescription });
-      (e.target as HTMLFormElement).reset();
-    }, 1000);
+      form.reset();
+    } catch {
+      toast({ title: "Something went wrong", description: "Please try emailing us directly.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -64,17 +88,18 @@ const Contact = () => {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <EditableText contentKey="contact.nameLabel" defaultValue={t.contact.nameLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
-                    <Input required placeholder={t.contact.namePlaceholder} className="rounded-lg bg-background border-border h-11" />
+                    <Input required name="name" placeholder={t.contact.namePlaceholder} className="rounded-lg bg-background border-border h-11" />
                   </div>
                   <div>
                     <EditableText contentKey="contact.emailLabel" defaultValue={t.contact.emailLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
-                    <Input required type="email" placeholder={t.contact.emailPlaceholder} className="rounded-lg bg-background border-border h-11" />
+                    <Input required name="email" type="email" placeholder={t.contact.emailPlaceholder} className="rounded-lg bg-background border-border h-11" />
                   </div>
                 </div>
                 <div>
                   <EditableText contentKey="contact.interestedLabel" defaultValue={t.contact.interestedLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
                   <select
                     className="w-full border border-border bg-background rounded-lg px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    name="service"
                     defaultValue=""
                   >
                     <option value="" disabled>{t.contact.selectService}</option>
@@ -85,7 +110,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <EditableText contentKey="contact.messageLabel" defaultValue={t.contact.messageLabel} as="label" className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2 block" />
-                  <Textarea required rows={5} placeholder={t.contact.messagePlaceholder} className="rounded-lg bg-background border-border" />
+                  <Textarea required name="message" rows={5} placeholder={t.contact.messagePlaceholder} className="rounded-lg bg-background border-border" />
                 </div>
                 <Button type="submit" className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-[14px] font-medium shadow-apple" size="lg" disabled={submitting}>
                   {submitting ? t.contact.sending : t.contact.sendButton}

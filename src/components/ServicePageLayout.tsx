@@ -159,9 +159,12 @@ const ServicePageLayout = ({
                       </li>
                     ))}
                   </ul>
-                  <p className="text-xs text-muted-foreground italic">
+                  <p className="text-xs text-muted-foreground italic mb-6">
                     {t.serviceLayout.idealFor} <EditableText contentKey={`${pageKey}.pkg.${i}.ideal`} defaultValue={pkg.ideal} as="span" />
                   </p>
+                  <Button asChild size="sm" variant="outline" className="w-full rounded-full border-border hover:border-primary/40 text-[13px]">
+                    <Link to="/contact">Get in Touch <ArrowRight size={13} className="ml-1.5" /></Link>
+                  </Button>
                 </div>
               </ScrollReveal>
             ))}
