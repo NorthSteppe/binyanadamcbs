@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 // ── Shared metallic background style ─────────────────────────────────────────
 export const METAL_BG: React.CSSProperties = {
@@ -74,6 +75,7 @@ export const StatTile = ({
   accentColor,
   iconBg,
   delay = 0,
+  to,
 }: {
   label: string;
   value: number | string;
@@ -82,28 +84,45 @@ export const StatTile = ({
   accentColor: string;
   iconBg: string;
   delay?: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 18 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-    whileHover={{ y: -5, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
-    className="rounded-2xl p-5 relative bg-white/75 backdrop-blur-md border border-white/70
-      shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.06)]
-      hover:shadow-[0_14px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.07)]
-      transition-shadow duration-500 ease-out"
-  >
-    <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: accentColor }} />
-    <div className="flex items-start justify-between mb-3 pt-1">
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: iconBg }}>
-        <Icon size={16} style={{ color: accentColor }} />
+  to?: string;
+}) => {
+  const inner = (
+    <>
+      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: accentColor }} />
+      <div className="flex items-start justify-between mb-3 pt-1">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: iconBg }}>
+          <Icon size={16} style={{ color: accentColor }} />
+        </div>
+        <span className="text-2xl font-bold" style={{ color: accentColor }}>{value}</span>
       </div>
-      <span className="text-2xl font-bold" style={{ color: accentColor }}>{value}</span>
-    </div>
-    <p className="text-xs font-semibold text-foreground">{label}</p>
-    <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{note}</p>
-  </motion.div>
-);
+      <p className="text-xs font-semibold text-foreground">{label}</p>
+      <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{note}</p>
+      {to && (
+        <p className="text-[10px] mt-2 font-medium" style={{ color: accentColor }}>View →</p>
+      )}
+    </>
+  );
+
+  const tileClass = `rounded-2xl p-5 relative bg-white/75 backdrop-blur-md border border-white/70
+    shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.06)]
+    hover:shadow-[0_14px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.07)]
+    transition-shadow duration-500 ease-out block`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -5, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
+    >
+      {to ? (
+        <Link to={to} className={tileClass}>{inner}</Link>
+      ) : (
+        <div className={tileClass}>{inner}</div>
+      )}
+    </motion.div>
+  );
+};
 
 // ── Page header bar (dark glass under site header) ────────────────────────────
 export const PortalTopBar = ({

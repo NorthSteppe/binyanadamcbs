@@ -60,9 +60,9 @@ const SuperviseeDashboard = () => {
         {/* Stats */}
         {!stats.loading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <StatTile label="Case Logs" value={stats.caseLogs} note="Total sessions logged" icon={ClipboardList} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} />
-            <StatTile label="Documents" value={stats.documents} note="Uploaded supervision files" icon={FileText} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} />
-            <StatTile label="Pending To-Dos" value={stats.pendingTodos} note="Tasks to complete" icon={ListTodo} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} />
+            <StatTile label="Case Logs" value={stats.caseLogs} note="Total sessions logged" icon={ClipboardList} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} to="/supervisee/case-logs" />
+            <StatTile label="Documents" value={stats.documents} note="Uploaded supervision files" icon={FileText} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} to="/supervisee/documents" />
+            <StatTile label="Pending To-Dos" value={stats.pendingTodos} note="Tasks to complete" icon={ListTodo} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} to="/supervisee/todos" />
           </div>
         )}
 

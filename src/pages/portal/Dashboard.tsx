@@ -327,6 +327,7 @@ const Dashboard = () => {
               accentColor: "#3b82f6",
               iconBg: "rgba(59,130,246,0.10)",
               note: nextSession ? `Next: ${formatDay(nextSession.session_date)}` : "None scheduled",
+              to: "/portal/booking",
             },
             {
               label: "Pending Tasks",
@@ -335,6 +336,7 @@ const Dashboard = () => {
               accentColor: "#8b5cf6",
               iconBg: "rgba(139,92,246,0.10)",
               note: `${completedTasks} of ${totalTasks} done`,
+              to: "/portal/productivity",
             },
             {
               label: "Messages",
@@ -343,6 +345,7 @@ const Dashboard = () => {
               accentColor: "#10b981",
               iconBg: "rgba(16,185,129,0.10)",
               note: unreadCount > 0 ? "Unread waiting" : "All read",
+              to: "/portal/messages",
             },
             {
               label: "Documents",
@@ -351,6 +354,7 @@ const Dashboard = () => {
               accentColor: "#f59e0b",
               iconBg: "rgba(245,158,11,0.10)",
               note: "Shared securely",
+              to: "#documents",
             },
           ].map((stat, i) => (
             <motion.div
@@ -359,30 +363,34 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ y: -5, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
-              className="rounded-2xl p-5 overflow-hidden relative
-                bg-white/75 backdrop-blur-md border border-white/70
-                shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.06)]
-                hover:shadow-[0_14px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.07)]
-                transition-shadow duration-500 ease-out"
             >
-              {/* Top accent line */}
-              <div
-                className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
-                style={{ background: stat.accentColor }}
-              />
-              <div className="flex items-start justify-between mb-3 pt-1">
+              <Link
+                to={stat.to}
+                className="rounded-2xl p-5 overflow-hidden relative block
+                  bg-white/75 backdrop-blur-md border border-white/70
+                  shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.06)]
+                  hover:shadow-[0_14px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.07)]
+                  transition-shadow duration-500 ease-out"
+              >
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: stat.iconBg }}
-                >
-                  <stat.icon size={16} style={{ color: stat.accentColor }} />
+                  className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
+                  style={{ background: stat.accentColor }}
+                />
+                <div className="flex items-start justify-between mb-3 pt-1">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center"
+                    style={{ background: stat.iconBg }}
+                  >
+                    <stat.icon size={16} style={{ color: stat.accentColor }} />
+                  </div>
+                  <span className="text-2xl font-bold" style={{ color: stat.accentColor }}>
+                    {stat.value}
+                  </span>
                 </div>
-                <span className="text-2xl font-bold" style={{ color: stat.accentColor }}>
-                  {stat.value}
-                </span>
-              </div>
-              <p className="text-xs font-semibold text-foreground">{stat.label}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{stat.note}</p>
+                <p className="text-xs font-semibold text-foreground">{stat.label}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{stat.note}</p>
+                <p className="text-[10px] mt-2 font-medium" style={{ color: stat.accentColor }}>View →</p>
+              </Link>
             </motion.div>
           ))}
         </div>

@@ -98,9 +98,9 @@ const StaffDashboard = () => {
         {/* Stats */}
         {!stats.loading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <StatTile label="Upcoming Sessions" value={stats.upcomingSessions} note="Scheduled in future" icon={Calendar} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} />
-            <StatTile label="My Tasks" value={stats.pendingStaffTodos} note="Incomplete staff to-dos" icon={ListTodo} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} />
-            <StatTile label="Client Homework" value={stats.pendingClientTodos} note="Pending from clients" icon={ClipboardList} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} />
+            <StatTile label="Upcoming Sessions" value={stats.upcomingSessions} note="Scheduled in future" icon={Calendar} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} to="/staff/calendar" />
+            <StatTile label="My Tasks" value={stats.pendingStaffTodos} note="Incomplete staff to-dos" icon={ListTodo} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} to="/staff/staff-todos" />
+            <StatTile label="Client Homework" value={stats.pendingClientTodos} note="Pending from clients" icon={ClipboardList} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} to="/staff/todos" />
           </div>
         )}
 

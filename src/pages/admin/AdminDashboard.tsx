@@ -130,9 +130,9 @@ const AdminDashboard = () => {
         {/* Stats */}
         {!stats.loading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <StatTile label="Active Clients" value={stats.activeClients} note="Registered in portal" icon={Users} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} />
-            <StatTile label="Upcoming Sessions" value={stats.upcomingSessions} note="Scheduled in future" icon={Calendar} accentColor="#10b981" iconBg="rgba(16,185,129,0.10)" delay={0.07} />
-            <StatTile label="Pending Client Tasks" value={stats.pendingTodos} note="Incomplete client to-dos" icon={ListTodo} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} />
+            <StatTile label="Active Clients" value={stats.activeClients} note="Registered in portal" icon={Users} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} to="/admin/users" />
+            <StatTile label="Upcoming Sessions" value={stats.upcomingSessions} note="Scheduled in future" icon={Calendar} accentColor="#10b981" iconBg="rgba(16,185,129,0.10)" delay={0.07} to="/admin/calendar" />
+            <StatTile label="Pending Client Tasks" value={stats.pendingTodos} note="Incomplete client to-dos" icon={ListTodo} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} to="/admin/todos" />
           </div>
         )}
 
