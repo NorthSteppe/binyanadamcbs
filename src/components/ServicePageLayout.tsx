@@ -61,7 +61,9 @@ const ServicePageLayout = ({
   const getServiceName = (service: string | ServiceOffer) =>
     typeof service === "string" ? service : service.name;
   const getServiceLink = (service: string | ServiceOffer) =>
-    typeof service === "string" ? "#" : `${basePath}/${service.slug}`;
+    typeof service === "string"
+      ? `${basePath}/${service.toLowerCase().replace(/\s+/g, "-")}`
+      : `${basePath}/${service.slug}`;
 
   return (
     <div className="min-h-screen bg-background">
