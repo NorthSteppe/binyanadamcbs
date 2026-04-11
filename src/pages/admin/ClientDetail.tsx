@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, ListTodo, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, ListTodo, CheckCircle2, Circle, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -88,6 +88,17 @@ const ClientDetail = () => {
       setNewTodo({ title: "", description: "" });
       fetchData();
     }
+  };
+
+  const handleDeleteDocument = async (doc: any) => {
+    // Extract storage path from public URL
+    const storagePath = doc.file_url.includes("/storage/v1/object/public/client-documents/")
+      ? doc.file_url.split("/storage/v1/object/public/client-documents/")[1]
+      : doc.file_url;
+    await supabase.storage.from("client-documents").remove([storagePath]);
+    await supabase.from("client_documents").delete().eq("id", doc.id);
+    fetchData();
+    toast.success("Document deleted");
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -287,13 +298,18 @@ const ClientDetail = () => {
               ) : (
                 <div className="grid sm:grid-cols-2 gap-3">
                   {documents.map((doc) => (
-                    <a key={doc.id} href={doc.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors">
-                      <FileText size={16} className="text-primary shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{doc.file_name}</p>
-                        <p className="text-xs text-muted-foreground">{format(new Date(doc.created_at), "MMM d, yyyy")}</p>
-                      </div>
-                    </a>
+                    <div key={doc.id} className="group flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors">
+                      <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 flex-1 min-w-0">
+                        <FileText size={16} className="text-primary shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{doc.file_name}</p>
+                          <p className="text-xs text-muted-foreground">{format(new Date(doc.created_at), "MMM d, yyyy")}</p>
+                        </div>
+                      </a>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteDocument(doc)}>
+                        <Trash2 size={13} />
+                      </Button>
+                    </div>
                   ))}
                 </div>
               )}

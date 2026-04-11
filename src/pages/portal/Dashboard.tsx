@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Calendar, MessageSquare, BookOpen, Upload, FileText,
   CheckCircle2, ListTodo, Phone, Mail, Timer, Sparkles,
-  Files, ArrowRight, TrendingUp, Bell, ChevronRight,
+  Files, ArrowRight, TrendingUp, Bell, ChevronRight, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -189,6 +189,14 @@ const Dashboard = () => {
     setUploading(false);
     toast({ title: "Uploaded successfully" });
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleDeleteDocument = async (doc: ClientDoc) => {
+    const { error: storageErr } = await supabase.storage.from("client-documents").remove([doc.file_url]);
+    if (storageErr) { toast({ title: "Delete failed", description: storageErr.message, variant: "destructive" }); return; }
+    await supabase.from("client_documents").delete().eq("id", doc.id);
+    setDocuments(prev => prev.filter(d => d.id !== doc.id));
+    toast({ title: "Document removed" });
   };
 
   const completedTasks = todos.filter(t => t.is_completed).length;
@@ -622,26 +630,36 @@ const Dashboard = () => {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {documents.slice(0, 6).map((doc) => (
-                  <button
+                  <div
                     key={doc.id}
-                    onClick={async () => {
-                      const { data, error } = await supabase.storage.from("client-documents").download(doc.file_url);
-                      if (error || !data) return;
-                      const url = URL.createObjectURL(data);
-                      const a = document.createElement("a");
-                      a.href = url; a.download = doc.file_name; a.click();
-                      URL.revokeObjectURL(url);
-                    }}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-black/[0.06] bg-white/40 hover:bg-white/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 text-left"
+                    className="group flex items-center gap-3 p-3 rounded-xl border border-black/[0.06] bg-white/40 hover:bg-white/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                      <FileText size={14} className="text-blue-500" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(doc.created_at).toLocaleDateString()}</p>
-                    </div>
-                  </button>
+                    <button
+                      onClick={async () => {
+                        const { data, error } = await supabase.storage.from("client-documents").download(doc.file_url);
+                        if (error || !data) return;
+                        const url = URL.createObjectURL(data);
+                        const a = document.createElement("a");
+                        a.href = url; a.download = doc.file_name; a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                        <FileText size={14} className="text-blue-500" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-foreground truncate">{doc.file_name}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(doc.created_at).toLocaleDateString()}</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDocument(doc)}
+                      className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
