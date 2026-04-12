@@ -200,7 +200,7 @@ const initialData: FBAData = {
 // ── Styled HTML report generator ───────────────────────────────────────────────
 
 function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
-  const color = d.reportColor;
+  const _reportColor = d.reportColor;
   const firstName = d.clientName.split(" ")[0] || d.clientName;
   const enabledMethods = ASSESSMENT_METHODS.filter((m) => d.methods[m.key]).map((m) => m.label);
   if (d.methodsOther) enabledMethods.push(d.methodsOther);
