@@ -1,30 +1,23 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ── Telegram API helpers ───────────────────────────────────────────────────────
+// ── Telegram API helpers (direct — no Lovable gateway) ────────────────────────
 
-async function tgCall(method: string, body: object) {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-  const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY")!;
-  return fetch(`${GATEWAY_URL}/${method}`, {
+function tgApi(method: string, body: object) {
+  const token = Deno.env.get("TELEGRAM_API_KEY")!;
+  return fetch(`https://api.telegram.org/bot${token}/${method}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": TELEGRAM_API_KEY,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 }
 
 async function reply(chatId: number | string, text: string, extra: object = {}) {
-  await tgCall("sendMessage", {
+  await tgApi("sendMessage", {
     chat_id: chatId,
     text,
     parse_mode: "HTML",
@@ -34,7 +27,7 @@ async function reply(chatId: number | string, text: string, extra: object = {}) 
 }
 
 async function answerCallback(callbackQueryId: string, text = "") {
-  await tgCall("answerCallbackQuery", { callback_query_id: callbackQueryId, text });
+  await tgApi("answerCallbackQuery", { callback_query_id: callbackQueryId, text });
 }
 
 // ── Inline keyboard shown after every bot response ────────────────────────────

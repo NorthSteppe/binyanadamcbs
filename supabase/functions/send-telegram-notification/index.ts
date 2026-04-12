@@ -1,6 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
+// Call Telegram Bot API directly — Lovable's gateway strips reply_markup and
+// controls the webhook, so we bypass it entirely.
+function tgApi(token: string, method: string, body: object) {
+  return fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,14 +19,6 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
-  }
-
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) {
-    return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   }
 
   const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
@@ -129,21 +129,12 @@ Deno.serve(async (req) => {
       ],
     };
 
-    // Send via Telegram gateway
-    const response = await fetch(`${GATEWAY_URL}/sendMessage`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": TELEGRAM_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: secrets.telegram_chat_id,
-        text,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-        reply_markup: replyMarkup,
-      }),
+    const response = await tgApi(TELEGRAM_API_KEY, "sendMessage", {
+      chat_id: secrets.telegram_chat_id,
+      text,
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+      reply_markup: replyMarkup,
     });
 
     const data = await response.json();
