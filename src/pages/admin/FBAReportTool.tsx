@@ -176,7 +176,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
   const aCreds = assessor?.credentials || "";
   const aSig   = assessor?.signature_url || null;
   const aWeb   = assessor?.social_website || "bacbs.com";
-  const logoUrl = "https://bacbs.com/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png";
+  const logoUrl = window.location.origin + "/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png";
 
   const sec = (title: string, content: string) =>
     content.trim()
@@ -392,7 +392,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
 
 <!-- ═══ HEADER ═══════════════════════════════════════════════════════ -->
 <div class="report-header">
-  <img class="logo" src="${logoUrl}" alt="Binyan Adam CBS" onerror="this.style.display='none'">
+  <img class="logo" id="report-logo" src="${logoUrl}" alt="Binyan Adam CBS" onerror="this.style.display='none'">
   <div class="report-header-right">
     <strong>BINYAN ADAM CBS</strong><br>
     Constructional Behaviour Support<br>
@@ -568,7 +568,17 @@ ${d.additionalNotes ? sec("ADDITIONAL NOTES / CAVEATS", d.additionalNotes) : ""}
 
 const FBAReportTool = () => {
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<FBAData>(initialData);
+  const [data, setData] = useState<FBAData>(() => {
+    const saved = localStorage.getItem("fba-report-draft");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse draft", e);
+      }
+    }
+    return initialData;
+  });
   const [assessor, setAssessor] = useState<AssessorInfo | null>(null);
   const [uploading, setUploading] = useState<Record<number, boolean>>({});
 
@@ -584,6 +594,11 @@ const FBAReportTool = () => {
       });
   }, []);
 
+  // Save to draft on change
+  useEffect(() => {
+    localStorage.setItem("fba-report-draft", JSON.stringify(data));
+  }, [data]);
+
   const set = <K extends keyof FBAData>(key: K, value: FBAData[K]) =>
     setData((d) => ({ ...d, [key]: value }));
 
@@ -596,7 +611,15 @@ const FBAReportTool = () => {
     if (!w) { toast.error("Pop-up blocked — please allow pop-ups for this site."); return; }
     w.document.write(html);
     w.document.close();
-    setTimeout(() => w.print(), 800);
+    
+    // Wait for the logo to load before printing
+    const img = w.document.getElementById('report-logo') as HTMLImageElement | null;
+    if (img && !img.complete) {
+      img.onload = () => setTimeout(() => w.print(), 200);
+      img.onerror = () => setTimeout(() => w.print(), 200);
+    } else {
+      setTimeout(() => w.print(), 800);
+    }
   };
 
   const handleFileUpload = async (index: number, file: File) => {
@@ -1127,7 +1150,15 @@ const FBAReportTool = () => {
         <Button onClick={handlePrint} className="gap-2">
           <Printer size={15} /> Generate PDF Report
         </Button>
-        <p className="text-xs text-muted-foreground">Opens in a new window — use your browser's Print → Save as PDF</p>
+        <Button variant="outline" onClick={() => {
+          if (window.confirm("Are you sure you want to clear your draft and start a new report?")) {
+            setData(initialData);
+            setStep(1);
+          }
+        }} className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive">
+          <Trash2 size={15} /> Clear Draft & Start New
+        </Button>
+        <p className="text-xs text-muted-foreground w-full sm:w-auto mt-2 sm:mt-0">Opens in a new window — use your browser's Print → Save as PDF</p>
       </div>
 
       {/* Live preview */}
