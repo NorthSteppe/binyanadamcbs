@@ -12,17 +12,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Settings as SettingsIcon, Moon, Sun, Monitor, Bell, Globe, LayoutDashboard, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
 
-const WIDGET_OPTIONS = [
-  { id: "tasks", label: setT.widgetTasks || "My Tasks" },
-  { id: "calendar", label: setT.widgetCalendar || "Calendar" },
-  { id: "messages", label: setT.widgetMessages || "Messages" },
-  { id: "linear", label: "Practice Tasks (Linear)" },
-  { id: "notifications", label: setT.widgetNotifications || "Recent Notifications" },
-];
-
 const Settings = () => {
   const { prefs, updatePrefs } = usePreferences();
   const { isStaff } = useAuth();
+  const { t } = useLanguage();
+  const setT = (t as any).settings || {};
+
   const WIDGET_OPTIONS = [
     { id: "tasks", label: setT.widgetTasks || "My Tasks" },
     { id: "calendar", label: setT.widgetCalendar || "Calendar" },
@@ -30,8 +25,6 @@ const Settings = () => {
     { id: "linear", label: setT.widgetLinear || "Practice Tasks (Linear)" },
     { id: "notifications", label: setT.widgetNotifications || "Recent Notifications" },
   ];
-  const { t } = useLanguage();
-  const setT = (t as any).settings || {};
 
   const toggleWidget = (id: string) => {
     const current = prefs.dashboardWidgets;

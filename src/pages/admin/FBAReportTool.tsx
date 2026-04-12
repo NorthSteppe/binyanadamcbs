@@ -586,6 +586,21 @@ ${d.additionalNotes ? sec("ADDITIONAL NOTES / CAVEATS", d.additionalNotes) : ""}
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 const FBAReportTool = () => {
+  const { t } = useLanguage();
+  const isRTL = (t as any)._dir === "rtl";
+  const STEPS: { id: number; label: string; icon: typeof User }[] = [
+    { id: 1, label: (t as any).fbaTool?.steps?.clientInfo || "Client Info", icon: User },
+    { id: 2, label: (t as any).fbaTool?.steps?.methods || "Methods", icon: ClipboardList },
+    { id: 3, label: (t as any).fbaTool?.steps?.supportingDocs || "Supporting Docs", icon: Paperclip },
+    { id: 4, label: (t as any).fbaTool?.steps?.background || "Background", icon: FileText },
+    { id: 5, label: (t as any).fbaTool?.steps?.strengths || "Strengths", icon: Heart },
+    { id: 6, label: (t as any).fbaTool?.steps?.targetBehaviours || "Target Behaviours", icon: AlertTriangle },
+    { id: 7, label: (t as any).fbaTool?.steps?.constructionalInterview || "Constructional Interview", icon: MessageSquare },
+    { id: 8, label: (t as any).fbaTool?.steps?.actAssessment || "ACT Assessment", icon: Brain },
+    { id: 9, label: (t as any).fbaTool?.steps?.directObservations || "Direct Observations", icon: Eye },
+    { id: 10, label: (t as any).fbaTool?.steps?.nonlinearAnalysis || "Nonlinear Analysis", icon: Scale },
+    { id: 11, label: (t as any).fbaTool?.steps?.recommendations || "Recommendations", icon: Lightbulb },
+  ];
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FBAData>(() => {
     const saved = localStorage.getItem("fba-report-draft");
