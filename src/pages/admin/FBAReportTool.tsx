@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { METAL_BG } from "@/components/portal/PortalShell";
 import { toast } from "sonner";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -126,27 +127,10 @@ const ASSESSMENT_METHODS = [
   { key: "daily_events_log", label: "Daily Events Log" },
 ];
 
-const COLOUR_PRESETS = [
-  { name: "Navy", value: "#1a2744" },
-  { name: "Teal", value: "#0e7490" },
-  { name: "Forest", value: "#166534" },
-  { name: "Plum", value: "#581c87" },
-  { name: "Crimson", value: "#9f1239" },
-  { name: "Slate", value: "#334155" },
-];
-
-const STEPS = [
-  { id: 1,  label: "Client Info",             icon: User },
-  { id: 2,  label: "Methods",                 icon: ClipboardList },
-  { id: 3,  label: "Supporting Documents",    icon: Paperclip },
-  { id: 4,  label: "Background",              icon: FileText },
-  { id: 5,  label: "Strengths & Resources",   icon: Heart },
-  { id: 6,  label: "Target Behaviours",       icon: AlertTriangle },
-  { id: 7,  label: "Constructional Interview",icon: MessageSquare },
-  { id: 8,  label: "ACT Assessment",          icon: Brain },
-  { id: 9,  label: "Direct Observations",     icon: Eye },
-  { id: 10, label: "Nonlinear Analysis",      icon: Scale },
-  { id: 11, label: "Recommendations",         icon: Lightbulb },
+const ASSESSMENT_METHODS_KEYS = [
+  "fai", "mas", "qabf", "constructional_questionnaire", "cpfq", "camm",
+  "peak", "records_review", "parent_interview", "client_interview",
+  "staff_interview", "direct_observation_abc", "scatter_plot", "daily_events_log"
 ];
 
 const isStepComplete = (stepId: number, data: FBAData): boolean => {
@@ -177,7 +161,7 @@ const initialData: FBAData = {
   clientName: "", clientDOB: "", diagnosis: "", settingType: "School",
   settingName: "", referralReason: "", assessor: "Adam Dayan – Behaviour Analyst",
   assessmentDates: "",
-  methods: Object.fromEntries(ASSESSMENT_METHODS.map((m) => [m.key, false])),
+  methods: Object.fromEntries(ASSESSMENT_METHODS_KEYS.map((key) => [key, false])),
   methodsOther: "",
   supportingDocs: [],
   background: "", environment: "", supportStaff: "",
@@ -199,10 +183,10 @@ const initialData: FBAData = {
 
 // ── Styled HTML report generator ───────────────────────────────────────────────
 
-function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
-  const color = d.reportColor;
+function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, isRTL: boolean, assessmentMethodsLabels: string[]): string {
+  const colorReport = d.reportColor;
   const firstName = d.clientName.split(" ")[0] || d.clientName;
-  const enabledMethods = ASSESSMENT_METHODS.filter((m) => d.methods[m.key]).map((m) => m.label);
+  const enabledMethods = assessmentMethodsLabels;
   if (d.methodsOther) enabledMethods.push(d.methodsOther);
   const aName  = assessor?.name        || d.assessor;
   const aRole  = assessor?.role        || "Behaviour Analyst";
@@ -236,7 +220,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
 
   const docsSection = d.supportingDocs.filter((doc) => doc.title.trim()).length > 0
     ? `<div class="section">
-        <div class="section-header">DOCUMENTS REVIEWED — REPORTS FROM OTHER PROFESSIONALS</div>
+        <div class="section-header">${t.fbaTool.report.docReviewed}</div>
         <div class="section-content">
           ${d.supportingDocs.filter((doc) => doc.title.trim()).map((doc, i) => `
             <div class="doc-card">
@@ -245,7 +229,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
                 ${doc.docType ? ` &mdash; <em>${doc.docType}</em>` : ""}
                 ${doc.professional ? ` &mdash; ${doc.professional}` : ""}
                 ${doc.docDate ? ` &mdash; ${new Date(doc.docDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}
-                ${doc.fileUrl ? ` <span class="doc-attached">[file attached]</span>` : ""}
+                ${doc.fileUrl ? ` <span class="doc-attached">${t.fbaTool.report.fileAttached}</span>` : ""}
               </div>
               ${doc.keyFindings ? `<div class="doc-findings">${doc.keyFindings.replace(/\n/g, "<br>")}</div>` : ""}
             </div>`).join("")}
@@ -260,41 +244,41 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
   const behavioursHtml = d.behaviours.filter((b) => b.name.trim()).map((b, i) =>
     `<div class="behaviour-card">
       <strong>${i + 1}. ${b.name}</strong>
-      ${b.topography ? `<div><span class="field-label">Topography:</span> ${b.topography}</div>` : ""}
+      ${b.topography ? `<div><span class="field-label">${t.fbaTool.report.topography}</span> ${b.topography}</div>` : ""}
       <div class="behaviour-grid">
-        ${b.frequency ? `<div><span class="field-label">Frequency:</span> ${b.frequency}</div>` : ""}
-        ${b.intensity ? `<div><span class="field-label">Intensity:</span> ${b.intensity}</div>` : ""}
-        ${b.duration  ? `<div><span class="field-label">Duration:</span> ${b.duration}</div>`  : ""}
+        ${b.frequency ? `<div><span class="field-label">${t.fbaTool.report.frequency}</span> ${b.frequency}</div>` : ""}
+        ${b.intensity ? `<div><span class="field-label">${t.fbaTool.report.intensity}</span> ${b.intensity}</div>` : ""}
+        ${b.duration  ? `<div><span class="field-label">${t.fbaTool.report.duration}</span> ${b.duration}</div>`  : ""}
       </div>
-      ${b.context ? `<div><span class="field-label">Antecedents/Context:</span> ${b.context}</div>` : ""}
+      ${b.context ? `<div><span class="field-label">${t.fbaTool.report.antecedents}</span> ${b.context}</div>` : ""}
     </div>`
   ).join("");
 
   const obsHtml = d.observations.filter((o) => o.date || o.observations).map((o) =>
     `<div class="obs-card">
-      <div class="obs-header">Session ${o.sessionNumber}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>
-      ${o.setting      ? `<div><span class="field-label">Setting:</span> ${o.setting}</div>` : ""}
-      ${o.participants ? `<div><span class="field-label">Participants:</span> ${o.participants}</div>` : ""}
-      ${o.purpose      ? `<div><span class="field-label">Purpose:</span> ${o.purpose}</div>` : ""}
-      ${o.observations ? `<div class="obs-body"><span class="field-label">Observations:</span><br>${o.observations.replace(/\n/g, "<br>")}</div>` : ""}
-      ${o.analysis     ? `<div class="obs-body"><span class="field-label">Analysis:</span><br>${o.analysis.replace(/\n/g, "<br>")}</div>` : ""}
+      <div class="obs-header">${t.fbaTool.form.session} ${o.sessionNumber}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>
+      ${o.setting      ? `<div><span class="field-label">${t.fbaTool.report.setting}</span> ${o.setting}</div>` : ""}
+      ${o.participants ? `<div><span class="field-label">${t.fbaTool.report.participants}</span> ${o.participants}</div>` : ""}
+      ${o.purpose      ? `<div><span class="field-label">${t.fbaTool.report.purpose}</span> ${o.purpose}</div>` : ""}
+      ${o.observations ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.obsDesc}</span><br>${o.observations.replace(/\n/g, "<br>")}</div>` : ""}
+      ${o.analysis     ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.analysis}</span><br>${o.analysis.replace(/\n/g, "<br>")}</div>` : ""}
     </div>`
   ).join("");
 
   const hypHtml = d.hypotheses.filter((h) => h.behaviour.trim()).map((h, i) =>
     `<div class="hyp-card">
       <strong>${i + 1}. ${h.behaviour}</strong>
-      ${h.function ? `<div><span class="field-label">Identified Function:</span> ${h.function}</div>` : ""}
-      ${h.benefitsOfBehaviour ? `<div><span class="field-label">Benefits of Current Pattern:</span> ${h.benefitsOfBehaviour}</div>` : ""}
-      ${h.costsOfAlternatives ? `<div><span class="field-label">Costs of Alternatives:</span> ${h.costsOfAlternatives}</div>` : ""}
-      ${h.hypothesis ? `<div class="obs-body"><span class="field-label">Hypothesis:</span><br>${h.hypothesis.replace(/\n/g, "<br>")}</div>` : ""}
+      ${h.function ? `<div><span class="field-label">${t.fbaTool.form.identifiedFunction}:</span> ${h.function}</div>` : ""}
+      ${h.benefitsOfBehaviour ? `<div><span class="field-label">${t.fbaTool.form.benefitsOfBehaviour}:</span> ${h.benefitsOfBehaviour}</div>` : ""}
+      ${h.costsOfAlternatives ? `<div><span class="field-label">${t.fbaTool.form.costsOfAlternatives}:</span> ${h.costsOfAlternatives}</div>` : ""}
+      ${h.hypothesis ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.hypothesis}</span><br>${h.hypothesis.replace(/\n/g, "<br>")}</div>` : ""}
     </div>`
   ).join("");
 
   const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${isRTL ? 'he' : 'en'}" dir="${isRTL ? 'rtl' : 'ltr'}">
 <head>
 <meta charset="UTF-8">
 <title>FBA Report — ${d.clientName}</title>
@@ -444,18 +428,18 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
 
 <!-- ═══ TITLE BLOCK ══════════════════════════════════════════════════ -->
 <div class="title-block">
-  <h1>Assessment &amp; Recommendations Report</h1>
-  <div class="subtitle">ACT-Informed Constructional Functional Behaviour Assessment</div>
+  <h1>${t.fbaTool.report.title}</h1>
+  <div class="subtitle">${t.fbaTool.report.subtitle}</div>
   <div class="client-grid">
-    <div><span class="field-label">Client:</span> ${d.clientName || "—"}</div>
-    <div><span class="field-label">Date of Birth:</span> ${d.clientDOB ? new Date(d.clientDOB).toLocaleDateString("en-GB") : "—"}</div>
-    <div><span class="field-label">Diagnosis / Profile:</span> ${d.diagnosis || "—"}</div>
-    <div><span class="field-label">Setting:</span> ${d.settingType}${d.settingName ? " — " + d.settingName : ""}</div>
-    <div><span class="field-label">Assessed by:</span> ${aName}${aCreds ? ", " + aCreds : ""}</div>
-    <div><span class="field-label">Assessment Dates:</span> ${d.assessmentDates || "—"}</div>
-    <div><span class="field-label">Report Date:</span> ${today}</div>
+    <div><span class="field-label">${t.fbaTool.report.client}</span> ${d.clientName || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.dob}</span> ${d.clientDOB ? new Date(d.clientDOB).toLocaleDateString("en-GB") : "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.diagnosis}</span> ${d.diagnosis || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.setting}</span> ${d.settingType}${d.settingName ? " — " + d.settingName : ""}</div>
+    <div><span class="field-label">${t.fbaTool.report.assessedBy}</span> ${aName}${aCreds ? ", " + aCreds : ""}</div>
+    <div><span class="field-label">${t.fbaTool.report.assessmentDates}</span> ${d.assessmentDates || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.reportDate}</span> ${today}</div>
   </div>
-  <div class="confidential">Confidential &nbsp;|&nbsp; Clinical Document</div>
+  <div class="confidential">${t.fbaTool.report.confidential.replace(" | ", " &nbsp;|&nbsp; ")}</div>
 </div>
 
 <!-- ═══ REFERRAL ════════════════════════════════════════════════════ -->
@@ -463,7 +447,7 @@ ${d.referralReason ? sec("REASON FOR REFERRAL", d.referralReason) : ""}
 
 <!-- ═══ METHODS ═════════════════════════════════════════════════════ -->
 ${enabledMethods.length ? `<div class="section">
-  <div class="section-header">ASSESSMENT METHODS</div>
+  <div class="section-header">${t.fbaTool.report.assessmentMethods}</div>
   <ul class="methods-list">
     ${enabledMethods.map((m) => `<li>${m}</li>`).join("")}
   </ul>
@@ -474,22 +458,20 @@ ${docsSection}
 
 <!-- ═══ BACKGROUND ══════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-header">BACKGROUND</div>
+  <div class="section-header">${t.fbaTool.report.background}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:10px;">
-      This assessment adopts a constructional approach, presenting ${firstName || "the client"} as a person
-      functioning competently given available contingencies — not as exhibiting pathology (Goldiamond, 1974; Layng et al., 2022).
-      Where relevant, an ACT-informed lens considers the role of language and psychological flexibility (Dixon et al., 2023).
+      ${t.fbaTool.report.backgroundIntro.replace("the client", firstName || "the client")}
     </p>
     ${d.background ? d.background.replace(/\n/g, "<br>") : "—"}
-    ${d.environment ? `<br><br><strong>Educational / Clinical Environment:</strong><br>${d.environment.replace(/\n/g, "<br>")}` : ""}
-    ${d.supportStaff ? `<br><br><strong>Support Staff and Key People:</strong><br>${d.supportStaff.replace(/\n/g, "<br>")}` : ""}
+    ${d.environment ? `<br><br><strong>${t.fbaTool.report.envTitle}</strong><br>${d.environment.replace(/\n/g, "<br>")}` : ""}
+    ${d.supportStaff ? `<br><br><strong>${t.fbaTool.report.supportStaffTitle}</strong><br>${d.supportStaff.replace(/\n/g, "<br>")}` : ""}
   </div>
 </div>
 
 <!-- ═══ STRENGTHS ═══════════════════════════════════════════════════ -->
 <div class="section no-break">
-  <div class="section-header">CURRENT RELEVANT REPERTOIRE — STRENGTHS &amp; RESOURCES</div>
+  <div class="section-header">${t.fbaTool.report.currentRepertoire.replace("&", "&amp;")}</div>
   <div class="section-content">
     ${strengthsHtml || "<em>—</em>"}
   </div>
@@ -497,7 +479,7 @@ ${docsSection}
 
 <!-- ═══ TARGET BEHAVIOURS ═══════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-header">TARGET BEHAVIOURS</div>
+  <div class="section-header">${t.fbaTool.report.targetBehavioursTitle}</div>
   <div class="section-content">
     ${behavioursHtml || "<em>—</em>"}
   </div>
@@ -505,11 +487,10 @@ ${docsSection}
 
 <!-- ═══ CONSTRUCTIONAL INTERVIEW ════════════════════════════════════ -->
 <div class="section page-break">
-  <div class="section-header">CONSTRUCTIONAL INTERVIEW — GOLDIAMOND'S QUESTIONNAIRE (1974)</div>
+  <div class="section-header">${t.fbaTool.report.cQuestionnaire}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:14px;">
-      Rather than asking about the problem, the constructional interview explores where the client wants to go,
-      and then designs a programme to take them there using the very contingencies maintaining the current pattern.
+      ${t.fbaTool.report.cQuestionnaireIntro}
     </p>
     ${subsec("1. Stated Outcome", "What would the outcome be for you? (verbatim)", d.cq_statedOutcome)}
     ${subsec("2. Observed Outcome", "What would others see when a successful outcome is achieved?", d.cq_observedOutcome)}
@@ -524,11 +505,10 @@ ${docsSection}
 
 <!-- ═══ ACT ASSESSMENT ═══════════════════════════════════════════════ -->
 <div class="section page-break">
-  <div class="section-header">ACT-INFORMED ASSESSMENT — PSYCHOLOGICAL FLEXIBILITY (HEXAFLEX)</div>
+  <div class="section-header">${t.fbaTool.report.actAssessment}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:14px;">
-      Once a client demonstrates language about past/future events and perspective-taking, a comprehensive functional
-      analysis must account for how verbal behaviour interacts with contingencies (Dixon et al., 2023).
+      ${t.fbaTool.report.actAssessmentIntro}
     </p>
     ${subsec("Language & Relational Repertoire", "Candidate for ACT?", d.act_languageComplexity)}
     ${subsec("Present-Moment Awareness", "Contact with current experience vs. past/future preoccupation", d.act_presentMoment)}
@@ -544,7 +524,7 @@ ${docsSection}
 
 <!-- ═══ DIRECT OBSERVATIONS ══════════════════════════════════════════ -->
 <div class="section page-break">
-  <div class="section-header">DIRECT OBSERVATIONS</div>
+  <div class="section-header">${t.fbaTool.report.observations}</div>
   <div class="section-content">
     ${obsHtml || "<em>—</em>"}
   </div>
@@ -552,12 +532,10 @@ ${docsSection}
 
 <!-- ═══ NONLINEAR ANALYSIS ═══════════════════════════════════════════ -->
 <div class="section page-break">
-  <div class="section-header">FUNCTIONAL AND NONLINEAR CONTINGENCY ANALYSIS</div>
+  <div class="section-header">${t.fbaTool.report.nonlinearAnalysis}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:14px;">
-      A nonlinear analysis (Layng et al., 2022) considers not only the consequences of the presenting behaviour,
-      but also the consequences of <em>not</em> doing it — the costs of the alternatives.
-      This typically reveals that the behaviour is the rational, competent outcome of available contingencies.
+      ${t.fbaTool.report.nonlinearAnalysisIntro}
     </p>
     ${hypHtml || "<em>—</em>"}
   </div>
@@ -565,11 +543,10 @@ ${docsSection}
 
 <!-- ═══ RECOMMENDATIONS ══════════════════════════════════════════════ -->
 ${d.recommendations ? `<div class="section page-break">
-  <div class="section-header">RECOMMENDATIONS</div>
+  <div class="section-header">${t.fbaTool.report.recommendations}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:10px;">
-      The following recommendations are constructional: they focus on establishing new repertoires aligned with
-      ${firstName || "the client"}'s stated values and terminal goals.
+      ${t.fbaTool.report.recommendationsIntro.replace("the client", firstName || "the client")}
     </p>
     ${d.recommendations.replace(/\n/g, "<br>")}
   </div>
@@ -580,7 +557,7 @@ ${d.additionalNotes ? sec("ADDITIONAL NOTES / CAVEATS", d.additionalNotes) : ""}
 
 <!-- ═══ REFERENCES ═══════════════════════════════════════════════════ -->
 <div class="section no-break">
-  <div class="section-header">REFERENCES</div>
+  <div class="section-header">${t.fbaTool.report.references}</div>
   <div class="references">
     Dixon, M. R., Belisle, J., Stanley, C. R., &amp; Rowsey, K. E. (2023). <em>Promoting psychological flexibility with clients and in our field.</em> In M. R. Dixon (Ed.), Acceptance and commitment therapy for behavior analysts.<br>
     Goldiamond, I. (1974). Toward a constructional approach to social problems: Ethical and constitutional issues raised by applied behaviour analysis. <em>Behaviourism, 2</em>(1), 1–84.<br>
@@ -598,7 +575,7 @@ ${d.additionalNotes ? sec("ADDITIONAL NOTES / CAVEATS", d.additionalNotes) : ""}
     <strong>${aName}</strong><br>
     ${aRole}${aCreds ? " · " + aCreds : ""}<br>
     <span class="creds">adamdayan@bacbs.com &nbsp;·&nbsp; ${aWeb}</span><br>
-    <span class="footer-date">Report completed: ${today}</span>
+    <span class="footer-date">${t.fbaTool.report.reportCompleted} ${today}</span>
   </div>
   ${aSig ? `<div class="footer-sig"><img src="${aSig}" alt="Signature" onerror="this.parentNode.innerHTML='&nbsp;'"></div>` : ""}
 </div>
@@ -648,7 +625,13 @@ const FBAReportTool = () => {
   const prev = () => setStep((s) => Math.max(s - 1, 1));
 
   const handlePrint = () => {
-    const html = generateStyledHTML(data, assessor);
+    const html = generateStyledHTML(
+      data, 
+      assessor, 
+      t, 
+      isRTL, 
+      ASSESSMENT_METHODS.filter(m => data.methods[m.key]).map(m => t.fbaTool.form[m.key] || m.label)
+    );
     const w = window.open("", "_blank");
     if (!w) { toast.error("Pop-up blocked — please allow pop-ups for this site."); return; }
     w.document.write(html);
@@ -685,18 +668,18 @@ const FBAReportTool = () => {
 
   const renderStep1 = () => (
     <div className="space-y-4">
-      <SectionTitle>Client Information</SectionTitle>
+      <SectionTitle>{t.fbaTool.steps.clientInfo}</SectionTitle>
       <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Client Full Name *">
-          <Input value={data.clientName} onChange={(e) => set("clientName", e.target.value)} placeholder="e.g. John Smith" />
+        <Field label={t.fbaTool.form.clientName}>
+          <Input value={data.clientName} onChange={(e) => set("clientName", e.target.value)} placeholder={t.fbaTool.form.clientNameHint} />
         </Field>
-        <Field label="Date of Birth">
+        <Field label={t.fbaTool.form.dob}>
           <Input type="date" value={data.clientDOB} onChange={(e) => set("clientDOB", e.target.value)} />
         </Field>
-        <Field label="Diagnosis / Presenting Profile">
+        <Field label={t.fbaTool.form.diagnosis}>
           <Input value={data.diagnosis} onChange={(e) => set("diagnosis", e.target.value)} placeholder="e.g. ADHD, ASD, anxiety..." />
         </Field>
-        <Field label="Setting Type">
+        <Field label={t.fbaTool.form.settingType}>
           <Select value={data.settingType} onValueChange={(v) => set("settingType", v)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -706,19 +689,19 @@ const FBAReportTool = () => {
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Setting Name">
-          <Input value={data.settingName} onChange={(e) => set("settingName", e.target.value)} placeholder="e.g. School name or clinic" />
+        <Field label={t.fbaTool.form.settingName}>
+          <Input value={data.settingName} onChange={(e) => set("settingName", e.target.value)} placeholder={t.fbaTool.form.settingNamePlaceholder} />
         </Field>
-        <Field label="Assessor">
+        <Field label={t.fbaTool.form.assessor}>
           <Input value={data.assessor} onChange={(e) => set("assessor", e.target.value)} />
         </Field>
-        <Field label="Assessment Dates" className="sm:col-span-2">
+        <Field label={t.fbaTool.form.assessmentDates} className="sm:col-span-2">
           <Input value={data.assessmentDates} onChange={(e) => set("assessmentDates", e.target.value)} placeholder="e.g. May–June 2025" />
         </Field>
       </div>
-      <Field label="Reason for Referral">
+      <Field label={t.fbaTool.form.referralReason}>
         <Textarea rows={4} value={data.referralReason} onChange={(e) => set("referralReason", e.target.value)}
-          placeholder="Why was this assessment requested? Key concerns and who referred..." />
+          placeholder={t.fbaTool.form.referralReasonPlaceholder} />
       </Field>
       {/* Theme and Formatting */}
       <div className="grid sm:grid-cols-2 gap-4 pt-2">
@@ -727,7 +710,7 @@ const FBAReportTool = () => {
           <div className="flex flex-col gap-2">
             {REPORT_THEMES.map((t) => (
               <button key={t.id} onClick={() => set("themePreset", t.id)}
-                className={`flex flex-col items-start px-3 py-2 rounded-lg text-xs font-medium border transition-all text-left ${data.themePreset === t.id ? "ring-2 ring-offset-1 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/50"}`}>
+                className={`flex flex-col items-start px-3 py-2 rounded-lg text-xs font-medium border transition-all text-start ${data.themePreset === t.id ? "ring-2 ring-offset-1 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/50"}`}>
                 <div className="flex items-center gap-2 mb-1 w-full">
                   <div className="w-3 h-3 rounded-full" style={{ background: t.primary }}></div>
                   <span className="font-semibold text-[13px]">{t.label}</span>
@@ -743,7 +726,7 @@ const FBAReportTool = () => {
           <div className="flex flex-col gap-2">
             {REPORT_FONTS.map((f) => (
               <button key={f.id} onClick={() => set("fontFamily", f.id)}
-                className={`flex flex-col items-start px-3 py-2.5 rounded-lg text-xs font-medium border transition-all text-left ${data.fontFamily === f.id ? "ring-2 ring-offset-1 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/50"}`}>
+                className={`flex flex-col items-start px-3 py-2.5 rounded-lg text-xs font-medium border transition-all text-start ${data.fontFamily === f.id ? "ring-2 ring-offset-1 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/50"}`}>
                 <span className="font-semibold text-[13px] w-full flex items-center justify-between" style={{ fontFamily: f.value }}>
                   {f.label}
                   {data.fontFamily === f.id && <CheckCircle2 size={13} className="text-primary" />}
@@ -758,24 +741,24 @@ const FBAReportTool = () => {
 
   const renderStep2 = () => (
     <div className="space-y-4">
-      <SectionTitle>Assessment Methods Used</SectionTitle>
+      <SectionTitle>{t.fbaTool.form.assessmentMethods}</SectionTitle>
       <div className="space-y-2">
         {ASSESSMENT_METHODS.map((m) => (
           <label key={m.key} className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
             <Checkbox checked={!!data.methods[m.key]} onCheckedChange={(v) => set("methods", { ...data.methods, [m.key]: !!v })} />
-            <span className="text-sm">{m.label}</span>
+            <span className="text-sm">{t.fbaTool.form[m.key] || m.label}</span>
           </label>
         ))}
       </div>
-      <Field label="Other (specify)">
-        <Input value={data.methodsOther} onChange={(e) => set("methodsOther", e.target.value)} placeholder="Any other methods..." />
+      <Field label={t.fbaTool.form.otherMethods}>
+        <Input value={data.methodsOther} onChange={(e) => set("methodsOther", e.target.value)} placeholder={t.fbaTool.form.otherMethodsPlaceholder} />
       </Field>
     </div>
   );
 
   const renderStep3 = () => (
     <div className="space-y-4">
-      <SectionTitle>Supporting Documents from Other Professionals</SectionTitle>
+      <SectionTitle>{t.fbaTool.steps.supportingDocs}</SectionTitle>
       <InfoBox color="blue">
         Add documents from other professionals (educational psychologists, SALT, OT, paediatricians, school, etc.)
         that were reviewed as part of this assessment. Upload the file and/or summarise key findings to include in the report.
@@ -796,12 +779,12 @@ const FBAReportTool = () => {
               </Button>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
-              <Field label="Document Title">
+              <Field label={t.fbaTool.form.docTitle}>
                 <Input value={doc.title} onChange={(e) => {
                   const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], title: e.target.value }; set("supportingDocs", arr);
                 }} placeholder="e.g. Educational Psychology Report — John Smith" />
               </Field>
-              <Field label="Document Type">
+              <Field label={t.fbaTool.form.docType}>
                 <Select value={doc.docType} onValueChange={(v) => {
                   const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], docType: v }; set("supportingDocs", arr);
                 }}>
@@ -811,26 +794,26 @@ const FBAReportTool = () => {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Professional / Author">
+              <Field label={t.fbaTool.form.professional}>
                 <Input value={doc.professional} onChange={(e) => {
                   const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], professional: e.target.value }; set("supportingDocs", arr);
                 }} placeholder="e.g. Dr. Sarah Jones, Educational Psychologist" />
               </Field>
-              <Field label="Document Date">
+              <Field label={t.fbaTool.form.docDate}>
                 <Input type="date" value={doc.docDate} onChange={(e) => {
                   const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], docDate: e.target.value }; set("supportingDocs", arr);
                 }} />
               </Field>
             </div>
-            <Field label="Key Findings / Relevant Excerpts"
+            <Field label={t.fbaTool.form.keyFindings}
               hint="Summarise or paste the key findings from this document that are relevant to this FBA">
               <Textarea rows={4} value={doc.keyFindings} onChange={(e) => {
                 const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], keyFindings: e.target.value }; set("supportingDocs", arr);
-              }} placeholder="Key findings, recommendations, diagnosis, scores, or relevant quotes from this document..." />
+              }} placeholder={t.fbaTool.form.keyFindingsPlaceholder} />
             </Field>
             {/* File upload */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Attach File (optional)</Label>
+              <Label className="text-xs font-medium">{t.fbaTool.form.attachFile}</Label>
               {doc.fileUrl ? (
                 <div className="flex items-center gap-2 text-sm text-green-600">
                   <CheckCircle2 size={14} />
@@ -863,20 +846,20 @@ const FBAReportTool = () => {
 
   const renderStep4 = () => (
     <div className="space-y-4">
-      <SectionTitle>Background</SectionTitle>
+      <SectionTitle>{t.fbaTool.steps.background}</SectionTitle>
       <InfoBox color="blue">
         Present the client as a person functioning competently given their circumstances (Goldiamond, 1974).
         Background informs the nonlinear analysis — how the current pattern was shaped reveals why it is a sensible response.
       </InfoBox>
-      <Field label="Personal & Family Background">
+      <Field label={t.fbaTool.form.background}>
         <Textarea rows={5} value={data.background} onChange={(e) => set("background", e.target.value)}
           placeholder="Living situation, family, medical/developmental history, prior assessments, cultural context..." />
       </Field>
-      <Field label="Educational / Clinical Environment">
+      <Field label={t.fbaTool.form.environment}>
         <Textarea rows={4} value={data.environment} onChange={(e) => set("environment", e.target.value)}
           placeholder="Setting structure, routines, sensory environment, available resources, support in place..." />
       </Field>
-      <Field label="Support Staff and Key People">
+      <Field label={t.fbaTool.form.supportStaff}>
         <Textarea rows={3} value={data.supportStaff} onChange={(e) => set("supportStaff", e.target.value)}
           placeholder="LSAs, teachers, therapists, family — roles and duration of involvement..." />
       </Field>
@@ -885,7 +868,7 @@ const FBAReportTool = () => {
 
   const renderStep5 = () => (
     <div className="space-y-4">
-      <SectionTitle>Current Relevant Repertoire — Strengths & Resources</SectionTitle>
+      <SectionTitle>{t.fbaTool.steps.strengths}</SectionTitle>
       <InfoBox color="green">
         The constructional approach begins here. Strengths are the existing repertoires a programme builds upon.
         These are what make progress possible — not just positives, but foundations.
@@ -902,12 +885,12 @@ const FBAReportTool = () => {
                 </Button>
               )}
             </div>
-            <Field label="Title">
+            <Field label={t.fbaTool.form.strengthTitle}>
               <Input value={s.title} onChange={(e) => {
                 const arr = [...data.strengths]; arr[i] = { ...arr[i], title: e.target.value }; set("strengths", arr);
               }} placeholder="e.g. Cognitive Foundations, Social Motivation, Family Support..." />
             </Field>
-            <Field label="Description">
+            <Field label={t.fbaTool.form.description}>
               <Textarea rows={3} value={s.description} onChange={(e) => {
                 const arr = [...data.strengths]; arr[i] = { ...arr[i], description: e.target.value }; set("strengths", arr);
               }} placeholder="How this strength manifests and its relevance to the programme..." />
@@ -916,14 +899,14 @@ const FBAReportTool = () => {
         </Card>
       ))}
       <Button variant="outline" size="sm" className="gap-1.5" onClick={() => set("strengths", [...data.strengths, emptyStrength()])}>
-        <Plus size={14} /> Add Strength
+        <Plus size={14} /> {t.fbaTool.form.addStrength}
       </Button>
     </div>
   );
 
   const renderStep6 = () => (
     <div className="space-y-4">
-      <SectionTitle>Target Behaviours</SectionTitle>
+      <SectionTitle>{t.fbaTool.steps.targetBehaviours}</SectionTitle>
       <InfoBox color="amber">
         Define each behaviour operationally — topography (what it looks like), not assumed cause.
         The behaviour is a competent adaptation to existing contingencies, not a pathology.
@@ -940,7 +923,7 @@ const FBAReportTool = () => {
                 </Button>
               )}
             </div>
-            <Field label="Behaviour Name">
+            <Field label={t.fbaTool.form.behaviourName}>
               <Input value={b.name} onChange={(e) => {
                 const arr = [...data.behaviours]; arr[i] = { ...arr[i], name: e.target.value }; set("behaviours", arr);
               }} placeholder="e.g. Physical Aggression, Task Refusal, Verbal Outburst..." />
@@ -951,13 +934,13 @@ const FBAReportTool = () => {
               }} placeholder="Specific physical form: hitting with open hand toward others' face, throwing objects, screaming words at volume louder than conversation..." />
             </Field>
             <div className="grid sm:grid-cols-3 gap-3">
-              <Field label="Frequency"><Input value={b.frequency} onChange={(e) => {
+              <Field label={t.fbaTool.form.frequency}><Input value={b.frequency} onChange={(e) => {
                 const arr = [...data.behaviours]; arr[i] = { ...arr[i], frequency: e.target.value }; set("behaviours", arr);
               }} placeholder="e.g. 3–5 × per day" /></Field>
-              <Field label="Intensity"><Input value={b.intensity} onChange={(e) => {
+              <Field label={t.fbaTool.form.intensity}><Input value={b.intensity} onChange={(e) => {
                 const arr = [...data.behaviours]; arr[i] = { ...arr[i], intensity: e.target.value }; set("behaviours", arr);
               }} placeholder="Mild / Moderate / Severe" /></Field>
-              <Field label="Duration"><Input value={b.duration} onChange={(e) => {
+              <Field label={t.fbaTool.form.duration}><Input value={b.duration} onChange={(e) => {
                 const arr = [...data.behaviours]; arr[i] = { ...arr[i], duration: e.target.value }; set("behaviours", arr);
               }} placeholder="e.g. 5–20 min" /></Field>
             </div>
@@ -970,7 +953,7 @@ const FBAReportTool = () => {
         </Card>
       ))}
       <Button variant="outline" size="sm" className="gap-1.5" onClick={() => set("behaviours", [...data.behaviours, emptyBehaviour()])}>
-        <Plus size={14} /> Add Behaviour
+        <Plus size={14} /> {t.fbaTool.form.addBehaviour}
       </Button>
     </div>
   );
@@ -982,31 +965,31 @@ const FBAReportTool = () => {
         <strong>Goldiamond (1974):</strong> "The goal is not to ask about the problem but about where the client wants to go.
         The intervention is then designed to take the client there — using the very same contingencies that maintain the current pattern."
       </InfoBox>
-      <Field label="1. Stated Outcome" hint={`"Assuming we were successful, what would the outcome be for you?" — verbatim.`}>
+      <Field label={t.fbaTool.form.cq1} hint={`"Assuming we were successful, what would the outcome be for you?" — verbatim.`}>
         <Textarea rows={4} value={data.cq_statedOutcome} onChange={(e) => set("cq_statedOutcome", e.target.value)}
           placeholder={`e.g. "I wouldn't be sent out of class. I'd have friends. My teacher would like me."`} />
       </Field>
-      <Field label="2. Observed Outcome" hint={`"What would others observe when the outcome is achieved?"`}>
+      <Field label={t.fbaTool.form.cq2} hint={`"What would others observe when the outcome is achieved?"`}>
         <Textarea rows={4} value={data.cq_observedOutcome} onChange={(e) => set("cq_observedOutcome", e.target.value)}
           placeholder="Observable specifics: 'You would see him sitting at his desk, completing work, talking to peers at lunch...'" />
       </Field>
-      <Field label="3. Current State" hint={`"How does the present situation differ from what you'd like?"`}>
+      <Field label={t.fbaTool.form.cq3} hint={`"How does the present situation differ from what you'd like?"`}>
         <Textarea rows={3} value={data.cq_currentState} onChange={(e) => set("cq_currentState", e.target.value)}
           placeholder="What is happening now that should be different?" />
       </Field>
-      <Field label="4. History of the Pattern" hint="How was this pattern shaped? What events and contingencies led to it?">
+      <Field label={t.fbaTool.form.cq4} hint="How was this pattern shaped? What events and contingencies led to it?">
         <Textarea rows={4} value={data.cq_historyOfPattern} onChange={(e) => set("cq_historyOfPattern", e.target.value)}
           placeholder="What experiences shaped the current pattern? When did it begin? What maintained it over time?" />
       </Field>
-      <Field label="5. Conditions When Better" hint={`When is the problem less severe or absent? What is different about those times?`}>
+      <Field label={t.fbaTool.form.cq5} hint={`When is the problem less severe or absent? What is different about those times?`}>
         <Textarea rows={3} value={data.cq_conditionsWhenBetter} onChange={(e) => set("cq_conditionsWhenBetter", e.target.value)}
           placeholder="Settings, people, activities, or times when the challenging behaviour is reduced or absent..." />
       </Field>
-      <Field label="6. Related Successes" hint={`"What related problems have you tackled successfully before?"`}>
+      <Field label={t.fbaTool.form.cq6} hint={`"What related problems have you tackled successfully before?"`}>
         <Textarea rows={3} value={data.cq_whatHasWorked} onChange={(e) => set("cq_whatHasWorked", e.target.value)}
           placeholder="Past achievements and capacity for change. Interventions that had some success." />
       </Field>
-      <Field label="7. Natural Reinforcers for Progress" hint="What would naturally maintain movement toward goals? (No extraneous reinforcers needed.)">
+      <Field label={t.fbaTool.form.cq7} hint="What would naturally maintain movement toward goals? (No extraneous reinforcers needed.)">
         <Textarea rows={3} value={data.cq_naturalReinforcer} onChange={(e) => set("cq_naturalReinforcer", e.target.value)}
           placeholder="What does the client gain as they progress? What is already available in the environment?" />
       </Field>
@@ -1025,42 +1008,42 @@ const FBAReportTool = () => {
         a full functional analysis must account for how language interacts with contingencies.
         The Hexaflex provides a framework for assessing and targeting psychological flexibility processes.
       </InfoBox>
-      <Field label="Language & Relational Repertoire" hint="Candidate for ACT? Speaks about past/future? Perspective-taking? Metaphor? Empathy?">
+      <Field label={t.fbaTool.form.languageComplexity} hint="Candidate for ACT? Speaks about past/future? Perspective-taking? Metaphor? Empathy?">
         <Textarea rows={3} value={data.act_languageComplexity} onChange={(e) => set("act_languageComplexity", e.target.value)}
           placeholder="Language complexity: past/future references, empathy, metaphor, understanding jokes/irony..." />
       </Field>
       <div className="bg-slate-50 rounded-xl p-4 space-y-4 border border-slate-200">
         <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Hexaflex Processes</p>
-        <Field label="Present-Moment Awareness" hint="Contact with current experience vs. past/future preoccupation">
+        <Field label={t.fbaTool.form.presentMoment} hint="Contact with current experience vs. past/future preoccupation">
           <Textarea rows={2} value={data.act_presentMoment} onChange={(e) => set("act_presentMoment", e.target.value)}
             placeholder="Distractibility, attention quality, contact with present activity..." />
         </Field>
-        <Field label="Defusion (vs. Cognitive Fusion)" hint="Rigid entanglement with thoughts; repetitive formulations; arguing who is right">
+        <Field label={t.fbaTool.form.defusion} hint="Rigid entanglement with thoughts; repetitive formulations; arguing who is right">
           <Textarea rows={2} value={data.act_defusion} onChange={(e) => set("act_defusion", e.target.value)}
             placeholder="Observations of thought-action fusion, rigid rule-following, formulaic statements..." />
         </Field>
-        <Field label="Acceptance (vs. Experiential Avoidance)" hint="Willingness to experience discomfort; escape/avoidance patterns">
+        <Field label={t.fbaTool.form.acceptance} hint="Willingness to experience discomfort; escape/avoidance patterns">
           <Textarea rows={2} value={data.act_acceptance} onChange={(e) => set("act_acceptance", e.target.value)}
             placeholder="Low frustration tolerance, escape-maintained patterns, suppression attempts..." />
         </Field>
-        <Field label="Self-as-Context (vs. Self-as-Content)" hint="Conceptualised self; perspective-taking ability; flexibility of identity">
+        <Field label={t.fbaTool.form.selfAsContext} hint="Conceptualised self; perspective-taking ability; flexibility of identity">
           <Textarea rows={2} value={data.act_selfAsContext} onChange={(e) => set("act_selfAsContext", e.target.value)}
             placeholder="Rigid self-story, difficulty considering others' views, OR flexible empathy..." />
         </Field>
-        <Field label="Values" hint="What matters? Can they say why things are important? Heroes/guides? Actions beyond immediate reward?">
+        <Field label={t.fbaTool.form.values} hint="What matters? Can they say why things are important? Heroes/guides? Actions beyond immediate reward?">
           <Textarea rows={2} value={data.act_values} onChange={(e) => set("act_values", e.target.value)}
             placeholder="Values clarity, ability to articulate what matters, presence of long-term motivation..." />
         </Field>
-        <Field label="Committed Action (vs. Inaction / Impulsivity)" hint="Values-consistent behaviour patterns; goal-directed vs. avoidance-driven">
+        <Field label={t.fbaTool.form.committedAction} hint="Values-consistent behaviour patterns; goal-directed vs. avoidance-driven">
           <Textarea rows={2} value={data.act_committedAction} onChange={(e) => set("act_committedAction", e.target.value)}
             placeholder="Persistence, delayed gratification capacity, patterns of habits and goal-directed work..." />
         </Field>
       </div>
-      <Field label="Client's Stated Values and Interests">
+      <Field label={t.fbaTool.form.statedValues}>
         <Textarea rows={3} value={data.act_statedValues} onChange={(e) => set("act_statedValues", e.target.value)}
           placeholder="What the client says matters to them: fairness, respect, friendships, sports, family, autonomy..." />
       </Field>
-      <Field label="Preferred Reinforcers">
+      <Field label={t.fbaTool.form.reinforcers}>
         <Textarea rows={2} value={data.act_reinforcers} onChange={(e) => set("act_reinforcers", e.target.value)}
           placeholder="High-preference activities, items, and interactions..." />
       </Field>
@@ -1069,7 +1052,7 @@ const FBAReportTool = () => {
 
   const renderStep9 = () => (
     <div className="space-y-4">
-      <SectionTitle>Direct Observations</SectionTitle>
+      <SectionTitle>{t.fbaTool.steps.directObservations}</SectionTitle>
       {data.observations.map((o, i) => (
         <Card key={i} className="border-border/50">
           <CardContent className="pt-4 space-y-3">
@@ -1137,7 +1120,7 @@ const FBAReportTool = () => {
                 const arr = [...data.hypotheses]; arr[i] = { ...arr[i], behaviour: e.target.value }; set("hypotheses", arr);
               }} placeholder="Which target behaviour does this hypothesis address?" />
             </Field>
-            <Field label="Identified Function">
+            <Field label={t.fbaTool.form.identifiedFunction}>
               <Select value={h.function} onValueChange={(v) => {
                 const arr = [...data.hypotheses]; arr[i] = { ...arr[i], function: v }; set("hypotheses", arr);
               }}>
@@ -1152,7 +1135,7 @@ const FBAReportTool = () => {
                 const arr = [...data.hypotheses]; arr[i] = { ...arr[i], benefitsOfBehaviour: e.target.value }; set("hypotheses", arr);
               }} placeholder="e.g. Escape from demands; agency/control; access to preferred space; teacher attention..." />
             </Field>
-            <Field label="Costs of Alternatives" hint="What happens if the client does NOT engage in this behaviour? Why isn't a 'better' alternative already occurring?">
+            <Field label={t.fbaTool.form.costsOfAlternatives} hint="What happens if the client does NOT engage in this behaviour? Why isn't a 'better' alternative already occurring?">
               <Textarea rows={2} value={h.costsOfAlternatives} onChange={(e) => {
                 const arr = [...data.hypotheses]; arr[i] = { ...arr[i], costsOfAlternatives: e.target.value }; set("hypotheses", arr);
               }} placeholder="e.g. Complying results in overwhelming demands / social approach leads to rejection / asking for help results in shame..." />
@@ -1183,7 +1166,7 @@ const FBAReportTool = () => {
         <Textarea rows={14} value={data.recommendations} onChange={(e) => set("recommendations", e.target.value)}
           placeholder={`Structure around:\n• Environmental modifications (antecedent strategies)\n• Skill-building targets (systematic approximations)\n• Reinforcement strategies — natural reinforcers already maintaining current patterns\n• ACT components (values clarification, defusion, acceptance, committed action)\n• Staff/caregiver guidance\n• Monitoring and data collection plan\n• Review schedule`} />
       </Field>
-      <Field label="Additional Notes / Caveats">
+      <Field label={t.fbaTool.form.additionalNotes}>
         <Textarea rows={4} value={data.additionalNotes} onChange={(e) => set("additionalNotes", e.target.value)}
           placeholder="Limitations of assessment, areas needing further investigation, urgent concerns, follow-up actions..." />
       </Field>
@@ -1204,9 +1187,9 @@ const FBAReportTool = () => {
         <div className="container max-w-6xl flex items-center gap-3">
           <Link to="/admin" className="text-white/60 hover:text-white transition-colors"><ArrowLeft size={16} /></Link>
           <div>
-            <h1 className="text-white font-semibold text-sm tracking-wide">FBA Report Tool</h1>
+            <h1 className="text-white font-semibold text-sm tracking-wide">{t.fbaTool.ui.title}</h1>
             <p className="text-white/50 text-[11px]">
-              Constructional · Goldiamond (1974) · Nonlinear Contingency Analysis · ACT-Informed
+              {t.fbaTool.ui.subtitle}
             </p>
           </div>
           {data.clientName && (
@@ -1227,7 +1210,7 @@ const FBAReportTool = () => {
                 const complete = isStepComplete(s.id, data);
                 return (
                   <button key={s.id} onClick={() => setStep(s.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-200 text-[12px] font-medium
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-start transition-all duration-200 text-[12px] font-medium
                       ${active ? "bg-primary text-white shadow-sm" : "text-muted-foreground/80 hover:bg-white/60 hover:text-foreground"}`}>
                     <Icon size={13} className="shrink-0" />
                     <span className="truncate">{s.label}</span>
@@ -1265,11 +1248,11 @@ const FBAReportTool = () => {
 
             <div className="flex items-center justify-between mt-6 bg-white/50 backdrop-blur-md border border-neutral-200/60 p-3 rounded-xl shadow-sm">
               <Button variant="outline" onClick={prev} disabled={step === 1} className="gap-1.5 bg-white">
-                <ChevronLeft size={14} /> Back
+                <ChevronLeft size={14} /> {t.fbaTool.ui.back}
               </Button>
               <div className="flex flex-col items-center">
-                <span className="text-xs font-semibold">Step {step} of {STEPS.length}</span>
-                <span className="text-[10px] text-muted-foreground">{isStepComplete(step, data) ? "Section complete" : "Section incomplete"}</span>
+                <span className="text-xs font-semibold">{t.fbaTool.ui.step} {step} {t.fbaTool.ui.of} {STEPS.length}</span>
+                <span className="text-[10px] text-muted-foreground">{isStepComplete(step, data) ? t.fbaTool.ui.sectionComplete : t.fbaTool.ui.sectionIncomplete}</span>
               </div>
               <Button onClick={next} disabled={step === STEPS.length} className="gap-1.5">
                 Next <ChevronRight size={14} />
@@ -1284,18 +1267,18 @@ const FBAReportTool = () => {
               <div className="px-4 py-3 border-b bg-muted/20 flex items-center justify-between z-10 shrink-0">
                 <div className="flex items-center gap-2">
                   <Eye className="text-muted-foreground w-4 h-4" />
-                  <span className="text-xs font-semibold tracking-wide">Live Report Preview</span>
+                  <span className="text-xs font-semibold tracking-wide">{t.fbaTool.ui.livePreview}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" onClick={() => {
-                    if (window.confirm("Are you sure you want to clear your draft and start a new report?")) {
+                    if (window.confirm(t.fbaTool.ui.clearDraftConfirm)) {
                       setData(initialData); setStep(1);
                     }
                   }} className="h-7 px-2 text-[11px] text-muted-foreground hover:text-destructive">
-                    Clear Draft
+                    {t.fbaTool.ui.clearDraft}
                   </Button>
                   <Button size="sm" onClick={handlePrint} className="h-7 text-[11px] gap-1.5 shadow-sm">
-                    <Printer size={13} /> Export PDF
+                    <Printer size={13} /> {t.fbaTool.ui.exportPdf}
                   </Button>
                 </div>
               </div>
@@ -1303,7 +1286,13 @@ const FBAReportTool = () => {
               {/* Preview Content */}
               <div className="flex-1 bg-white relative overflow-hidden">
                 <iframe
-                  srcDoc={generateStyledHTML(data, assessor)}
+                  srcDoc={generateStyledHTML(
+                    data, 
+                    assessor, 
+                    t, 
+                    isRTL, 
+                    ASSESSMENT_METHODS.filter(m => data.methods[m.key]).map(m => t.fbaTool.form[m.key] || m.label)
+                  )}
                   className="w-full h-full border-0 absolute inset-0"
                   title="Live Preview"
                   sandbox="allow-same-origin"
