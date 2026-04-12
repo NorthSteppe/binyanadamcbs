@@ -7,14 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Send, CheckCircle2, Loader2, MessageCircle, Webhook } from "lucide-react";
+import { Send, CheckCircle2, Loader2, MessageCircle } from "lucide-react";
 
 const NotificationSettings = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [chatId, setChatId] = useState("");
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [registering, setRegistering] = useState(false);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -59,22 +58,6 @@ const NotificationSettings = () => {
     setConnected(false);
     setSaving(false);
     toast.success("Telegram disconnected");
-  };
-
-  const registerWebhook = async () => {
-    setRegistering(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("setup-telegram-webhook");
-      if (error) throw error;
-      if (data?.ok) {
-        toast.success(`Webhook registered! Bot commands are now active.`);
-      } else {
-        toast.error(`Registration failed: ${data?.description || "Unknown error"}`);
-      }
-    } catch (e: any) {
-      toast.error(e.message || "Failed to register webhook");
-    }
-    setRegistering(false);
   };
 
   const testNotification = async () => {
@@ -158,24 +141,6 @@ const NotificationSettings = () => {
           </div>
         )}
 
-        {isAdmin && (
-          <div className="pt-2 border-t border-border/50">
-            <p className="text-[11px] text-muted-foreground mb-2">
-              Admin: register the webhook so bot commands (/sessions, /tasks, etc.) work.
-              Do this once after any redeployment.
-            </p>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={registerWebhook}
-              disabled={registering}
-              className="gap-1.5 w-full"
-            >
-              {registering ? <Loader2 size={14} className="animate-spin" /> : <Webhook size={14} />}
-              {registering ? "Registering…" : "Register Bot Webhook"}
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
