@@ -103,16 +103,12 @@ const ProactiveAssistant = () => {
   // Derive first name
   const firstName = profile?.full_name?.split(" ")[0] || null;
 
-  // Fetch assistant config
+  // Fetch assistant config (public-safe fields only via RPC)
   const { data: config } = useQuery({
     queryKey: ["assistant-config"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("assistant_config")
-        .select("*")
-        .limit(1)
-        .maybeSingle();
-      return data;
+      const { data } = await supabase.rpc("get_public_assistant_config");
+      return data?.[0] ?? null;
     },
     staleTime: 60000,
   });
