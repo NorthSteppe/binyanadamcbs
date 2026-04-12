@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -14,92 +15,74 @@ import { Badge } from "@/components/ui/badge";
 import {
   ChevronLeft, ChevronRight, Plus, Trash2, Printer, ArrowLeft,
   User, ClipboardList, Heart, AlertTriangle, MessageSquare, Eye,
-  Lightbulb, FileText, CheckCircle2, Brain, Scale,
+  Lightbulb, FileText, CheckCircle2, Brain, Scale, Upload, Paperclip,
+  Loader2, Palette,
 } from "lucide-react";
 import { METAL_BG } from "@/components/portal/PortalShell";
+import { toast } from "sonner";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface Strength {
+interface SupportingDoc {
   title: string;
-  description: string;
+  professional: string;
+  docDate: string;
+  docType: string;
+  keyFindings: string;
+  fileUrl?: string;
+  fileName?: string;
 }
 
+interface Strength { title: string; description: string; }
 interface TargetBehaviour {
-  name: string;
-  topography: string;
-  frequency: string;
-  intensity: string;
-  duration: string;
-  context: string;
+  name: string; topography: string; frequency: string;
+  intensity: string; duration: string; context: string;
 }
-
 interface ObservationSession {
-  sessionNumber: number;
-  date: string;
-  setting: string;
-  participants: string;
-  purpose: string;
-  observations: string;
-  analysis: string;
+  sessionNumber: number; date: string; setting: string; participants: string;
+  purpose: string; observations: string; analysis: string;
+}
+interface BehaviourHypothesis {
+  behaviour: string; function: string;
+  benefitsOfBehaviour: string; costsOfAlternatives: string; hypothesis: string;
 }
 
-interface BehaviourHypothesis {
-  behaviour: string;
-  function: string;
-  benefitsOfBehaviour: string;   // Nonlinear: what maintaining this behaviour gives the person
-  costsOfAlternatives: string;   // Nonlinear: what happens if they DON'T do this behaviour
-  hypothesis: string;
+interface AssessorInfo {
+  name: string; role: string; credentials: string;
+  bio: string; avatar_url: string | null; signature_url: string | null;
+  social_website: string; social_linkedin: string;
 }
 
 interface FBAData {
-  // Step 1 – Client Info
-  clientName: string;
-  clientDOB: string;
-  diagnosis: string;
-  settingType: string;
-  settingName: string;
-  referralReason: string;
-  assessor: string;
-  assessmentDates: string;
-  // Step 2 – Assessment Methods
-  methods: Record<string, boolean>;
-  methodsOther: string;
-  // Step 3 – Background
-  background: string;
-  environment: string;
-  supportStaff: string;
-  // Step 4 – Strengths (current relevant repertoire assets)
+  clientName: string; clientDOB: string; diagnosis: string;
+  settingType: string; settingName: string; referralReason: string;
+  assessor: string; assessmentDates: string;
+  methods: Record<string, boolean>; methodsOther: string;
+  supportingDocs: SupportingDoc[];
+  background: string; environment: string; supportStaff: string;
   strengths: Strength[];
-  // Step 5 – Target Behaviours
   behaviours: TargetBehaviour[];
-  // Step 6 – Goldiamond's Constructional Questionnaire
-  cq_statedOutcome: string;        // 1. "What would the outcome be for you?"
-  cq_observedOutcome: string;      // 2. "What would others observe?"
-  cq_currentState: string;         // 3. "How does current differ from desired?"
-  cq_historyOfPattern: string;     // 4. History of how the pattern developed
-  cq_conditionsWhenBetter: string; // 5. When is the problem less severe or absent?
-  cq_whatHasWorked: string;        // 6. Related successes / what worked before
-  cq_naturalReinforcer: string;    // 7. What would maintain progress toward goals?
-  cq_subgoals: string;             // 8. Systematic approximations / stepping stones
-  // Step 7 – ACT Assessment (Hexaflex)
-  act_languageComplexity: string;  // Candidacy for ACT (language/relational repertoire)
-  act_presentMoment: string;       // Distractibility, contact with now vs. past/future
-  act_defusion: string;            // Cognitive fusion, rigid rule-following, repetitive formulations
-  act_acceptance: string;          // Experiential avoidance, escape/avoidance patterns
-  act_selfAsContext: string;       // Self-as-content, conceptualised self
-  act_values: string;              // Stated values, what matters, heroes/guides
-  act_committedAction: string;     // Patterns of values-based action / inaction/impulsivity
-  act_statedValues: string;        // Client's own values expressed
-  act_reinforcers: string;         // Preferred activities and items
-  // Step 8 – Direct Observations
+  cq_statedOutcome: string; cq_observedOutcome: string; cq_currentState: string;
+  cq_historyOfPattern: string; cq_conditionsWhenBetter: string;
+  cq_whatHasWorked: string; cq_naturalReinforcer: string; cq_subgoals: string;
+  act_languageComplexity: string; act_presentMoment: string; act_defusion: string;
+  act_acceptance: string; act_selfAsContext: string; act_values: string;
+  act_committedAction: string; act_statedValues: string; act_reinforcers: string;
   observations: ObservationSession[];
-  // Step 9 – Hypotheses (Nonlinear Contingency Analysis)
   hypotheses: BehaviourHypothesis[];
-  // Step 10 – Recommendations
-  recommendations: string;
-  additionalNotes: string;
+  recommendations: string; additionalNotes: string;
+  reportColor: string;
 }
+
+// ── Constants ──────────────────────────────────────────────────────────────────
+
+const DOC_TYPES = [
+  "Educational Psychology Report", "School EHCP / SEND Plan",
+  "SALT Report (Speech & Language)", "Occupational Therapy Report",
+  "Paediatric Assessment", "Previous Behaviour Assessment (FBA/BIP)",
+  "Medical / Psychiatric Report", "School Report / Teacher Notes",
+  "Parent Report", "Social Care Assessment", "ADOS / ADI-R Report", "Other",
+];
 
 const BEHAVIOUR_FUNCTIONS = [
   "Escape / Avoidance (Sr–)",
@@ -119,7 +102,7 @@ const ASSESSMENT_METHODS = [
   { key: "cpfq", label: "Child Psychological Flexibility Questionnaire (CPFQ)" },
   { key: "camm", label: "Child & Adolescent Mindfulness Measure (CAMM)" },
   { key: "peak", label: "PEAK Comprehensive Assessment (PCA – Dixon, 2019)" },
-  { key: "records_review", label: "Records Review (previous reports, assessments)" },
+  { key: "records_review", label: "Records Review (previous reports and assessments)" },
   { key: "parent_interview", label: "Parent / Caregiver Interview" },
   { key: "client_interview", label: "Client Interview" },
   { key: "staff_interview", label: "Staff / Teacher Interview" },
@@ -128,30 +111,36 @@ const ASSESSMENT_METHODS = [
   { key: "daily_events_log", label: "Daily Events Log" },
 ];
 
-const STEPS = [
-  { id: 1, label: "Client Info", icon: User },
-  { id: 2, label: "Methods", icon: ClipboardList },
-  { id: 3, label: "Background", icon: FileText },
-  { id: 4, label: "Strengths & Resources", icon: Heart },
-  { id: 5, label: "Target Behaviours", icon: AlertTriangle },
-  { id: 6, label: "Constructional Interview", icon: MessageSquare },
-  { id: 7, label: "ACT Assessment", icon: Brain },
-  { id: 8, label: "Direct Observations", icon: Eye },
-  { id: 9, label: "Nonlinear Analysis", icon: Scale },
-  { id: 10, label: "Recommendations", icon: Lightbulb },
-  { id: 11, label: "Report Preview", icon: Printer },
+const COLOUR_PRESETS = [
+  { name: "Navy", value: "#1a2744" },
+  { name: "Teal", value: "#0e7490" },
+  { name: "Forest", value: "#166534" },
+  { name: "Plum", value: "#581c87" },
+  { name: "Crimson", value: "#9f1239" },
+  { name: "Slate", value: "#334155" },
 ];
 
+const STEPS = [
+  { id: 1,  label: "Client Info",             icon: User },
+  { id: 2,  label: "Methods",                 icon: ClipboardList },
+  { id: 3,  label: "Supporting Documents",    icon: Paperclip },
+  { id: 4,  label: "Background",              icon: FileText },
+  { id: 5,  label: "Strengths & Resources",   icon: Heart },
+  { id: 6,  label: "Target Behaviours",       icon: AlertTriangle },
+  { id: 7,  label: "Constructional Interview",icon: MessageSquare },
+  { id: 8,  label: "ACT Assessment",          icon: Brain },
+  { id: 9,  label: "Direct Observations",     icon: Eye },
+  { id: 10, label: "Nonlinear Analysis",      icon: Scale },
+  { id: 11, label: "Recommendations",         icon: Lightbulb },
+  { id: 12, label: "Report Preview",          icon: Printer },
+];
+
+// ── Blank factories ────────────────────────────────────────────────────────────
+const emptyDoc = (): SupportingDoc => ({ title: "", professional: "", docDate: "", docType: "", keyFindings: "" });
 const emptyStrength = (): Strength => ({ title: "", description: "" });
-const emptyBehaviour = (): TargetBehaviour => ({
-  name: "", topography: "", frequency: "", intensity: "", duration: "", context: "",
-});
-const emptyObservation = (n: number): ObservationSession => ({
-  sessionNumber: n, date: "", setting: "", participants: "", purpose: "", observations: "", analysis: "",
-});
-const emptyHypothesis = (): BehaviourHypothesis => ({
-  behaviour: "", function: "", benefitsOfBehaviour: "", costsOfAlternatives: "", hypothesis: "",
-});
+const emptyBehaviour = (): TargetBehaviour => ({ name: "", topography: "", frequency: "", intensity: "", duration: "", context: "" });
+const emptyObs = (n: number): ObservationSession => ({ sessionNumber: n, date: "", setting: "", participants: "", purpose: "", observations: "", analysis: "" });
+const emptyHyp = (): BehaviourHypothesis => ({ behaviour: "", function: "", benefitsOfBehaviour: "", costsOfAlternatives: "", hypothesis: "" });
 
 const initialData: FBAData = {
   clientName: "", clientDOB: "", diagnosis: "", settingType: "School",
@@ -159,249 +148,420 @@ const initialData: FBAData = {
   assessmentDates: "",
   methods: Object.fromEntries(ASSESSMENT_METHODS.map((m) => [m.key, false])),
   methodsOther: "",
+  supportingDocs: [],
   background: "", environment: "", supportStaff: "",
   strengths: [emptyStrength()],
   behaviours: [emptyBehaviour()],
   cq_statedOutcome: "", cq_observedOutcome: "", cq_currentState: "",
-  cq_historyOfPattern: "", cq_conditionsWhenBetter: "", cq_whatHasWorked: "",
-  cq_naturalReinforcer: "", cq_subgoals: "",
+  cq_historyOfPattern: "", cq_conditionsWhenBetter: "",
+  cq_whatHasWorked: "", cq_naturalReinforcer: "", cq_subgoals: "",
   act_languageComplexity: "", act_presentMoment: "", act_defusion: "",
   act_acceptance: "", act_selfAsContext: "", act_values: "",
   act_committedAction: "", act_statedValues: "", act_reinforcers: "",
-  observations: [emptyObservation(1)],
-  hypotheses: [emptyHypothesis()],
+  observations: [emptyObs(1)],
+  hypotheses: [emptyHyp()],
   recommendations: "", additionalNotes: "",
+  reportColor: "#1a2744",
 };
 
-// ── Report Generator ───────────────────────────────────────────────────────────
+// ── Styled HTML report generator ───────────────────────────────────────────────
 
-function generateReport(d: FBAData): string {
+function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
+  const color = d.reportColor;
   const firstName = d.clientName.split(" ")[0] || d.clientName;
-  const enabledMethods = ASSESSMENT_METHODS
-    .filter((m) => d.methods[m.key]).map((m) => m.label);
+  const enabledMethods = ASSESSMENT_METHODS.filter((m) => d.methods[m.key]).map((m) => m.label);
   if (d.methodsOther) enabledMethods.push(d.methodsOther);
-
-  const strengthsText = d.strengths
-    .filter((s) => s.title.trim())
-    .map((s, i) => `${i + 1}. ${s.title}${s.description ? `\n   ${s.description}` : ""}`)
-    .join("\n\n");
-
-  const behavioursText = d.behaviours
-    .filter((b) => b.name.trim())
-    .map((b, i) => {
-      let text = `${i + 1}. ${b.name}`;
-      if (b.topography) text += `\n   Topography: ${b.topography}`;
-      if (b.frequency) text += `\n   Frequency: ${b.frequency}`;
-      if (b.intensity) text += `\n   Intensity: ${b.intensity}`;
-      if (b.duration) text += `\n   Duration: ${b.duration}`;
-      if (b.context) text += `\n   Antecedents/Context: ${b.context}`;
-      return text;
-    })
-    .join("\n\n");
-
-  const observationsText = d.observations
-    .filter((o) => o.date || o.observations)
-    .map((o) => {
-      let text = `Session ${o.sessionNumber}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}`;
-      if (o.setting) text += `\nSetting: ${o.setting}`;
-      if (o.participants) text += `\nParticipants: ${o.participants}`;
-      if (o.purpose) text += `\nPurpose: ${o.purpose}`;
-      if (o.observations) text += `\n\nObservations:\n${o.observations}`;
-      if (o.analysis) text += `\n\nAnalysis:\n${o.analysis}`;
-      return text;
-    })
-    .join("\n\n─────────────────────────────────────\n\n");
-
-  const hypothesesText = d.hypotheses
-    .filter((h) => h.behaviour.trim())
-    .map((h, i) => {
-      let text = `${i + 1}. Behaviour: ${h.behaviour}`;
-      if (h.function) text += `\n   Identified Function: ${h.function}`;
-      if (h.benefitsOfBehaviour) text += `\n   Benefits of the Current Pattern (what it provides): ${h.benefitsOfBehaviour}`;
-      if (h.costsOfAlternatives) text += `\n   Costs of Alternatives (what happens without the behaviour): ${h.costsOfAlternatives}`;
-      if (h.hypothesis) text += `\n   Hypothesis Statement: ${h.hypothesis}`;
-      return text;
-    })
-    .join("\n\n");
-
-  return `
-ASSESSMENT AND RECOMMENDATIONS REPORT
-ACT-Informed Constructional Functional Behaviour Assessment
-
-─────────────────────────────────────────────────────────────────────────────────
-
-CLIENT: ${d.clientName}
-Date of Birth: ${d.clientDOB || "—"}
-Diagnosis / Profile: ${d.diagnosis || "—"}
-Setting: ${d.settingType}${d.settingName ? ` — ${d.settingName}` : ""}
-Conducted by: ${d.assessor}
-Assessment Dates: ${d.assessmentDates || "—"}
-Report Date: ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-ASSESSMENT METHODS
-
-${enabledMethods.length ? enabledMethods.map((m) => `• ${m}`).join("\n") : "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-REASON FOR REFERRAL
-
-${d.referralReason || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-BACKGROUND
-
-This report presents the findings of a Functional Behaviour Assessment (FBA) conducted with ${d.clientName}${d.diagnosis ? `, who has a diagnosis of ${d.diagnosis}` : ""}. The assessment adopts a constructional approach, viewing ${firstName}'s behaviour as the competent outcome of available contingencies, rather than as a pathology to be eliminated (Goldiamond, 1974; Layng et al., 2022). Where relevant, an ACT-informed lens is applied to understand the role of language, relational responding, and psychological flexibility in maintaining current patterns and shaping future ones (Dixon et al., 2023).
-
-${d.background || "—"}
-
-Educational / Clinical Environment:
-${d.environment || "—"}
-
-Support Staff and Key People:
-${d.supportStaff || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-CURRENT RELEVANT REPERTOIRE — STRENGTHS AND RESOURCES
-
-The following strengths form the foundation upon which a constructional programme can be built. These are the existing repertoires and assets that ${firstName} can draw upon.
-
-${strengthsText || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-PRESENTING CONCERNS — TARGET BEHAVIOURS
-
-${behavioursText || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-CONSTRUCTIONAL INTERVIEW
-Goldiamond's Constructional Questionnaire (1974)
-
-Note: This interview is designed to obtain information for a constructional programme. It explores not what to eliminate, but what to establish. The goal is to understand where ${firstName} wants to go, where they are now, and what steps can be taken to get there.
-
-1. Stated Outcome
-   (What would the outcome be for you? What do you want?)
-${d.cq_statedOutcome || "—"}
-
-2. Observed Outcome
-   (What would others observe when a successful outcome has been achieved?)
-${d.cq_observedOutcome || "—"}
-
-3. Current State
-   (How does the present situation differ from the desired outcome?)
-${d.cq_currentState || "—"}
-
-4. History of the Pattern
-   (How has this pattern developed? What shaped and maintains it?)
-${d.cq_historyOfPattern || "—"}
-
-5. Conditions When Better
-   (When is the problem less severe or absent? What is different then?)
-${d.cq_conditionsWhenBetter || "—"}
-
-6. Related Successes
-   (What related problems has ${firstName} tackled successfully before? What has worked?)
-${d.cq_whatHasWorked || "—"}
-
-7. Natural Reinforcers for Progress
-   (What consequences would naturally maintain progress toward the terminal goals?)
-${d.cq_naturalReinforcer || "—"}
-
-8. Systematic Approximations — Subgoals
-   (Stepping stones from current state toward terminal outcomes)
-${d.cq_subgoals || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-ACT-INFORMED ASSESSMENT — PSYCHOLOGICAL FLEXIBILITY ANALYSIS
-
-Language and Relational Repertoire
-(Candidate for ACT? Does ${firstName} speak about past/future, take perspective of others?)
-${d.act_languageComplexity || "—"}
-
-Present-Moment Awareness
-(Contact with the here and now; distractibility; attention to current context)
-${d.act_presentMoment || "—"}
-
-Defusion (vs. Cognitive Fusion)
-(Entanglement with thoughts; rigid rule-following; formulaic responding; arguing about who is right)
-${d.act_defusion || "—"}
-
-Acceptance (vs. Experiential Avoidance)
-(Escape/avoidance of private events; suppression; attempts to control thoughts/feelings)
-${d.act_acceptance || "—"}
-
-Self-as-Context (vs. Self-as-Content)
-(Conceptualised self; rigidity about identity; perspective-taking ability)
-${d.act_selfAsContext || "—"}
-
-Values
-(What does ${firstName} care about? What would they want their life to be about?)
-${d.act_values || "—"}
-
-Committed Action (vs. Inaction or Impulsive Action)
-(Values-consistent action patterns; habits; goal-directed vs. avoidance-driven behaviour)
-${d.act_committedAction || "—"}
-
-Client's Stated Values and Areas of Importance:
-${d.act_statedValues || "—"}
-
-Preferred Reinforcers:
-${d.act_reinforcers || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-DIRECT OBSERVATIONS
-
-${observationsText || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-FUNCTIONAL AND NONLINEAR CONTINGENCY ANALYSIS
-
-The following hypotheses are informed by a nonlinear contingency analysis (Goldiamond, 1974; Layng et al., 2022), which considers not only the consequences of the presenting behaviour but also the consequences of alternatives — that is, what would happen if ${firstName} did NOT engage in the behaviour? This analysis typically reveals that the disturbing behaviour is a rational and competent outcome of the available contingencies.
-
-${hypothesesText || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-RECOMMENDATIONS
-
-The following recommendations are constructional in nature: they focus on establishing new repertoires that are aligned with ${firstName}'s stated values and terminal goals, rather than on eliminating or suppressing existing behaviours.
-
-${d.recommendations || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-ADDITIONAL NOTES
-
-${d.additionalNotes || "—"}
-
-─────────────────────────────────────────────────────────────────────────────────
-
-REFERENCES
-
-Dixon, M. R., Belisle, J., Stanley, C. R., & Rowsey, K. E. (2023). Promoting psychological flexibility with clients and in our field. In M. R. Dixon (Ed.), Acceptance and commitment therapy for behavior analysts.
-
-Goldiamond, I. (1974). Toward a constructional approach to social problems: Ethical and constitutional issues raised by applied behaviour analysis. Behaviourism, 2(1), 1–84.
-
-Hayes, S. C., Strosahl, K. D., & Wilson, K. G. (2012). Acceptance and commitment therapy: The process and practice of mindful change (2nd ed.). Guilford Press.
-
-Layng, T. V. J., Andronis, P. T., Codd, R. T., III, & Abdel-Jalil, A. (2022). Nonlinear contingency analysis: Going beyond cognition and behavior in clinical practice. Routledge.
-
-O'Neill, R. E., Albin, R. W., Storey, K., Horner, R. H., & Sprague, J. R. (2014). Functional assessment and program development. Cengage Learning.
-
-─────────────────────────────────────────────────────────────────────────────────
-
-Report prepared by: ${d.assessor}
-Date of Report: ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-`.trim();
+  const aName  = assessor?.name        || d.assessor;
+  const aRole  = assessor?.role        || "Behaviour Analyst";
+  const aCreds = assessor?.credentials || "";
+  const aSig   = assessor?.signature_url || null;
+  const aWeb   = assessor?.social_website || "bacbs.com";
+  const logoUrl = "https://bacbs.com/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png";
+
+  const sec = (title: string, content: string) =>
+    content.trim()
+      ? `<div class="section">
+          <div class="section-header">${title}</div>
+          <div class="section-content">${content.replace(/\n/g, "<br>")}</div>
+        </div>`
+      : "";
+
+  const subsec = (title: string, hint: string, content: string) =>
+    content.trim()
+      ? `<div class="subsection">
+          <div class="subsection-title">${title}</div>
+          ${hint ? `<div class="subsection-hint">${hint}</div>` : ""}
+          <div class="subsection-body">${content.replace(/\n/g, "<br>")}</div>
+        </div>`
+      : "";
+
+  const docsSection = d.supportingDocs.filter((doc) => doc.title.trim()).length > 0
+    ? `<div class="section">
+        <div class="section-header">DOCUMENTS REVIEWED — REPORTS FROM OTHER PROFESSIONALS</div>
+        <div class="section-content">
+          ${d.supportingDocs.filter((doc) => doc.title.trim()).map((doc, i) => `
+            <div class="doc-card">
+              <div class="doc-meta">
+                <strong>${i + 1}. ${doc.title}</strong>
+                ${doc.docType ? ` &mdash; <em>${doc.docType}</em>` : ""}
+                ${doc.professional ? ` &mdash; ${doc.professional}` : ""}
+                ${doc.docDate ? ` &mdash; ${new Date(doc.docDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}
+                ${doc.fileUrl ? ` <span class="doc-attached">[file attached]</span>` : ""}
+              </div>
+              ${doc.keyFindings ? `<div class="doc-findings">${doc.keyFindings.replace(/\n/g, "<br>")}</div>` : ""}
+            </div>`).join("")}
+        </div>
+      </div>`
+    : "";
+
+  const strengthsHtml = d.strengths.filter((s) => s.title.trim()).map((s, i) =>
+    `<div class="strength-item"><strong>${i + 1}. ${s.title}</strong>${s.description ? `<br><span style="color:#444;">${s.description.replace(/\n/g, "<br>")}</span>` : ""}</div>`
+  ).join("");
+
+  const behavioursHtml = d.behaviours.filter((b) => b.name.trim()).map((b, i) =>
+    `<div class="behaviour-card">
+      <strong>${i + 1}. ${b.name}</strong>
+      ${b.topography ? `<div><span class="field-label">Topography:</span> ${b.topography}</div>` : ""}
+      <div class="behaviour-grid">
+        ${b.frequency ? `<div><span class="field-label">Frequency:</span> ${b.frequency}</div>` : ""}
+        ${b.intensity ? `<div><span class="field-label">Intensity:</span> ${b.intensity}</div>` : ""}
+        ${b.duration  ? `<div><span class="field-label">Duration:</span> ${b.duration}</div>`  : ""}
+      </div>
+      ${b.context ? `<div><span class="field-label">Antecedents/Context:</span> ${b.context}</div>` : ""}
+    </div>`
+  ).join("");
+
+  const obsHtml = d.observations.filter((o) => o.date || o.observations).map((o) =>
+    `<div class="obs-card">
+      <div class="obs-header">Session ${o.sessionNumber}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>
+      ${o.setting      ? `<div><span class="field-label">Setting:</span> ${o.setting}</div>` : ""}
+      ${o.participants ? `<div><span class="field-label">Participants:</span> ${o.participants}</div>` : ""}
+      ${o.purpose      ? `<div><span class="field-label">Purpose:</span> ${o.purpose}</div>` : ""}
+      ${o.observations ? `<div class="obs-body"><span class="field-label">Observations:</span><br>${o.observations.replace(/\n/g, "<br>")}</div>` : ""}
+      ${o.analysis     ? `<div class="obs-body"><span class="field-label">Analysis:</span><br>${o.analysis.replace(/\n/g, "<br>")}</div>` : ""}
+    </div>`
+  ).join("");
+
+  const hypHtml = d.hypotheses.filter((h) => h.behaviour.trim()).map((h, i) =>
+    `<div class="hyp-card">
+      <strong>${i + 1}. ${h.behaviour}</strong>
+      ${h.function ? `<div><span class="field-label">Identified Function:</span> ${h.function}</div>` : ""}
+      ${h.benefitsOfBehaviour ? `<div><span class="field-label">Benefits of Current Pattern:</span> ${h.benefitsOfBehaviour}</div>` : ""}
+      ${h.costsOfAlternatives ? `<div><span class="field-label">Costs of Alternatives:</span> ${h.costsOfAlternatives}</div>` : ""}
+      ${h.hypothesis ? `<div class="obs-body"><span class="field-label">Hypothesis:</span><br>${h.hypothesis.replace(/\n/g, "<br>")}</div>` : ""}
+    </div>`
+  ).join("");
+
+  const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FBA Report — ${d.clientName}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', 'Times New Roman', serif; font-size: 11pt; color: #1a1a2e; background: white; }
+
+  /* ── HEADER ── */
+  .report-header {
+    background: ${color};
+    color: white;
+    padding: 22px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .report-header img.logo { height: 52px; object-fit: contain; filter: brightness(0) invert(1); }
+  .report-header-right { text-align: right; font-size: 9pt; line-height: 1.7; }
+  .report-header-right strong { font-size: 11pt; letter-spacing: 0.5px; }
+
+  /* ── TITLE BLOCK ── */
+  .title-block {
+    background: #f8faff;
+    border-top: 4px solid ${color};
+    padding: 20px 40px 18px;
+  }
+  .title-block h1 { font-size: 16pt; font-weight: bold; color: ${color}; margin-bottom: 2px; }
+  .title-block .subtitle { font-size: 9pt; color: #666; letter-spacing: 0.3px; margin-bottom: 14px; }
+  .client-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 24px; font-size: 10pt; }
+  .client-grid .field-label { font-weight: bold; color: ${color}; }
+  .confidential {
+    display: inline-block;
+    border: 1px solid ${color};
+    color: ${color};
+    font-size: 8pt;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-top: 12px;
+    text-transform: uppercase;
+  }
+
+  /* ── SECTIONS ── */
+  .section { margin: 0 40px 20px; }
+  .section-header {
+    background: ${color};
+    color: white;
+    padding: 6px 12px;
+    font-size: 9pt;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .section-content { font-size: 10.5pt; line-height: 1.75; }
+
+  /* ── SUBSECTIONS ── */
+  .subsection { margin-bottom: 16px; }
+  .subsection-title {
+    font-size: 10pt;
+    font-weight: bold;
+    color: ${color};
+    border-bottom: 1.5px solid ${color}33;
+    padding-bottom: 3px;
+    margin-bottom: 6px;
+  }
+  .subsection-hint { font-size: 9pt; color: #888; font-style: italic; margin-bottom: 5px; }
+  .subsection-body { font-size: 10.5pt; line-height: 1.75; }
+
+  /* ── DOCUMENT CARDS ── */
+  .doc-card { border-left: 3px solid ${color}; padding: 8px 12px; margin-bottom: 10px; background: #fafafa; border-radius: 0 4px 4px 0; }
+  .doc-meta { font-size: 10pt; margin-bottom: 4px; }
+  .doc-attached { color: ${color}; font-size: 9pt; }
+  .doc-findings { font-size: 10pt; color: #444; line-height: 1.6; }
+
+  /* ── STRENGTHS ── */
+  .strength-item { padding: 7px 0; border-bottom: 1px solid #eee; font-size: 10.5pt; line-height: 1.65; }
+  .strength-item:last-child { border-bottom: none; }
+
+  /* ── BEHAVIOURS ── */
+  .behaviour-card { border: 1px solid #ddd; border-radius: 4px; padding: 10px 14px; margin-bottom: 10px; font-size: 10pt; line-height: 1.6; }
+  .behaviour-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin: 5px 0; }
+
+  /* ── OBSERVATIONS ── */
+  .obs-card { border: 1px solid #ddd; border-radius: 4px; padding: 10px 14px; margin-bottom: 12px; font-size: 10pt; line-height: 1.65; }
+  .obs-header { font-weight: bold; color: ${color}; margin-bottom: 6px; font-size: 10.5pt; }
+  .obs-body { margin-top: 6px; }
+
+  /* ── HYPOTHESES ── */
+  .hyp-card { border-left: 4px solid ${color}; padding: 10px 14px; margin-bottom: 12px; font-size: 10pt; line-height: 1.65; background: #fafafa; }
+
+  /* ── SHARED ── */
+  .field-label { font-weight: bold; color: ${color}; }
+  .methods-list { columns: 2; column-gap: 20px; }
+  .methods-list li { font-size: 10pt; margin-bottom: 4px; break-inside: avoid; }
+
+  /* ── DIVIDER ── */
+  hr.section-rule { border: none; border-top: 1px solid #ddd; margin: 18px 40px; }
+
+  /* ── FOOTER ── */
+  .report-footer {
+    border-top: 2.5px solid ${color};
+    margin: 30px 40px 0;
+    padding: 18px 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 9.5pt;
+    gap: 20px;
+  }
+  .footer-assessor strong { font-size: 11pt; color: ${color}; }
+  .footer-assessor .creds { color: #555; font-style: italic; }
+  .footer-sig img { height: 50px; display: block; }
+  .footer-date { color: #888; font-size: 9pt; margin-top: 4px; }
+
+  /* ── REFERENCES ── */
+  .references { font-size: 9pt; line-height: 1.7; color: #555; }
+
+  /* ── PAGE BREAKS ── */
+  .page-break { page-break-before: always; }
+  .no-break { page-break-inside: avoid; }
+
+  @media print {
+    body { margin: 0; }
+    .section-header, .report-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .title-block { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════════════════ -->
+<div class="report-header">
+  <img class="logo" src="${logoUrl}" alt="Binyan Adam CBS" onerror="this.style.display='none'">
+  <div class="report-header-right">
+    <strong>BINYAN ADAM CBS</strong><br>
+    Constructional Behaviour Support<br>
+    ${aWeb ? aWeb : "bacbs.com"} &nbsp;·&nbsp; adamdayan@bacbs.com
+  </div>
+</div>
+
+<!-- ═══ TITLE BLOCK ══════════════════════════════════════════════════ -->
+<div class="title-block">
+  <h1>Assessment &amp; Recommendations Report</h1>
+  <div class="subtitle">ACT-Informed Constructional Functional Behaviour Assessment</div>
+  <div class="client-grid">
+    <div><span class="field-label">Client:</span> ${d.clientName || "—"}</div>
+    <div><span class="field-label">Date of Birth:</span> ${d.clientDOB ? new Date(d.clientDOB).toLocaleDateString("en-GB") : "—"}</div>
+    <div><span class="field-label">Diagnosis / Profile:</span> ${d.diagnosis || "—"}</div>
+    <div><span class="field-label">Setting:</span> ${d.settingType}${d.settingName ? " — " + d.settingName : ""}</div>
+    <div><span class="field-label">Assessed by:</span> ${aName}${aCreds ? ", " + aCreds : ""}</div>
+    <div><span class="field-label">Assessment Dates:</span> ${d.assessmentDates || "—"}</div>
+    <div><span class="field-label">Report Date:</span> ${today}</div>
+  </div>
+  <div class="confidential">Confidential &nbsp;|&nbsp; Clinical Document</div>
+</div>
+
+<!-- ═══ REFERRAL ════════════════════════════════════════════════════ -->
+${d.referralReason ? sec("REASON FOR REFERRAL", d.referralReason) : ""}
+
+<!-- ═══ METHODS ═════════════════════════════════════════════════════ -->
+${enabledMethods.length ? `<div class="section">
+  <div class="section-header">ASSESSMENT METHODS</div>
+  <ul class="methods-list">
+    ${enabledMethods.map((m) => `<li>${m}</li>`).join("")}
+  </ul>
+</div>` : ""}
+
+<!-- ═══ SUPPORTING DOCUMENTS ════════════════════════════════════════ -->
+${docsSection}
+
+<!-- ═══ BACKGROUND ══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">BACKGROUND</div>
+  <div class="section-content">
+    <p style="font-style:italic;color:#555;margin-bottom:10px;">
+      This assessment adopts a constructional approach, presenting ${firstName || "the client"} as a person
+      functioning competently given available contingencies — not as exhibiting pathology (Goldiamond, 1974; Layng et al., 2022).
+      Where relevant, an ACT-informed lens considers the role of language and psychological flexibility (Dixon et al., 2023).
+    </p>
+    ${d.background ? d.background.replace(/\n/g, "<br>") : "—"}
+    ${d.environment ? `<br><br><strong>Educational / Clinical Environment:</strong><br>${d.environment.replace(/\n/g, "<br>")}` : ""}
+    ${d.supportStaff ? `<br><br><strong>Support Staff and Key People:</strong><br>${d.supportStaff.replace(/\n/g, "<br>")}` : ""}
+  </div>
+</div>
+
+<!-- ═══ STRENGTHS ═══════════════════════════════════════════════════ -->
+<div class="section no-break">
+  <div class="section-header">CURRENT RELEVANT REPERTOIRE — STRENGTHS &amp; RESOURCES</div>
+  <div class="section-content">
+    ${strengthsHtml || "<em>—</em>"}
+  </div>
+</div>
+
+<!-- ═══ TARGET BEHAVIOURS ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">TARGET BEHAVIOURS</div>
+  <div class="section-content">
+    ${behavioursHtml || "<em>—</em>"}
+  </div>
+</div>
+
+<!-- ═══ CONSTRUCTIONAL INTERVIEW ════════════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">CONSTRUCTIONAL INTERVIEW — GOLDIAMOND'S QUESTIONNAIRE (1974)</div>
+  <div class="section-content">
+    <p style="font-style:italic;color:#555;margin-bottom:14px;">
+      Rather than asking about the problem, the constructional interview explores where the client wants to go,
+      and then designs a programme to take them there using the very contingencies maintaining the current pattern.
+    </p>
+    ${subsec("1. Stated Outcome", "What would the outcome be for you? (verbatim)", d.cq_statedOutcome)}
+    ${subsec("2. Observed Outcome", "What would others see when a successful outcome is achieved?", d.cq_observedOutcome)}
+    ${subsec("3. Current State", "How does the present situation differ from the desired outcome?", d.cq_currentState)}
+    ${subsec("4. History of the Pattern", "How was this pattern shaped? What maintains it?", d.cq_historyOfPattern)}
+    ${subsec("5. Conditions When Better", "When is the problem less severe or absent?", d.cq_conditionsWhenBetter)}
+    ${subsec("6. Related Successes", "What related challenges has the client succeeded in before?", d.cq_whatHasWorked)}
+    ${subsec("7. Natural Reinforcers for Progress", "What would naturally maintain movement toward goals?", d.cq_naturalReinforcer)}
+    ${subsec("8. Systematic Approximations (Subgoals)", "Stepping stones from current repertoire toward terminal outcomes", d.cq_subgoals)}
+  </div>
+</div>
+
+<!-- ═══ ACT ASSESSMENT ═══════════════════════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">ACT-INFORMED ASSESSMENT — PSYCHOLOGICAL FLEXIBILITY (HEXAFLEX)</div>
+  <div class="section-content">
+    <p style="font-style:italic;color:#555;margin-bottom:14px;">
+      Once a client demonstrates language about past/future events and perspective-taking, a comprehensive functional
+      analysis must account for how verbal behaviour interacts with contingencies (Dixon et al., 2023).
+    </p>
+    ${subsec("Language & Relational Repertoire", "Candidate for ACT?", d.act_languageComplexity)}
+    ${subsec("Present-Moment Awareness", "Contact with current experience vs. past/future preoccupation", d.act_presentMoment)}
+    ${subsec("Defusion (vs. Cognitive Fusion)", "Rigid entanglement with thoughts; rule-following without flexibility", d.act_defusion)}
+    ${subsec("Acceptance (vs. Experiential Avoidance)", "Escape from uncomfortable internal experiences", d.act_acceptance)}
+    ${subsec("Self-as-Context (vs. Self-as-Content)", "Rigid self-story; perspective-taking ability", d.act_selfAsContext)}
+    ${subsec("Values", "What matters to the client? What would they want their life to be about?", d.act_values)}
+    ${subsec("Committed Action (vs. Inaction / Impulsivity)", "Values-consistent action patterns", d.act_committedAction)}
+    ${subsec("Client's Stated Values and Interests", "", d.act_statedValues)}
+    ${subsec("Preferred Reinforcers", "", d.act_reinforcers)}
+  </div>
+</div>
+
+<!-- ═══ DIRECT OBSERVATIONS ══════════════════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">DIRECT OBSERVATIONS</div>
+  <div class="section-content">
+    ${obsHtml || "<em>—</em>"}
+  </div>
+</div>
+
+<!-- ═══ NONLINEAR ANALYSIS ═══════════════════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">FUNCTIONAL AND NONLINEAR CONTINGENCY ANALYSIS</div>
+  <div class="section-content">
+    <p style="font-style:italic;color:#555;margin-bottom:14px;">
+      A nonlinear analysis (Layng et al., 2022) considers not only the consequences of the presenting behaviour,
+      but also the consequences of <em>not</em> doing it — the costs of the alternatives.
+      This typically reveals that the behaviour is the rational, competent outcome of available contingencies.
+    </p>
+    ${hypHtml || "<em>—</em>"}
+  </div>
+</div>
+
+<!-- ═══ RECOMMENDATIONS ══════════════════════════════════════════════ -->
+${d.recommendations ? `<div class="section page-break">
+  <div class="section-header">RECOMMENDATIONS</div>
+  <div class="section-content">
+    <p style="font-style:italic;color:#555;margin-bottom:10px;">
+      The following recommendations are constructional: they focus on establishing new repertoires aligned with
+      ${firstName || "the client"}'s stated values and terminal goals.
+    </p>
+    ${d.recommendations.replace(/\n/g, "<br>")}
+  </div>
+</div>` : ""}
+
+<!-- ═══ ADDITIONAL NOTES ══════════════════════════════════════════════ -->
+${d.additionalNotes ? sec("ADDITIONAL NOTES / CAVEATS", d.additionalNotes) : ""}
+
+<!-- ═══ REFERENCES ═══════════════════════════════════════════════════ -->
+<div class="section no-break">
+  <div class="section-header">REFERENCES</div>
+  <div class="references">
+    Dixon, M. R., Belisle, J., Stanley, C. R., &amp; Rowsey, K. E. (2023). <em>Promoting psychological flexibility with clients and in our field.</em> In M. R. Dixon (Ed.), Acceptance and commitment therapy for behavior analysts.<br>
+    Goldiamond, I. (1974). Toward a constructional approach to social problems: Ethical and constitutional issues raised by applied behaviour analysis. <em>Behaviourism, 2</em>(1), 1–84.<br>
+    Hayes, S. C., Strosahl, K. D., &amp; Wilson, K. G. (2012). <em>Acceptance and commitment therapy: The process and practice of mindful change</em> (2nd ed.). Guilford Press.<br>
+    Layng, T. V. J., Andronis, P. T., Codd, R. T., III, &amp; Abdel-Jalil, A. (2022). <em>Nonlinear contingency analysis: Going beyond cognition and behavior in clinical practice.</em> Routledge.<br>
+    O'Neill, R. E., Albin, R. W., Storey, K., Horner, R. H., &amp; Sprague, J. R. (2014). <em>Functional assessment and program development.</em> Cengage Learning.
+  </div>
+</div>
+
+<hr class="section-rule">
+
+<!-- ═══ FOOTER ═══════════════════════════════════════════════════════ -->
+<div class="report-footer">
+  <div class="footer-assessor">
+    <strong>${aName}</strong><br>
+    ${aRole}${aCreds ? " · " + aCreds : ""}<br>
+    <span class="creds">adamdayan@bacbs.com &nbsp;·&nbsp; ${aWeb}</span><br>
+    <span class="footer-date">Report completed: ${today}</span>
+  </div>
+  ${aSig ? `<div class="footer-sig"><img src="${aSig}" alt="Signature" onerror="this.parentNode.innerHTML='&nbsp;'"></div>` : ""}
+</div>
+
+</body></html>`;
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
@@ -409,7 +569,20 @@ Date of Report: ${new Date().toLocaleDateString("en-GB", { day: "numeric", month
 const FBAReportTool = () => {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FBAData>(initialData);
-  const printRef = useRef<HTMLPreElement>(null);
+  const [assessor, setAssessor] = useState<AssessorInfo | null>(null);
+  const [uploading, setUploading] = useState<Record<number, boolean>>({});
+
+  // Fetch Adam Dayan's profile
+  useEffect(() => {
+    supabase
+      .from("team_members")
+      .select("name, role, credentials, bio, avatar_url, signature_url, social_website, social_linkedin")
+      .ilike("name", "%adam%dayan%")
+      .maybeSingle()
+      .then(({ data: tm }) => {
+        if (tm) setAssessor(tm as AssessorInfo);
+      });
+  }, []);
 
   const set = <K extends keyof FBAData>(key: K, value: FBAData[K]) =>
     setData((d) => ({ ...d, [key]: value }));
@@ -418,23 +591,32 @@ const FBAReportTool = () => {
   const prev = () => setStep((s) => Math.max(s - 1, 1));
 
   const handlePrint = () => {
-    const content = generateReport(data);
+    const html = generateStyledHTML(data, assessor);
     const w = window.open("", "_blank");
-    if (!w) return;
-    w.document.write(`<!DOCTYPE html><html><head><title>FBA Report – ${data.clientName}</title>
-      <style>
-        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.7;
-          max-width: 820px; margin: 40px auto; padding: 0 24px; color: #111; }
-        pre { white-space: pre-wrap; font-family: inherit; font-size: 12pt; }
-        @media print { body { margin: 20px; } }
-      </style></head><body><pre>${content
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      }</pre></body></html>`);
+    if (!w) { toast.error("Pop-up blocked — please allow pop-ups for this site."); return; }
+    w.document.write(html);
     w.document.close();
-    w.print();
+    setTimeout(() => w.print(), 800);
   };
 
-  // ── Step Renderers ─────────────────────────────────────────────────────────
+  const handleFileUpload = async (index: number, file: File) => {
+    setUploading((u) => ({ ...u, [index]: true }));
+    const path = `fba-reports/${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+    const { error } = await supabase.storage.from("client-documents").upload(path, file);
+    if (error) {
+      toast.error("Upload failed: " + error.message);
+      setUploading((u) => ({ ...u, [index]: false }));
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("client-documents").getPublicUrl(path);
+    const arr = [...data.supportingDocs];
+    arr[index] = { ...arr[index], fileUrl: urlData.publicUrl, fileName: file.name };
+    set("supportingDocs", arr);
+    setUploading((u) => ({ ...u, [index]: false }));
+    toast.success("Document uploaded");
+  };
+
+  // ── Step Renderers ─────────────────────────────────────────────────
 
   const renderStep1 = () => (
     <div className="space-y-4">
@@ -460,7 +642,7 @@ const FBAReportTool = () => {
           </Select>
         </Field>
         <Field label="Setting Name">
-          <Input value={data.settingName} onChange={(e) => set("settingName", e.target.value)} placeholder="e.g. Bury & Whitefield Jewish Primary School" />
+          <Input value={data.settingName} onChange={(e) => set("settingName", e.target.value)} placeholder="e.g. School name or clinic" />
         </Field>
         <Field label="Assessor">
           <Input value={data.assessor} onChange={(e) => set("assessor", e.target.value)} />
@@ -471,62 +653,157 @@ const FBAReportTool = () => {
       </div>
       <Field label="Reason for Referral">
         <Textarea rows={4} value={data.referralReason} onChange={(e) => set("referralReason", e.target.value)}
-          placeholder="Why was this assessment requested? What are the key concerns and who referred?" />
+          placeholder="Why was this assessment requested? Key concerns and who referred..." />
       </Field>
+      {/* Report colour */}
+      <div className="space-y-2 pt-2">
+        <Label className="text-xs font-medium flex items-center gap-1.5"><Palette size={13} /> Report Accent Colour</Label>
+        <div className="flex flex-wrap gap-2">
+          {COLOUR_PRESETS.map((c) => (
+            <button key={c.value} onClick={() => set("reportColor", c.value)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${data.reportColor === c.value ? "ring-2 ring-offset-1 ring-primary" : "border-border/50 hover:border-primary/50"}`}
+              style={{ background: c.value, color: "white" }}>
+              {c.name} {data.reportColor === c.value && "✓"}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
   const renderStep2 = () => (
     <div className="space-y-4">
       <SectionTitle>Assessment Methods Used</SectionTitle>
-      <p className="text-sm text-muted-foreground">Select all methods used in this assessment.</p>
       <div className="space-y-2">
         {ASSESSMENT_METHODS.map((m) => (
           <label key={m.key} className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
-            <Checkbox
-              checked={!!data.methods[m.key]}
-              onCheckedChange={(v) => set("methods", { ...data.methods, [m.key]: !!v })}
-            />
+            <Checkbox checked={!!data.methods[m.key]} onCheckedChange={(v) => set("methods", { ...data.methods, [m.key]: !!v })} />
             <span className="text-sm">{m.label}</span>
           </label>
         ))}
       </div>
       <Field label="Other (specify)">
-        <Input value={data.methodsOther} onChange={(e) => set("methodsOther", e.target.value)} placeholder="Any other methods not listed..." />
+        <Input value={data.methodsOther} onChange={(e) => set("methodsOther", e.target.value)} placeholder="Any other methods..." />
       </Field>
     </div>
   );
 
   const renderStep3 = () => (
     <div className="space-y-4">
-      <SectionTitle>Background</SectionTitle>
+      <SectionTitle>Supporting Documents from Other Professionals</SectionTitle>
       <InfoBox color="blue">
-        Present the client as a person functioning competently given their circumstances and available contingencies
-        (Goldiamond, 1974). Background informs the nonlinear analysis: understanding how the current pattern was shaped
-        helps explain why it is a sensible response to life's demands.
+        Add documents from other professionals (educational psychologists, SALT, OT, paediatricians, school, etc.)
+        that were reviewed as part of this assessment. Upload the file and/or summarise key findings to include in the report.
       </InfoBox>
-      <Field label="Personal & Family Background">
-        <Textarea rows={5} value={data.background} onChange={(e) => set("background", e.target.value)}
-          placeholder="Living situation, family composition, medical/developmental history, prior assessments or interventions, cultural/linguistic context, relevant life events..." />
-      </Field>
-      <Field label="Educational / Clinical Environment">
-        <Textarea rows={4} value={data.environment} onChange={(e) => set("environment", e.target.value)}
-          placeholder="Describe the setting: classroom structure, routines, sensory environment, available resources, learning supports..." />
-      </Field>
-      <Field label="Support Staff and Key People">
-        <Textarea rows={3} value={data.supportStaff} onChange={(e) => set("supportStaff", e.target.value)}
-          placeholder="LSAs, teachers, therapists, family members — include roles and duration of involvement..." />
-      </Field>
+
+      {data.supportingDocs.length === 0 && (
+        <p className="text-sm text-muted-foreground py-4 text-center">No documents added yet.</p>
+      )}
+
+      {data.supportingDocs.map((doc, i) => (
+        <Card key={i} className="border-border/50">
+          <CardContent className="pt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <Badge variant="outline" className="text-xs bg-sky-50 border-sky-200 text-sky-700">Document {i + 1}</Badge>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                onClick={() => set("supportingDocs", data.supportingDocs.filter((_, j) => j !== i))}>
+                <Trash2 size={14} />
+              </Button>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <Field label="Document Title">
+                <Input value={doc.title} onChange={(e) => {
+                  const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], title: e.target.value }; set("supportingDocs", arr);
+                }} placeholder="e.g. Educational Psychology Report — John Smith" />
+              </Field>
+              <Field label="Document Type">
+                <Select value={doc.docType} onValueChange={(v) => {
+                  const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], docType: v }; set("supportingDocs", arr);
+                }}>
+                  <SelectTrigger><SelectValue placeholder="Select type..." /></SelectTrigger>
+                  <SelectContent>
+                    {DOC_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Professional / Author">
+                <Input value={doc.professional} onChange={(e) => {
+                  const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], professional: e.target.value }; set("supportingDocs", arr);
+                }} placeholder="e.g. Dr. Sarah Jones, Educational Psychologist" />
+              </Field>
+              <Field label="Document Date">
+                <Input type="date" value={doc.docDate} onChange={(e) => {
+                  const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], docDate: e.target.value }; set("supportingDocs", arr);
+                }} />
+              </Field>
+            </div>
+            <Field label="Key Findings / Relevant Excerpts"
+              hint="Summarise or paste the key findings from this document that are relevant to this FBA">
+              <Textarea rows={4} value={doc.keyFindings} onChange={(e) => {
+                const arr = [...data.supportingDocs]; arr[i] = { ...arr[i], keyFindings: e.target.value }; set("supportingDocs", arr);
+              }} placeholder="Key findings, recommendations, diagnosis, scores, or relevant quotes from this document..." />
+            </Field>
+            {/* File upload */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Attach File (optional)</Label>
+              {doc.fileUrl ? (
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <CheckCircle2 size={14} />
+                  <span>{doc.fileName}</span>
+                  <button className="text-muted-foreground hover:text-destructive ml-1" onClick={() => {
+                    const arr = [...data.supportingDocs];
+                    arr[i] = { ...arr[i], fileUrl: undefined, fileName: undefined };
+                    set("supportingDocs", arr);
+                  }}><Trash2 size={12} /></button>
+                </div>
+              ) : (
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground border border-dashed border-border rounded-lg p-2.5 hover:bg-muted/30 transition-colors">
+                  {uploading[i] ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                  <span>{uploading[i] ? "Uploading..." : "Click to upload PDF, DOC, or image"}</span>
+                  <input type="file" className="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(i, f); }} />
+                </label>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+
+      <Button variant="outline" size="sm" className="gap-1.5"
+        onClick={() => set("supportingDocs", [...data.supportingDocs, emptyDoc()])}>
+        <Plus size={14} /> Add Document
+      </Button>
     </div>
   );
 
   const renderStep4 = () => (
     <div className="space-y-4">
+      <SectionTitle>Background</SectionTitle>
+      <InfoBox color="blue">
+        Present the client as a person functioning competently given their circumstances (Goldiamond, 1974).
+        Background informs the nonlinear analysis — how the current pattern was shaped reveals why it is a sensible response.
+      </InfoBox>
+      <Field label="Personal & Family Background">
+        <Textarea rows={5} value={data.background} onChange={(e) => set("background", e.target.value)}
+          placeholder="Living situation, family, medical/developmental history, prior assessments, cultural context..." />
+      </Field>
+      <Field label="Educational / Clinical Environment">
+        <Textarea rows={4} value={data.environment} onChange={(e) => set("environment", e.target.value)}
+          placeholder="Setting structure, routines, sensory environment, available resources, support in place..." />
+      </Field>
+      <Field label="Support Staff and Key People">
+        <Textarea rows={3} value={data.supportStaff} onChange={(e) => set("supportStaff", e.target.value)}
+          placeholder="LSAs, teachers, therapists, family — roles and duration of involvement..." />
+      </Field>
+    </div>
+  );
+
+  const renderStep5 = () => (
+    <div className="space-y-4">
       <SectionTitle>Current Relevant Repertoire — Strengths & Resources</SectionTitle>
       <InfoBox color="green">
-        The constructional approach begins here. Strengths are not just positives — they are the existing repertoires,
-        skills, and resources that a programme can be built upon. These are what make progress possible.
-        What does the client already bring to the table?
+        The constructional approach begins here. Strengths are the existing repertoires a programme builds upon.
+        These are what make progress possible — not just positives, but foundations.
       </InfoBox>
       {data.strengths.map((s, i) => (
         <Card key={i} className="border-border/50">
@@ -540,15 +817,15 @@ const FBAReportTool = () => {
                 </Button>
               )}
             </div>
-            <Field label="Strength / Resource Title">
+            <Field label="Title">
               <Input value={s.title} onChange={(e) => {
                 const arr = [...data.strengths]; arr[i] = { ...arr[i], title: e.target.value }; set("strengths", arr);
-              }} placeholder="e.g. Cognitive Foundations, Social Motivation, Creativity, Family Support..." />
+              }} placeholder="e.g. Cognitive Foundations, Social Motivation, Family Support..." />
             </Field>
             <Field label="Description">
               <Textarea rows={3} value={s.description} onChange={(e) => {
                 const arr = [...data.strengths]; arr[i] = { ...arr[i], description: e.target.value }; set("strengths", arr);
-              }} placeholder="Describe how this strength manifests and how it is relevant to the programme..." />
+              }} placeholder="How this strength manifests and its relevance to the programme..." />
             </Field>
           </CardContent>
         </Card>
@@ -559,12 +836,12 @@ const FBAReportTool = () => {
     </div>
   );
 
-  const renderStep5 = () => (
+  const renderStep6 = () => (
     <div className="space-y-4">
       <SectionTitle>Target Behaviours</SectionTitle>
       <InfoBox color="amber">
-        Define each behaviour operationally — its topography (what it looks like physically), not its assumed cause.
-        Be precise. Remember: the behaviour is a competent adaptation to existing contingencies, not a pathology.
+        Define each behaviour operationally — topography (what it looks like), not assumed cause.
+        The behaviour is a competent adaptation to existing contingencies, not a pathology.
       </InfoBox>
       {data.behaviours.map((b, i) => (
         <Card key={i} className="border-border/50">
@@ -581,34 +858,28 @@ const FBAReportTool = () => {
             <Field label="Behaviour Name">
               <Input value={b.name} onChange={(e) => {
                 const arr = [...data.behaviours]; arr[i] = { ...arr[i], name: e.target.value }; set("behaviours", arr);
-              }} placeholder="e.g. Physical Aggression, Task Refusal, Verbal Outburst, Elopement..." />
+              }} placeholder="e.g. Physical Aggression, Task Refusal, Verbal Outburst..." />
             </Field>
-            <Field label="Topography (what it looks like — not why)">
+            <Field label="Topography (what it looks like, not why)">
               <Textarea rows={2} value={b.topography} onChange={(e) => {
                 const arr = [...data.behaviours]; arr[i] = { ...arr[i], topography: e.target.value }; set("behaviours", arr);
-              }} placeholder="Specific physical form: hitting with open hand toward others' face, throwing objects less than 2 metres, screaming words at volume louder than conversation..." />
+              }} placeholder="Specific physical form: hitting with open hand toward others' face, throwing objects, screaming words at volume louder than conversation..." />
             </Field>
             <div className="grid sm:grid-cols-3 gap-3">
-              <Field label="Frequency">
-                <Input value={b.frequency} onChange={(e) => {
-                  const arr = [...data.behaviours]; arr[i] = { ...arr[i], frequency: e.target.value }; set("behaviours", arr);
-                }} placeholder="e.g. 3–5 × per day" />
-              </Field>
-              <Field label="Intensity">
-                <Input value={b.intensity} onChange={(e) => {
-                  const arr = [...data.behaviours]; arr[i] = { ...arr[i], intensity: e.target.value }; set("behaviours", arr);
-                }} placeholder="Mild / Moderate / Severe" />
-              </Field>
-              <Field label="Duration">
-                <Input value={b.duration} onChange={(e) => {
-                  const arr = [...data.behaviours]; arr[i] = { ...arr[i], duration: e.target.value }; set("behaviours", arr);
-                }} placeholder="e.g. 5–20 minutes" />
-              </Field>
+              <Field label="Frequency"><Input value={b.frequency} onChange={(e) => {
+                const arr = [...data.behaviours]; arr[i] = { ...arr[i], frequency: e.target.value }; set("behaviours", arr);
+              }} placeholder="e.g. 3–5 × per day" /></Field>
+              <Field label="Intensity"><Input value={b.intensity} onChange={(e) => {
+                const arr = [...data.behaviours]; arr[i] = { ...arr[i], intensity: e.target.value }; set("behaviours", arr);
+              }} placeholder="Mild / Moderate / Severe" /></Field>
+              <Field label="Duration"><Input value={b.duration} onChange={(e) => {
+                const arr = [...data.behaviours]; arr[i] = { ...arr[i], duration: e.target.value }; set("behaviours", arr);
+              }} placeholder="e.g. 5–20 min" /></Field>
             </div>
-            <Field label="Antecedents & Context (when/where does this occur?)">
+            <Field label="Antecedents & Context">
               <Textarea rows={2} value={b.context} onChange={(e) => {
                 const arr = [...data.behaviours]; arr[i] = { ...arr[i], context: e.target.value }; set("behaviours", arr);
-              }} placeholder="Setting events, immediate antecedents, who is present, what was happening beforehand..." />
+              }} placeholder="Setting events, immediate triggers, who is present, what was happening beforehand..." />
             </Field>
           </CardContent>
         </Card>
@@ -619,124 +890,101 @@ const FBAReportTool = () => {
     </div>
   );
 
-  const renderStep6 = () => (
+  const renderStep7 = () => (
     <div className="space-y-4">
       <SectionTitle>Constructional Interview — Goldiamond's Questionnaire</SectionTitle>
       <InfoBox color="blue">
         <strong>Goldiamond (1974):</strong> "The goal is not to ask about the problem but about where the client wants to go.
         The intervention is then designed to take the client there — using the very same contingencies that maintain the current pattern."
-        A typical interview takes 2–3 hours. Record the client's responses as closely to verbatim as possible.
       </InfoBox>
-
-      <Field label="1. Stated Outcome" hint={`"Assuming we were successful, what would the outcome be for you?" — Record verbatim.`}>
+      <Field label="1. Stated Outcome" hint={`"Assuming we were successful, what would the outcome be for you?" — verbatim.`}>
         <Textarea rows={4} value={data.cq_statedOutcome} onChange={(e) => set("cq_statedOutcome", e.target.value)}
-          placeholder={`e.g. "I wouldn't be sent out of class. I'd have friends. My teacher would like me. I could show everyone I'm smart."`} />
+          placeholder={`e.g. "I wouldn't be sent out of class. I'd have friends. My teacher would like me."`} />
       </Field>
-
-      <Field label="2. Observed Outcome" hint={`"What would others observe when a successful outcome has been achieved? What would they see you doing?"`}>
+      <Field label="2. Observed Outcome" hint={`"What would others observe when the outcome is achieved?"`}>
         <Textarea rows={4} value={data.cq_observedOutcome} onChange={(e) => set("cq_observedOutcome", e.target.value)}
-          placeholder="Observable, specific descriptions: 'You would see him sitting at his desk for 20 minutes, completing work, talking to peers at lunch, responding to instructions within 30 seconds...'" />
+          placeholder="Observable specifics: 'You would see him sitting at his desk, completing work, talking to peers at lunch...'" />
       </Field>
-
       <Field label="3. Current State" hint={`"How does the present situation differ from what you'd like?"`}>
-        <Textarea rows={4} value={data.cq_currentState} onChange={(e) => set("cq_currentState", e.target.value)}
-          placeholder="How is today different from the desired outcome? What is happening now that should be different?" />
+        <Textarea rows={3} value={data.cq_currentState} onChange={(e) => set("cq_currentState", e.target.value)}
+          placeholder="What is happening now that should be different?" />
       </Field>
-
-      <Field label="4. History of the Pattern" hint="How was this pattern shaped? What events and contingencies led to it developing? (Not to assign blame — to understand the ecology.)">
+      <Field label="4. History of the Pattern" hint="How was this pattern shaped? What events and contingencies led to it?">
         <Textarea rows={4} value={data.cq_historyOfPattern} onChange={(e) => set("cq_historyOfPattern", e.target.value)}
-          placeholder="What experiences, transitions, or changes shaped the current pattern? When did it begin? What maintained it over time?" />
+          placeholder="What experiences shaped the current pattern? When did it begin? What maintained it over time?" />
       </Field>
-
-      <Field label="5. Conditions When Better" hint={`"Are there situations when the problem is less severe or absent? What is different about those times?"`}>
+      <Field label="5. Conditions When Better" hint={`When is the problem less severe or absent? What is different about those times?`}>
         <Textarea rows={3} value={data.cq_conditionsWhenBetter} onChange={(e) => set("cq_conditionsWhenBetter", e.target.value)}
-          placeholder="Describe settings, people, activities, or times when the challenging behaviour is notably reduced or does not occur. What makes those conditions different?" />
+          placeholder="Settings, people, activities, or times when the challenging behaviour is reduced or absent..." />
       </Field>
-
-      <Field label="6. Related Successes" hint={`"What related problems have you tackled successfully? What change programmes have you succeeded in?"`}>
+      <Field label="6. Related Successes" hint={`"What related problems have you tackled successfully before?"`}>
         <Textarea rows={3} value={data.cq_whatHasWorked} onChange={(e) => set("cq_whatHasWorked", e.target.value)}
-          placeholder="Skills or challenges the client has overcome in the past. Any previous interventions that had some success. Evidence of capacity for change." />
+          placeholder="Past achievements and capacity for change. Interventions that had some success." />
       </Field>
-
-      <Field label="7. Natural Reinforcers for Progress" hint="What would naturally maintain the client's movement toward their goals? (No extraneous reinforcers needed — progress itself and existing reinforcers are enough.)">
+      <Field label="7. Natural Reinforcers for Progress" hint="What would naturally maintain movement toward goals? (No extraneous reinforcers needed.)">
         <Textarea rows={3} value={data.cq_naturalReinforcer} onChange={(e) => set("cq_naturalReinforcer", e.target.value)}
-          placeholder="What would the client naturally gain as they make progress? What consequences are already available in the environment that would sustain the new repertoire?" />
+          placeholder="What does the client gain as they progress? What is already available in the environment?" />
       </Field>
-
-      <Field label="8. Systematic Approximations — Subgoals" hint="Stepping stones from the current relevant repertoire toward the terminal outcomes. Small enough to ensure success.">
+      <Field label="8. Systematic Approximations — Subgoals" hint="Stepping stones from current repertoire toward terminal outcomes. Small enough to ensure early success.">
         <Textarea rows={4} value={data.cq_subgoals} onChange={(e) => set("cq_subgoals", e.target.value)}
-          placeholder="List incremental steps, in order of proximity to current repertoire. Each step should be achievable and move toward the terminal goal. Keep steps small enough to ensure early success." />
-      </Field>
-    </div>
-  );
-
-  const renderStep7 = () => (
-    <div className="space-y-4">
-      <SectionTitle>ACT-Informed Assessment — Psychological Flexibility</SectionTitle>
-      <InfoBox color="purple">
-        <strong>Dixon et al. (2023):</strong> Once a client communicates about past/future and takes others' perspectives,
-        a comprehensive functional analysis must account for how language interacts with contingencies.
-        The ACT Hexaflex provides a framework for assessing the role of verbal behaviour in maintaining current patterns
-        and building psychological flexibility.
-      </InfoBox>
-
-      <Field label="Language & Relational Repertoire" hint="Candidate for ACT? Does the client speak about past/future events? Do they take the perspective of others? Use metaphor, empathy?">
-        <Textarea rows={3} value={data.act_languageComplexity} onChange={(e) => set("act_languageComplexity", e.target.value)}
-          placeholder="Describe language complexity: Does the client refer to past events? Talk about the future? Show empathy or perspective-taking? Understand metaphor or jokes? This determines the appropriateness and depth of ACT-based intervention." />
-      </Field>
-
-      <div className="bg-slate-50 rounded-xl p-4 space-y-4 border border-slate-200">
-        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Hexaflex Assessment</p>
-
-        <Field label="Present-Moment Awareness" hint="Contact with current experience. Observation: Can the client attend to and describe what is happening now? Or is attention dominated by past/future concerns?">
-          <Textarea rows={2} value={data.act_presentMoment} onChange={(e) => set("act_presentMoment", e.target.value)}
-            placeholder="e.g. Frequently distracted by worries about later in the day / cannot describe what is happening in front of them / strong contact with present activity when interests are engaged..." />
-        </Field>
-
-        <Field label="Defusion (vs. Cognitive Fusion)" hint="Rigid entanglement with thoughts. Observation: Does the client act as if thoughts are literal truth? Argue persistently about being right? Repeat formulaic statements regardless of context?">
-          <Textarea rows={2} value={data.act_defusion} onChange={(e) => set("act_defusion", e.target.value)}
-            placeholder="e.g. Repeatedly states 'nobody likes me' and acts consistently with this rule regardless of evidence / new information does not change stated formulations / strong emotion when beliefs are challenged..." />
-        </Field>
-
-        <Field label="Acceptance (vs. Experiential Avoidance)" hint="Willingness to experience discomfort. Observation: Does the client flee from uncomfortable thoughts, feelings, or situations? Are escape/avoidance patterns prominent?">
-          <Textarea rows={2} value={data.act_acceptance} onChange={(e) => set("act_acceptance", e.target.value)}
-            placeholder="e.g. Refuses tasks when frustrated rather than persisting / leaves situation at first sign of discomfort / low frustration tolerance consistent with escape-maintained behaviour..." />
-        </Field>
-
-        <Field label="Self-as-Context (vs. Self-as-Content)" hint="Perspective-taking, flexible sense of self. Observation: Does the client have a rigid, inflexible self-story? Difficulty seeing situations from another's view?">
-          <Textarea rows={2} value={data.act_selfAsContext} onChange={(e) => set("act_selfAsContext", e.target.value)}
-            placeholder="e.g. Identifies strongly as 'the naughty one' and acts consistent with this / difficulty considering other perspectives / OR: shows flexible self-awareness and empathy..." />
-        </Field>
-
-        <Field label="Values" hint="What matters to the client? Observation: Can they say why things are important? Do they have heroes or guides? Do they act toward things beyond immediate reward?">
-          <Textarea rows={2} value={data.act_values} onChange={(e) => set("act_values", e.target.value)}
-            placeholder="e.g. Frequently references fairness and being respected / strong value placed on being seen as competent / family and relationships are stated as important / or: unable to articulate what matters beyond immediate preferences..." />
-        </Field>
-
-        <Field label="Committed Action (vs. Inaction / Impulsivity)" hint="Patterns of purposeful action. Observation: Does the client show values-consistent behaviour, or is action governed by immediate contingencies and avoidance?">
-          <Textarea rows={2} value={data.act_committedAction} onChange={(e) => set("act_committedAction", e.target.value)}
-            placeholder="e.g. Cannot persist with tasks that do not produce immediate reward / values stated but not acted upon / OR: shows capacity for delayed gratification and goal-directed work when motivated..." />
-        </Field>
-      </div>
-
-      <Field label="Client's Stated Values and Interests">
-        <Textarea rows={3} value={data.act_statedValues} onChange={(e) => set("act_statedValues", e.target.value)}
-          placeholder="Record directly what the client says matters to them: fairness, being respected, friendships, family, sports, creativity, being seen as clever, autonomy/control..." />
-      </Field>
-
-      <Field label="Preferred Reinforcers">
-        <Textarea rows={2} value={data.act_reinforcers} onChange={(e) => set("act_reinforcers", e.target.value)}
-          placeholder="Identify high-preference activities, items, and interactions that can serve as motivators in a constructional programme..." />
+          placeholder="List incremental steps in order of proximity to current repertoire..." />
       </Field>
     </div>
   );
 
   const renderStep8 = () => (
     <div className="space-y-4">
+      <SectionTitle>ACT-Informed Assessment — Psychological Flexibility</SectionTitle>
+      <InfoBox color="purple">
+        <strong>Dixon et al. (2023):</strong> Once a client communicates about past/future and takes others' perspectives,
+        a full functional analysis must account for how language interacts with contingencies.
+        The Hexaflex provides a framework for assessing and targeting psychological flexibility processes.
+      </InfoBox>
+      <Field label="Language & Relational Repertoire" hint="Candidate for ACT? Speaks about past/future? Perspective-taking? Metaphor? Empathy?">
+        <Textarea rows={3} value={data.act_languageComplexity} onChange={(e) => set("act_languageComplexity", e.target.value)}
+          placeholder="Language complexity: past/future references, empathy, metaphor, understanding jokes/irony..." />
+      </Field>
+      <div className="bg-slate-50 rounded-xl p-4 space-y-4 border border-slate-200">
+        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Hexaflex Processes</p>
+        <Field label="Present-Moment Awareness" hint="Contact with current experience vs. past/future preoccupation">
+          <Textarea rows={2} value={data.act_presentMoment} onChange={(e) => set("act_presentMoment", e.target.value)}
+            placeholder="Distractibility, attention quality, contact with present activity..." />
+        </Field>
+        <Field label="Defusion (vs. Cognitive Fusion)" hint="Rigid entanglement with thoughts; repetitive formulations; arguing who is right">
+          <Textarea rows={2} value={data.act_defusion} onChange={(e) => set("act_defusion", e.target.value)}
+            placeholder="Observations of thought-action fusion, rigid rule-following, formulaic statements..." />
+        </Field>
+        <Field label="Acceptance (vs. Experiential Avoidance)" hint="Willingness to experience discomfort; escape/avoidance patterns">
+          <Textarea rows={2} value={data.act_acceptance} onChange={(e) => set("act_acceptance", e.target.value)}
+            placeholder="Low frustration tolerance, escape-maintained patterns, suppression attempts..." />
+        </Field>
+        <Field label="Self-as-Context (vs. Self-as-Content)" hint="Conceptualised self; perspective-taking ability; flexibility of identity">
+          <Textarea rows={2} value={data.act_selfAsContext} onChange={(e) => set("act_selfAsContext", e.target.value)}
+            placeholder="Rigid self-story, difficulty considering others' views, OR flexible empathy..." />
+        </Field>
+        <Field label="Values" hint="What matters? Can they say why things are important? Heroes/guides? Actions beyond immediate reward?">
+          <Textarea rows={2} value={data.act_values} onChange={(e) => set("act_values", e.target.value)}
+            placeholder="Values clarity, ability to articulate what matters, presence of long-term motivation..." />
+        </Field>
+        <Field label="Committed Action (vs. Inaction / Impulsivity)" hint="Values-consistent behaviour patterns; goal-directed vs. avoidance-driven">
+          <Textarea rows={2} value={data.act_committedAction} onChange={(e) => set("act_committedAction", e.target.value)}
+            placeholder="Persistence, delayed gratification capacity, patterns of habits and goal-directed work..." />
+        </Field>
+      </div>
+      <Field label="Client's Stated Values and Interests">
+        <Textarea rows={3} value={data.act_statedValues} onChange={(e) => set("act_statedValues", e.target.value)}
+          placeholder="What the client says matters to them: fairness, respect, friendships, sports, family, autonomy..." />
+      </Field>
+      <Field label="Preferred Reinforcers">
+        <Textarea rows={2} value={data.act_reinforcers} onChange={(e) => set("act_reinforcers", e.target.value)}
+          placeholder="High-preference activities, items, and interactions..." />
+      </Field>
+    </div>
+  );
+
+  const renderStep9 = () => (
+    <div className="space-y-4">
       <SectionTitle>Direct Observations</SectionTitle>
-      <p className="text-sm text-muted-foreground">
-        Document each observation session. Record ABC data, setting events, staff interactions, and patterns across sessions.
-      </p>
       {data.observations.map((o, i) => (
         <Card key={i} className="border-border/50">
           <CardContent className="pt-4 space-y-3">
@@ -759,34 +1007,33 @@ const FBAReportTool = () => {
             </div>
             <Field label="Participants"><Input value={o.participants} onChange={(e) => {
               const arr = [...data.observations]; arr[i] = { ...arr[i], participants: e.target.value }; set("observations", arr);
-            }} placeholder="Client, LSA (name), class teacher, assessor..." /></Field>
-            <Field label="Purpose of this Session"><Textarea rows={2} value={o.purpose} onChange={(e) => {
+            }} placeholder="Client, LSA, teacher, assessor..." /></Field>
+            <Field label="Purpose"><Textarea rows={2} value={o.purpose} onChange={(e) => {
               const arr = [...data.observations]; arr[i] = { ...arr[i], purpose: e.target.value }; set("observations", arr);
-            }} placeholder="What were you specifically assessing in this session?" /></Field>
-            <Field label="Observations (ABC format where possible)"><Textarea rows={6} value={o.observations} onChange={(e) => {
+            }} placeholder="What were you specifically assessing?" /></Field>
+            <Field label="Observations (ABC format)"><Textarea rows={6} value={o.observations} onChange={(e) => {
               const arr = [...data.observations]; arr[i] = { ...arr[i], observations: e.target.value }; set("observations", arr);
-            }} placeholder="Describe chronologically. Include antecedents (A), behaviours (B), consequences (C). Record setting events, staff responses, duration, any positive behaviours or strengths observed..." /></Field>
-            <Field label="Analysis of Findings"><Textarea rows={3} value={o.analysis} onChange={(e) => {
+            }} placeholder="Chronological account. Include antecedents (A), behaviours (B), consequences (C), staff responses, strengths observed..." /></Field>
+            <Field label="Analysis"><Textarea rows={3} value={o.analysis} onChange={(e) => {
               const arr = [...data.observations]; arr[i] = { ...arr[i], analysis: e.target.value }; set("observations", arr);
-            }} placeholder="What patterns emerged? What did this observation add to the functional hypothesis? Were there moments that challenged or confirmed prior assumptions?" /></Field>
+            }} placeholder="What patterns emerged? What does this add to the functional hypothesis?" /></Field>
           </CardContent>
         </Card>
       ))}
       <Button variant="outline" size="sm" className="gap-1.5"
-        onClick={() => set("observations", [...data.observations, emptyObservation(data.observations.length + 1)])}>
+        onClick={() => set("observations", [...data.observations, emptyObs(data.observations.length + 1)])}>
         <Plus size={14} /> Add Session
       </Button>
     </div>
   );
 
-  const renderStep9 = () => (
+  const renderStep10 = () => (
     <div className="space-y-4">
-      <SectionTitle>Nonlinear Contingency Analysis — Functional Hypotheses</SectionTitle>
+      <SectionTitle>Nonlinear Contingency Analysis — Hypotheses</SectionTitle>
       <InfoBox color="amber">
-        <strong>Layng et al. (2022):</strong> A nonlinear analysis considers not just the consequences of the presenting behaviour,
-        but also the consequences of <em>not</em> doing it — what are the costs of the alternatives?
-        This typically reveals that the disturbing behaviour is the rational, competent outcome of available contingencies.
-        "While the costs are often the focus, there are real benefits, especially when measured against the alternatives."
+        <strong>Layng et al. (2022):</strong> Consider not just the consequences of the presenting behaviour,
+        but the consequences of NOT doing it. This reveals that the behaviour is the rational outcome of available contingencies —
+        "while the costs are often the focus, there are real benefits, especially measured against the alternatives."
       </InfoBox>
       {data.hypotheses.map((h, i) => (
         <Card key={i} className="border-border/50">
@@ -815,98 +1062,115 @@ const FBAReportTool = () => {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Benefits of the Current Pattern" hint="What does this behaviour provide? (Nonlinear lens: what would be lost if the behaviour disappeared?)">
+            <Field label="Benefits of the Current Pattern" hint="What does this behaviour provide? What would be lost if it disappeared?">
               <Textarea rows={2} value={h.benefitsOfBehaviour} onChange={(e) => {
                 const arr = [...data.hypotheses]; arr[i] = { ...arr[i], benefitsOfBehaviour: e.target.value }; set("hypotheses", arr);
-              }} placeholder="e.g. Escape from non-preferred demands; control over social environment; access to preferred space; sense of power and agency; teacher attention; avoiding feelings of failure..." />
+              }} placeholder="e.g. Escape from demands; agency/control; access to preferred space; teacher attention..." />
             </Field>
-            <Field label="Costs of Alternatives" hint="What happens if the client does NOT engage in this behaviour? Why isn't a 'better' alternative already happening?">
+            <Field label="Costs of Alternatives" hint="What happens if the client does NOT engage in this behaviour? Why isn't a 'better' alternative already occurring?">
               <Textarea rows={2} value={h.costsOfAlternatives} onChange={(e) => {
                 const arr = [...data.hypotheses]; arr[i] = { ...arr[i], costsOfAlternatives: e.target.value }; set("hypotheses", arr);
-              }} placeholder="e.g. Complying with demands results in overwhelming workload / social approach leads to rejection / asking for help results in shame / staying in class provides no access to preferred reinforcers..." />
+              }} placeholder="e.g. Complying results in overwhelming demands / social approach leads to rejection / asking for help results in shame..." />
             </Field>
-            <Field label="Full Hypothesis Statement">
+            <Field label="Hypothesis Statement">
               <Textarea rows={4} value={h.hypothesis} onChange={(e) => {
                 const arr = [...data.hypotheses]; arr[i] = { ...arr[i], hypothesis: e.target.value }; set("hypotheses", arr);
-              }} placeholder="e.g. When presented with non-preferred academic tasks (antecedent), [name] engages in task refusal (behaviour) maintained by escape from demands (function). The nonlinear analysis indicates this behaviour is the rational outcome: escape from demands provides immediate relief not available through any alternative currently in [name]'s repertoire..." />
+              }} placeholder="When [antecedent], [name] engages in [behaviour] maintained by [function]. The nonlinear analysis indicates this is the rational outcome because..." />
             </Field>
           </CardContent>
         </Card>
       ))}
-      <Button variant="outline" size="sm" className="gap-1.5" onClick={() => set("hypotheses", [...data.hypotheses, emptyHypothesis()])}>
+      <Button variant="outline" size="sm" className="gap-1.5" onClick={() => set("hypotheses", [...data.hypotheses, emptyHyp()])}>
         <Plus size={14} /> Add Hypothesis
       </Button>
     </div>
   );
 
-  const renderStep10 = () => (
+  const renderStep11 = () => (
     <div className="space-y-4">
       <SectionTitle>Recommendations</SectionTitle>
       <InfoBox color="green">
-        Recommendations are constructional: they establish new repertoires, not eliminate old ones.
-        Use the same reinforcers currently maintaining the challenging behaviour to build the alternative repertoire.
-        No extraneous reinforcers needed — progress toward the terminal goal IS the reinforcer (Goldiamond, 1974).
+        Constructional recommendations establish new repertoires — they do not eliminate old ones.
+        Use the same reinforcers maintaining the current pattern to build the alternative.
+        Progress toward the terminal goal IS the reinforcer (Goldiamond, 1974).
       </InfoBox>
-      <Field label="Constructional Programme Recommendations"
-        hint="Structure around: environmental modifications (antecedents); skill-building targets (approximations); reinforcement strategies; staff/family guidance; ACT components where indicated; monitoring plan.">
+      <Field label="Recommendations" hint="Environmental modifications; skill-building targets; reinforcement strategies; ACT components; staff guidance; monitoring plan.">
         <Textarea rows={14} value={data.recommendations} onChange={(e) => set("recommendations", e.target.value)}
-          placeholder={`Recommendations should address:\n\n• Environmental modifications (antecedent strategies — adjust setting events and immediate triggers)\n• Skill-building targets (systematic approximations toward terminal goals)\n• Reinforcement strategies — use natural reinforcers already maintaining current patterns\n• ACT-based components (values clarification, defusion, present-moment, acceptance, committed action — as applicable)\n• Staff/caregiver guidance — consistent responding, prompting style, relationship quality\n• Monitoring plan — how progress will be tracked and what data will be collected\n• Review schedule — when and how the programme will be reviewed and adjusted`} />
+          placeholder={`Structure around:\n• Environmental modifications (antecedent strategies)\n• Skill-building targets (systematic approximations)\n• Reinforcement strategies — natural reinforcers already maintaining current patterns\n• ACT components (values clarification, defusion, acceptance, committed action)\n• Staff/caregiver guidance\n• Monitoring and data collection plan\n• Review schedule`} />
       </Field>
       <Field label="Additional Notes / Caveats">
         <Textarea rows={4} value={data.additionalNotes} onChange={(e) => set("additionalNotes", e.target.value)}
-          placeholder="Limitations of this assessment, areas requiring further information, any urgent concerns, follow-up actions..." />
+          placeholder="Limitations of assessment, areas needing further investigation, urgent concerns, follow-up actions..." />
       </Field>
     </div>
   );
 
-  const renderStep11 = () => {
-    const report = generateReport(data);
-    return (
-      <div className="space-y-4">
-        <SectionTitle>Report Preview</SectionTitle>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button onClick={handlePrint} className="gap-2">
-            <Printer size={15} /> Print / Save as PDF
-          </Button>
-          <Button variant="outline" className="gap-2" onClick={() => navigator.clipboard?.writeText(report)}>
-            Copy Text
-          </Button>
+  const renderStep12 = () => (
+    <div className="space-y-4">
+      <SectionTitle>Report Preview & Export</SectionTitle>
+
+      {/* Assessor info display */}
+      {assessor && (
+        <div className="flex items-center gap-3 bg-muted/40 rounded-xl p-3 border border-border/50">
+          {assessor.avatar_url && <img src={assessor.avatar_url} className="w-10 h-10 rounded-full object-cover" alt={assessor.name} />}
+          <div>
+            <p className="text-sm font-semibold">{assessor.name}</p>
+            <p className="text-xs text-muted-foreground">{assessor.role}{assessor.credentials ? " · " + assessor.credentials : ""}</p>
+          </div>
+          <Badge variant="outline" className="ml-auto text-xs text-green-600 border-green-300">
+            <CheckCircle2 size={10} className="mr-1" /> Assessor loaded
+          </Badge>
         </div>
-        <div className="bg-white border border-border/50 rounded-xl p-6 shadow-sm max-h-[70vh] overflow-y-auto">
-          <pre ref={printRef} className="whitespace-pre-wrap font-serif text-sm leading-relaxed text-foreground">
-            {report}
-          </pre>
+      )}
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button onClick={handlePrint} className="gap-2">
+          <Printer size={15} /> Generate PDF Report
+        </Button>
+        <p className="text-xs text-muted-foreground">Opens in a new window — use your browser's Print → Save as PDF</p>
+      </div>
+
+      {/* Live preview */}
+      <div className="rounded-xl border border-border/50 overflow-hidden shadow-sm">
+        <div className="text-xs text-muted-foreground px-4 py-2 bg-muted/30 border-b flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
+          <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
+          <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+          <span className="ml-2">Report Preview (scrollable)</span>
+        </div>
+        <div className="bg-white max-h-[65vh] overflow-y-auto p-4">
+          <iframe
+            srcDoc={generateStyledHTML(data, assessor)}
+            className="w-full border-0"
+            style={{ minHeight: "600px" }}
+            title="Report Preview"
+          />
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
   const stepRenderers: Record<number, () => React.ReactNode> = {
-    1: renderStep1, 2: renderStep2, 3: renderStep3, 4: renderStep4, 5: renderStep5,
-    6: renderStep6, 7: renderStep7, 8: renderStep8, 9: renderStep9, 10: renderStep10,
-    11: renderStep11,
+    1: renderStep1, 2: renderStep2, 3: renderStep3, 4: renderStep4,
+    5: renderStep5, 6: renderStep6, 7: renderStep7, 8: renderStep8,
+    9: renderStep9, 10: renderStep10, 11: renderStep11, 12: renderStep12,
   };
 
   return (
     <div className="min-h-screen" style={METAL_BG}>
       <Header />
 
-      {/* Top bar */}
       <div className="bg-gradient-to-r from-slate-800 to-slate-700 border-b border-white/10 px-4 py-3">
         <div className="container max-w-6xl flex items-center gap-3">
-          <Link to="/admin" className="text-white/60 hover:text-white transition-colors">
-            <ArrowLeft size={16} />
-          </Link>
+          <Link to="/admin" className="text-white/60 hover:text-white transition-colors"><ArrowLeft size={16} /></Link>
           <div>
             <h1 className="text-white font-semibold text-sm tracking-wide">FBA Report Tool</h1>
             <p className="text-white/50 text-[11px]">
-              Constructional Approach (Goldiamond, 1974) · Nonlinear Contingency Analysis (Layng et al., 2022) · ACT-Informed
+              Constructional · Goldiamond (1974) · Nonlinear Contingency Analysis · ACT-Informed
             </p>
           </div>
           {data.clientName && (
-            <Badge className="ml-auto bg-white/10 text-white border-white/20 text-[11px]">
-              {data.clientName}
-            </Badge>
+            <Badge className="ml-auto bg-white/10 text-white border-white/20 text-[11px]">{data.clientName}</Badge>
           )}
         </div>
       </div>
@@ -934,9 +1198,8 @@ const FBAReportTool = () => {
             </div>
           </div>
 
-          {/* Main */}
+          {/* Main content */}
           <div className="flex-1 min-w-0">
-            {/* Mobile step indicator */}
             <div className="lg:hidden mb-4 flex items-center gap-1.5 overflow-x-auto pb-1">
               {STEPS.map((s) => (
                 <button key={s.id} onClick={() => setStep(s.id)}
@@ -947,12 +1210,7 @@ const FBAReportTool = () => {
               ))}
             </div>
 
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.25 }}
-            >
+            <motion.div key={step} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }}>
               <div className="bg-white/80 backdrop-blur-sm border border-black/[0.06] rounded-2xl p-6 shadow-sm">
                 {stepRenderers[step]?.()}
               </div>
@@ -966,27 +1224,22 @@ const FBAReportTool = () => {
               {step < STEPS.length ? (
                 <Button onClick={next} className="gap-1.5">Next <ChevronRight size={14} /></Button>
               ) : (
-                <Button onClick={handlePrint} className="gap-1.5"><Printer size={14} /> Print Report</Button>
+                <Button onClick={handlePrint} className="gap-1.5"><Printer size={14} /> Generate PDF</Button>
               )}
             </div>
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   );
 };
 
-// ── Small helpers ──────────────────────────────────────────────────────────────
-
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <h2 className="text-base font-semibold text-foreground mb-1">{children}</h2>
 );
-
-const Field = ({
-  label, hint, children, className,
-}: {
+const Field = ({ label, hint, children, className }: {
   label: string; hint?: string; children: React.ReactNode; className?: string;
 }) => (
   <div className={`space-y-1.5 ${className ?? ""}`}>
@@ -995,19 +1248,10 @@ const Field = ({
     {children}
   </div>
 );
-
-const InfoBox = ({ children, color }: { children: React.ReactNode; color: "blue" | "green" | "amber" | "purple" }) => {
-  const cls = {
-    blue: "bg-blue-50 border-blue-200 text-blue-700",
-    green: "bg-green-50 border-green-200 text-green-700",
-    amber: "bg-amber-50 border-amber-200 text-amber-700",
-    purple: "bg-purple-50 border-purple-200 text-purple-700",
-  }[color];
-  return (
-    <div className={`rounded-lg border p-3 text-xs leading-relaxed ${cls}`}>
-      {children}
-    </div>
-  );
+const InfoBox = ({ children, color }: { children: React.ReactNode; color: "blue"|"green"|"amber"|"purple" }) => {
+  const cls = { blue: "bg-blue-50 border-blue-200 text-blue-700", green: "bg-green-50 border-green-200 text-green-700",
+    amber: "bg-amber-50 border-amber-200 text-amber-700", purple: "bg-purple-50 border-purple-200 text-purple-700" }[color];
+  return <div className={`rounded-lg border p-3 text-xs leading-relaxed ${cls}`}>{children}</div>;
 };
 
 export default FBAReportTool;
