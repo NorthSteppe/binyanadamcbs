@@ -72,7 +72,22 @@ interface FBAData {
   hypotheses: BehaviourHypothesis[];
   recommendations: string; additionalNotes: string;
   reportColor: string;
+  themePreset: string;
+  fontFamily: string;
 }
+
+const REPORT_THEMES = [
+  { id: "clinical", label: "Clinical / Diagnostic", description: "Formal, sharp borders, elegant traditional spacing", primary: "#1a2744", secondary: "#f8faff", radius: "0px", accent: "#1a2744" },
+  { id: "educational", label: "Educational / School Consult", description: "Clean, bright blocks, highlighted lists", primary: "#0e7490", secondary: "#ecfeff", radius: "8px", accent: "#0891b2" },
+  { id: "community", label: "Community / Family", description: "Warm tones, softer radius, accessible", primary: "#9f1239", secondary: "#fff1f2", radius: "12px", accent: "#be123c" },
+];
+
+const REPORT_FONTS = [
+  { id: "georgia", label: "Georgia (Standard Clinical)", value: "'Georgia', 'Times New Roman', serif" },
+  { id: "helvetica", label: "Arial / Helvetica (Modern Clean)", value: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
+  { id: "garamond", label: "Garamond (Formal)", value: "'Garamond', 'Baskerville', serif" },
+  { id: "calibri", label: "Calibri / Roboto (Accessible)", value: "'Calibri', 'Roboto', sans-serif" },
+];
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -132,8 +147,24 @@ const STEPS = [
   { id: 9,  label: "Direct Observations",     icon: Eye },
   { id: 10, label: "Nonlinear Analysis",      icon: Scale },
   { id: 11, label: "Recommendations",         icon: Lightbulb },
-  { id: 12, label: "Report Preview",          icon: Printer },
 ];
+
+const isStepComplete = (stepId: number, data: FBAData): boolean => {
+  switch (stepId) {
+    case 1: return !!data.clientName && !!data.referralReason;
+    case 2: return Object.values(data.methods).some(Boolean) || !!data.methodsOther;
+    case 3: return true; // Optional docs
+    case 4: return !!data.background;
+    case 5: return data.strengths.some(s => !!s.title);
+    case 6: return data.behaviours.some(b => !!b.name);
+    case 7: return !!data.cq_statedOutcome;
+    case 8: return !!data.act_languageComplexity;
+    case 9: return true; // Ops are optional
+    case 10: return data.hypotheses.some(h => !!h.behaviour && !!h.hypothesis);
+    case 11: return !!data.recommendations;
+    default: return true;
+  }
+};
 
 // ── Blank factories ────────────────────────────────────────────────────────────
 const emptyDoc = (): SupportingDoc => ({ title: "", professional: "", docDate: "", docType: "", keyFindings: "" });
@@ -162,6 +193,8 @@ const initialData: FBAData = {
   hypotheses: [emptyHyp()],
   recommendations: "", additionalNotes: "",
   reportColor: "#1a2744",
+  themePreset: "clinical",
+  fontFamily: "georgia",
 };
 
 // ── Styled HTML report generator ───────────────────────────────────────────────
@@ -177,6 +210,12 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
   const aSig   = assessor?.signature_url || null;
   const aWeb   = assessor?.social_website || "bacbs.com";
   const logoUrl = window.location.origin + "/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png";
+  
+  const themeObj = REPORT_THEMES.find(t => t.id === d.themePreset) || REPORT_THEMES[0];
+  const fontObj = REPORT_FONTS.find(f => f.id === d.fontFamily) || REPORT_FONTS[0];
+  const color = themeObj.primary;
+  const bgSecondary = themeObj.secondary;
+  const radius = themeObj.radius;
 
   const sec = (title: string, content: string) =>
     content.trim()
@@ -261,7 +300,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
 <title>FBA Report — ${d.clientName}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Georgia', 'Times New Roman', serif; font-size: 11pt; color: #1a1a2e; background: white; }
+  body { font-family: ${fontObj.value}; font-size: 11pt; color: #1a1a2e; background: white; }
 
   /* ── HEADER ── */
   .report-header {
@@ -279,9 +318,11 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
 
   /* ── TITLE BLOCK ── */
   .title-block {
-    background: #f8faff;
+    background: ${bgSecondary};
     border-top: 4px solid ${color};
     padding: 20px 40px 18px;
+    border-radius: ${radius === '0px' ? '0' : `0 0 ${radius} ${radius}`};
+    margin-bottom: 24px;
   }
   .title-block h1 { font-size: 16pt; font-weight: bold; color: ${color}; margin-bottom: 2px; }
   .title-block .subtitle { font-size: 9pt; color: #666; letter-spacing: 0.3px; margin-bottom: 14px; }
@@ -310,6 +351,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
     letter-spacing: 0.8px;
     text-transform: uppercase;
     margin-bottom: 12px;
+    border-radius: ${radius === '0px' ? '0' : `${radius} ${radius} 0 0`};
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -329,7 +371,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
   .subsection-body { font-size: 10.5pt; line-height: 1.75; }
 
   /* ── DOCUMENT CARDS ── */
-  .doc-card { border-left: 3px solid ${color}; padding: 8px 12px; margin-bottom: 10px; background: #fafafa; border-radius: 0 4px 4px 0; }
+  .doc-card { border-left: 3px solid ${color}; padding: 8px 12px; margin-bottom: 10px; background: ${bgSecondary}; border-radius: 0 ${radius} ${radius} 0; }
   .doc-meta { font-size: 10pt; margin-bottom: 4px; }
   .doc-attached { color: ${color}; font-size: 9pt; }
   .doc-findings { font-size: 10pt; color: #444; line-height: 1.6; }
@@ -339,16 +381,16 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null): string {
   .strength-item:last-child { border-bottom: none; }
 
   /* ── BEHAVIOURS ── */
-  .behaviour-card { border: 1px solid #ddd; border-radius: 4px; padding: 10px 14px; margin-bottom: 10px; font-size: 10pt; line-height: 1.6; }
+  .behaviour-card { border: 1px solid #ddd; border-radius: ${radius === '0px' ? '4px' : radius}; padding: 10px 14px; margin-bottom: 10px; font-size: 10pt; line-height: 1.6; }
   .behaviour-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin: 5px 0; }
 
   /* ── OBSERVATIONS ── */
-  .obs-card { border: 1px solid #ddd; border-radius: 4px; padding: 10px 14px; margin-bottom: 12px; font-size: 10pt; line-height: 1.65; }
+  .obs-card { border: 1px solid #ddd; border-radius: ${radius === '0px' ? '4px' : radius}; padding: 10px 14px; margin-bottom: 12px; font-size: 10pt; line-height: 1.65; }
   .obs-header { font-weight: bold; color: ${color}; margin-bottom: 6px; font-size: 10.5pt; }
   .obs-body { margin-top: 6px; }
 
   /* ── HYPOTHESES ── */
-  .hyp-card { border-left: 4px solid ${color}; padding: 10px 14px; margin-bottom: 12px; font-size: 10pt; line-height: 1.65; background: #fafafa; }
+  .hyp-card { border-left: 4px solid ${color}; padding: 10px 14px; margin-bottom: 12px; font-size: 10pt; line-height: 1.65; background: ${bgSecondary}; border-radius: 0 ${radius} ${radius} 0; }
 
   /* ── SHARED ── */
   .field-label { font-weight: bold; color: ${color}; }
@@ -678,17 +720,37 @@ const FBAReportTool = () => {
         <Textarea rows={4} value={data.referralReason} onChange={(e) => set("referralReason", e.target.value)}
           placeholder="Why was this assessment requested? Key concerns and who referred..." />
       </Field>
-      {/* Report colour */}
-      <div className="space-y-2 pt-2">
-        <Label className="text-xs font-medium flex items-center gap-1.5"><Palette size={13} /> Report Accent Colour</Label>
-        <div className="flex flex-wrap gap-2">
-          {COLOUR_PRESETS.map((c) => (
-            <button key={c.value} onClick={() => set("reportColor", c.value)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${data.reportColor === c.value ? "ring-2 ring-offset-1 ring-primary" : "border-border/50 hover:border-primary/50"}`}
-              style={{ background: c.value, color: "white" }}>
-              {c.name} {data.reportColor === c.value && "✓"}
-            </button>
-          ))}
+      {/* Theme and Formatting */}
+      <div className="grid sm:grid-cols-2 gap-4 pt-2">
+        <div className="space-y-2">
+          <Label className="text-xs font-medium flex items-center gap-1.5"><Palette size={13} /> Report Theme</Label>
+          <div className="flex flex-col gap-2">
+            {REPORT_THEMES.map((t) => (
+              <button key={t.id} onClick={() => set("themePreset", t.id)}
+                className={`flex flex-col items-start px-3 py-2 rounded-lg text-xs font-medium border transition-all text-left ${data.themePreset === t.id ? "ring-2 ring-offset-1 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/50"}`}>
+                <div className="flex items-center gap-2 mb-1 w-full">
+                  <div className="w-3 h-3 rounded-full" style={{ background: t.primary }}></div>
+                  <span className="font-semibold text-[13px]">{t.label}</span>
+                  {data.themePreset === t.id && <CheckCircle2 size={13} className="ml-auto text-primary" />}
+                </div>
+                <span className="text-muted-foreground font-normal leading-snug">{t.description}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium flex items-center gap-1.5"><FileText size={13} /> Typography</Label>
+          <div className="flex flex-col gap-2">
+            {REPORT_FONTS.map((f) => (
+              <button key={f.id} onClick={() => set("fontFamily", f.id)}
+                className={`flex flex-col items-start px-3 py-2.5 rounded-lg text-xs font-medium border transition-all text-left ${data.fontFamily === f.id ? "ring-2 ring-offset-1 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/50"}`}>
+                <span className="font-semibold text-[13px] w-full flex items-center justify-between" style={{ fontFamily: f.value }}>
+                  {f.label}
+                  {data.fontFamily === f.id && <CheckCircle2 size={13} className="text-primary" />}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -1128,63 +1190,10 @@ const FBAReportTool = () => {
     </div>
   );
 
-  const renderStep12 = () => (
-    <div className="space-y-4">
-      <SectionTitle>Report Preview & Export</SectionTitle>
-
-      {/* Assessor info display */}
-      {assessor && (
-        <div className="flex items-center gap-3 bg-muted/40 rounded-xl p-3 border border-border/50">
-          {assessor.avatar_url && <img src={assessor.avatar_url} className="w-10 h-10 rounded-full object-cover" alt={assessor.name} />}
-          <div>
-            <p className="text-sm font-semibold">{assessor.name}</p>
-            <p className="text-xs text-muted-foreground">{assessor.role}{assessor.credentials ? " · " + assessor.credentials : ""}</p>
-          </div>
-          <Badge variant="outline" className="ml-auto text-xs text-green-600 border-green-300">
-            <CheckCircle2 size={10} className="mr-1" /> Assessor loaded
-          </Badge>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 flex-wrap">
-        <Button onClick={handlePrint} className="gap-2">
-          <Printer size={15} /> Generate PDF Report
-        </Button>
-        <Button variant="outline" onClick={() => {
-          if (window.confirm("Are you sure you want to clear your draft and start a new report?")) {
-            setData(initialData);
-            setStep(1);
-          }
-        }} className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive">
-          <Trash2 size={15} /> Clear Draft & Start New
-        </Button>
-        <p className="text-xs text-muted-foreground w-full sm:w-auto mt-2 sm:mt-0">Opens in a new window — use your browser's Print → Save as PDF</p>
-      </div>
-
-      {/* Live preview */}
-      <div className="rounded-xl border border-border/50 overflow-hidden shadow-sm">
-        <div className="text-xs text-muted-foreground px-4 py-2 bg-muted/30 border-b flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
-          <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
-          <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
-          <span className="ml-2">Report Preview (scrollable)</span>
-        </div>
-        <div className="bg-white max-h-[65vh] overflow-y-auto p-4">
-          <iframe
-            srcDoc={generateStyledHTML(data, assessor)}
-            className="w-full border-0"
-            style={{ minHeight: "600px" }}
-            title="Report Preview"
-          />
-        </div>
-      </div>
-    </div>
-  );
-
   const stepRenderers: Record<number, () => React.ReactNode> = {
     1: renderStep1, 2: renderStep2, 3: renderStep3, 4: renderStep4,
     5: renderStep5, 6: renderStep6, 7: renderStep7, 8: renderStep8,
-    9: renderStep9, 10: renderStep10, 11: renderStep11, 12: renderStep12,
+    9: renderStep9, 10: renderStep10, 11: renderStep11,
   };
 
   return (
@@ -1206,59 +1215,103 @@ const FBAReportTool = () => {
         </div>
       </div>
 
-      <div className="container max-w-6xl py-6">
-        <div className="flex gap-6">
+      <div className="container max-w-[1400px] py-6 px-4 md:px-6">
+        <div className="flex gap-6 h-full">
 
           {/* Sidebar */}
-          <div className="hidden lg:block w-52 shrink-0">
-            <div className="sticky top-6 space-y-1">
+          <div className="hidden xl:block w-56 shrink-0">
+            <div className="sticky top-24 space-y-1">
               {STEPS.map((s) => {
                 const Icon = s.icon;
                 const active = step === s.id;
-                const done = step > s.id;
+                const complete = isStepComplete(s.id, data);
                 return (
                   <button key={s.id} onClick={() => setStep(s.id)}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-200 text-[12px] font-medium
-                      ${active ? "bg-primary text-white shadow-sm" : done ? "text-muted-foreground hover:bg-white/60 hover:text-foreground" : "text-muted-foreground/60 hover:bg-white/40 hover:text-muted-foreground"}`}>
+                      ${active ? "bg-primary text-white shadow-sm" : "text-muted-foreground/80 hover:bg-white/60 hover:text-foreground"}`}>
                     <Icon size={13} className="shrink-0" />
                     <span className="truncate">{s.label}</span>
-                    {done && <CheckCircle2 size={11} className="ml-auto shrink-0 text-green-500" />}
+                    {complete ? (
+                      <CheckCircle2 size={13} className="ml-auto shrink-0 text-green-500" />
+                    ) : (
+                      <AlertTriangle size={13} className="ml-auto shrink-0 text-red-500" />
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Main content */}
-          <div className="flex-1 min-w-0">
-            <div className="lg:hidden mb-4 flex items-center gap-1.5 overflow-x-auto pb-1">
-              {STEPS.map((s) => (
-                <button key={s.id} onClick={() => setStep(s.id)}
-                  className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors
-                    ${step === s.id ? "bg-primary text-white" : step > s.id ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
-                  {s.id}
-                </button>
-              ))}
+          {/* Main content form */}
+          <div className="flex-1 min-w-0 max-w-2xl">
+            <div className="xl:hidden mb-4 flex items-center gap-1.5 overflow-x-auto pb-1">
+              {STEPS.map((s) => {
+                const complete = isStepComplete(s.id, data);
+                return (
+                  <button key={s.id} onClick={() => setStep(s.id)}
+                    className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors shadow-sm border
+                      ${step === s.id ? "bg-primary text-white border-primary" : complete ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"}`}>
+                    {s.id}
+                  </button>
+                );
+              })}
             </div>
 
-            <motion.div key={step} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }}>
-              <div className="bg-white/80 backdrop-blur-sm border border-black/[0.06] rounded-2xl p-6 shadow-sm">
+            <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+              <div className="bg-white/90 backdrop-blur-sm border border-black/[0.06] rounded-2xl p-6 shadow-sm">
                 {stepRenderers[step]?.()}
               </div>
             </motion.div>
 
-            <div className="flex items-center justify-between mt-4">
-              <Button variant="outline" onClick={prev} disabled={step === 1} className="gap-1.5">
+            <div className="flex items-center justify-between mt-6 bg-white/50 backdrop-blur-md border border-neutral-200/60 p-3 rounded-xl shadow-sm">
+              <Button variant="outline" onClick={prev} disabled={step === 1} className="gap-1.5 bg-white">
                 <ChevronLeft size={14} /> Back
               </Button>
-              <span className="text-xs text-muted-foreground">Step {step} of {STEPS.length}</span>
-              {step < STEPS.length ? (
-                <Button onClick={next} className="gap-1.5">Next <ChevronRight size={14} /></Button>
-              ) : (
-                <Button onClick={handlePrint} className="gap-1.5"><Printer size={14} /> Generate PDF</Button>
-              )}
+              <div className="flex flex-col items-center">
+                <span className="text-xs font-semibold">Step {step} of {STEPS.length}</span>
+                <span className="text-[10px] text-muted-foreground">{isStepComplete(step, data) ? "Section complete" : "Section incomplete"}</span>
+              </div>
+              <Button onClick={next} disabled={step === STEPS.length} className="gap-1.5">
+                Next <ChevronRight size={14} />
+              </Button>
             </div>
           </div>
+
+          {/* Persistent Live Preview */}
+          <div className="hidden lg:flex flex-col w-[480px] shrink-0 sticky top-24" style={{ height: "calc(100vh - 120px)" }}>
+            <div className="bg-white border text-sidebar-foreground rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col h-full overflow-hidden flex-1">
+              {/* Preview Header */}
+              <div className="px-4 py-3 border-b bg-muted/20 flex items-center justify-between z-10 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Eye className="text-muted-foreground w-4 h-4" />
+                  <span className="text-xs font-semibold tracking-wide">Live Report Preview</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" onClick={() => {
+                    if (window.confirm("Are you sure you want to clear your draft and start a new report?")) {
+                      setData(initialData); setStep(1);
+                    }
+                  }} className="h-7 px-2 text-[11px] text-muted-foreground hover:text-destructive">
+                    Clear Draft
+                  </Button>
+                  <Button size="sm" onClick={handlePrint} className="h-7 text-[11px] gap-1.5 shadow-sm">
+                    <Printer size={13} /> Export PDF
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Preview Content */}
+              <div className="flex-1 bg-white relative overflow-hidden">
+                <iframe
+                  srcDoc={generateStyledHTML(data, assessor)}
+                  className="w-full h-full border-0 absolute inset-0"
+                  title="Live Preview"
+                  sandbox="allow-same-origin"
+                />
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
       <Footer />
