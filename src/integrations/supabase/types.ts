@@ -1865,6 +1865,15 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_public_assistant_config: {
+        Args: never
+        Returns: {
+          auto_popup_delay_seconds: number
+          is_enabled: boolean
+          user_greeting: string
+          visitor_greeting: string
+        }[]
+      }
       get_safe_profiles: {
         Args: never
         Returns: {
