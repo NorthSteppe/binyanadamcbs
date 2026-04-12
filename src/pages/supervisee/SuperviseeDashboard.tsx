@@ -36,12 +36,11 @@ const SuperviseeDashboard = () => {
     if (!user) return;
     (async () => {
       try {
-        const [logsRes, docsRes, todosRes] = await Promise.all([
-          supabase.from("case_logs").select("id", { count: "exact" }).eq("supervisee_id", user.id),
-          supabase.from("supervisee_documents").select("id", { count: "exact" }).eq("supervisee_id", user.id),
+        const [logsRes, todosRes] = await Promise.all([
+          supabase.from("supervisee_case_logs").select("id", { count: "exact" }).eq("supervisee_id", user.id),
           supabase.from("client_todos").select("id", { count: "exact" }).eq("client_id", user.id).eq("is_completed", false),
         ]);
-        setStats({ caseLogs: logsRes.count || 0, documents: docsRes.count || 0, pendingTodos: todosRes.count || 0, loading: false });
+        setStats({ caseLogs: logsRes.count || 0, documents: 0, pendingTodos: todosRes.count || 0, loading: false });
       } catch { setStats(p => ({ ...p, loading: false })); }
     })();
   }, [user]);
