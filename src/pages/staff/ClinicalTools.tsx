@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { motion } from "framer-motion";
 import { ClipboardList, Activity, Target, Brain, BarChart3, FileText } from "lucide-react";
 import Header from "@/components/Header";
@@ -50,6 +51,57 @@ const tools = [
 ];
 
 const ClinicalTools = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).staffFunctional || {};
+  const staffT = (t as any).staffClinical || {};
+  const advT = (t as any).advancedModels || {};
+
+    const tools = [
+        {
+            label: staffT.abcTitle || "ABC Data Sheet",
+            path: "/staff/clinical/abc",
+            icon: ClipboardList,
+            description: staffT.abcDesc || "Record Antecedent–Behaviour–Consequence chains for functional analysis",
+            color: "bg-primary/10 text-primary",
+        },
+        {
+            label: portalT.title || "Functional Assessment",
+            path: "/staff/clinical/functional-assessment",
+            icon: Activity,
+            description: portalT.desc || "Comprehensive functional behaviour assessment with setting events & establishing operations",
+            color: "bg-secondary text-secondary-foreground",
+        },
+        {
+            label: advT.bullseyeTitle || "Values Bull's Eye",
+            path: "/staff/clinical/values-bullseye",
+            icon: Target,
+            description: advT.bullseyeDesc || "Rate values importance and consistency across life domains",
+            color: "bg-accent text-accent-foreground",
+        },
+        {
+            label: advT.hexaflexTitle || "Hexaflex Tracker",
+            path: "/staff/clinical/hexaflex",
+            icon: Brain,
+            description: advT.hexaflexDesc || "Track the six core ACT processes of psychological flexibility",
+            color: "bg-primary/10 text-primary",
+        },
+        {
+            label: staffT.logTitle || "Behaviour Tracking Log",
+            path: "/staff/clinical/behaviour-log",
+            icon: BarChart3,
+            description: staffT.logDesc || "Daily frequency, intensity, and context tracking for target behaviours",
+            color: "bg-secondary text-secondary-foreground",
+        },
+        {
+            label: staffT.caseTitle || "Case Formulation",
+            path: "/staff/clinical/case-formulation",
+            icon: FileText,
+            description: staffT.caseDesc || "Structured CBS case conceptualisation with functional analysis summary",
+            color: "bg-accent text-accent-foreground",
+        },
+    ];
+    
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -60,11 +112,9 @@ const ClinicalTools = () => {
               <div className="bg-primary/10 text-primary rounded-xl p-2.5">
                 <ClipboardList size={22} />
               </div>
-              <h1 className="text-2xl md:text-3xl font-serif text-foreground">Clinical Data Collection</h1>
+              <h1 className="text-2xl md:text-3xl font-serif text-foreground">{portalT.clinicalDataTitle || "Clinical Data Collection"}</h1>
             </div>
-            <p className="text-muted-foreground mb-10 ml-14 font-light">
-              Contextual Behaviour Science tools for assessment, tracking, and case formulation
-            </p>
+            <p className="text-muted-foreground mb-10 ms-14 font-light">{portalT.clinicalDataDesc || "Contextual Behaviour Science tools for assessment, tracking, and case formulation"}</p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 gap-4">

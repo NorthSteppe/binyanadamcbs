@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,10 @@ const defaultForm = {
 };
 
 const FunctionalAssessment = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).staffFunctional || {};
+  const staffT = (t as any).staffClinical || {};
+
   const { user } = useAuth();
   const [clientId, setClientId] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -40,8 +45,8 @@ const FunctionalAssessment = () => {
   const [notes, setNotes] = useState("");
 
   const handleSubmit = async () => {
-    if (!clientId || !user) return toast.error("Select a client first");
-    if (!form.target_behaviour) return toast.error("Enter target behaviour");
+    if (!clientId || !user) return toast.error(staffT.selectClientFirst || "Select a client first");
+    if (!form.target_behaviour) return toast.error(staffT.fillBehaviour || "Enter target behaviour");
     setSaving(true);
     const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
@@ -51,8 +56,8 @@ const FunctionalAssessment = () => {
       notes,
     });
     setSaving(false);
-    if (error) return toast.error("Failed to save");
-    toast.success("Assessment saved");
+    if (error) return toast.error(staffT.failedToSave || "Failed to save");
+    toast.success(portalT.assessmentSaved || "Assessment saved");
     setForm(defaultForm);
     setNotes("");
     setRefreshKey((k) => k + 1);
@@ -61,104 +66,104 @@ const FunctionalAssessment = () => {
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   return (
-    <ClinicalToolLayout title="Functional Assessment" description="Comprehensive functional behaviour analysis with CBS framework" icon={Activity}>
+    <ClinicalToolLayout title={portalT.title || "Functional Assessment"} description={portalT.desc || "Comprehensive functional behaviour analysis with CBS framework"} icon={Activity}>
       <Card className="border-border/50 mb-6">
         <CardContent className="pt-6 space-y-5">
           <div>
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Client</Label>
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{staffT.client || "Client"}</Label>
             <ClientSelector value={clientId} onChange={setClientId} />
           </div>
 
-          <div className="border-l-2 border-primary/30 pl-4 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Target Behaviour</h3>
+          <div className="border-s-2 border-primary/30 ps-4 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">{portalT.targetBehaviour || "Target Behaviour"}</h3>
             <div>
-              <Label className="text-xs text-muted-foreground">Behaviour Name</Label>
-              <Input value={form.target_behaviour} onChange={(e) => update("target_behaviour", e.target.value)} placeholder="e.g. Self-injurious behaviour" />
+              <Label className="text-xs text-muted-foreground">{portalT.behaviourName || "Behaviour Name"}</Label>
+              <Input value={form.target_behaviour} onChange={(e) => update("target_behaviour", e.target.value)} placeholder={portalT.behaviourPlaceholder || "e.g. Self-injurious behaviour"} />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Operational Definition</Label>
-              <Textarea value={form.operational_definition} onChange={(e) => update("operational_definition", e.target.value)} placeholder="Observable, measurable description..." />
+              <Label className="text-xs text-muted-foreground">{portalT.operationalDef || "Operational Definition"}</Label>
+              <Textarea value={form.operational_definition} onChange={(e) => update("operational_definition", e.target.value)} placeholder={portalT.opDefPlaceholder || "Observable, measurable description..."} />
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <Label className="text-xs text-muted-foreground">Frequency</Label>
-                <Input value={form.frequency} onChange={(e) => update("frequency", e.target.value)} placeholder="e.g. 3x/day" />
+                <Label className="text-xs text-muted-foreground">{portalT.frequency || "Frequency"}</Label>
+                <Input value={form.frequency} onChange={(e) => update("frequency", e.target.value)} placeholder={portalT.freqPlaceholder || "e.g. 3x/day"} />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Intensity</Label>
-                <Input value={form.intensity} onChange={(e) => update("intensity", e.target.value)} placeholder="Low/Med/High" />
+                <Label className="text-xs text-muted-foreground">{portalT.intensity || "Intensity"}</Label>
+                <Input value={form.intensity} onChange={(e) => update("intensity", e.target.value)} placeholder={portalT.intPlaceholder || "Low/Med/High"} />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Duration</Label>
-                <Input value={form.duration} onChange={(e) => update("duration", e.target.value)} placeholder="e.g. 5 minutes" />
+                <Label className="text-xs text-muted-foreground">{portalT.duration || "Duration"}</Label>
+                <Input value={form.duration} onChange={(e) => update("duration", e.target.value)} placeholder={portalT.durPlaceholder || "e.g. 5 minutes"} />
               </div>
             </div>
           </div>
 
-          <div className="border-l-2 border-secondary/50 pl-4 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Antecedent Variables</h3>
+          <div className="border-s-2 border-secondary/50 ps-4 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">{portalT.antecedents || "Antecedent Variables"}</h3>
             <div>
-              <Label className="text-xs text-muted-foreground">Setting Events (Distant)</Label>
-              <Textarea value={form.setting_events} onChange={(e) => update("setting_events", e.target.value)} placeholder="e.g. Poor sleep, missed medication, family conflict..." />
+              <Label className="text-xs text-muted-foreground">{portalT.settingEvents || "Setting Events (Distant)"}</Label>
+              <Textarea value={form.setting_events} onChange={(e) => update("setting_events", e.target.value)} placeholder={portalT.settingEventsPlaceholder || "e.g. Poor sleep, missed medication, family conflict..."} />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Establishing Operations (Motivational)</Label>
-              <Textarea value={form.establishing_operations} onChange={(e) => update("establishing_operations", e.target.value)} placeholder="e.g. Hunger, social deprivation, task satiation..." />
+              <Label className="text-xs text-muted-foreground">{portalT.establishingOps || "Establishing Operations (Motivational)"}</Label>
+              <Textarea value={form.establishing_operations} onChange={(e) => update("establishing_operations", e.target.value)} placeholder={portalT.estOpsPlaceholder || "e.g. Hunger, social deprivation, task satiation..."} />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Discriminative Stimuli (Immediate)</Label>
-              <Textarea value={form.discriminative_stimuli} onChange={(e) => update("discriminative_stimuli", e.target.value)} placeholder="e.g. Demand placed, attention withdrawn, transition signal..." />
-            </div>
-          </div>
-
-          <div className="border-l-2 border-accent/50 pl-4 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Consequence Analysis</h3>
-            <div>
-              <Label className="text-xs text-muted-foreground">SR+ (Positive Reinforcement — something added)</Label>
-              <Textarea value={form.consequences_sr_plus} onChange={(e) => update("consequences_sr_plus", e.target.value)} placeholder="e.g. Attention from staff, access to preferred item..." />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">SR− (Negative Reinforcement — something removed)</Label>
-              <Textarea value={form.consequences_sr_minus} onChange={(e) => update("consequences_sr_minus", e.target.value)} placeholder="e.g. Escape from task demand, removal of aversive noise..." />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">SP+ (Positive Punishment — something added)</Label>
-              <Textarea value={form.consequences_sp_plus} onChange={(e) => update("consequences_sp_plus", e.target.value)} placeholder="e.g. Verbal reprimand, physical block..." />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">SP− (Negative Punishment — something removed)</Label>
-              <Textarea value={form.consequences_sp_minus} onChange={(e) => update("consequences_sp_minus", e.target.value)} placeholder="e.g. Loss of privileges, time-out from reinforcement..." />
+              <Label className="text-xs text-muted-foreground">{portalT.discrimStimuli || "Discriminative Stimuli (Immediate)"}</Label>
+              <Textarea value={form.discriminative_stimuli} onChange={(e) => update("discriminative_stimuli", e.target.value)} placeholder={portalT.discrimStimuliPlaceholder || "e.g. Demand placed, attention withdrawn, transition signal..."} />
             </div>
           </div>
 
-          <div className="border-l-2 border-primary/30 pl-4 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Formulation</h3>
+          <div className="border-s-2 border-accent/50 ps-4 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">{portalT.consequences || "Consequence Analysis"}</h3>
             <div>
-              <Label className="text-xs text-muted-foreground">Hypothesised Function</Label>
-              <Textarea value={form.hypothesised_function} onChange={(e) => update("hypothesised_function", e.target.value)} placeholder="Based on the analysis, the behaviour appears to serve..." />
+              <Label className="text-xs text-muted-foreground">{portalT.srPlus || "SR+ (Positive Reinforcement — something added)"}</Label>
+              <Textarea value={form.consequences_sr_plus} onChange={(e) => update("consequences_sr_plus", e.target.value)} placeholder={portalT.srPlusPlaceholder || "e.g. Attention from staff, access to preferred item..."} />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Replacement Behaviour</Label>
-              <Textarea value={form.replacement_behaviour} onChange={(e) => update("replacement_behaviour", e.target.value)} placeholder="Functionally equivalent alternative behaviour..." />
+              <Label className="text-xs text-muted-foreground">{portalT.srMinus || "SR− (Negative Reinforcement — something removed)"}</Label>
+              <Textarea value={form.consequences_sr_minus} onChange={(e) => update("consequences_sr_minus", e.target.value)} placeholder={portalT.srMinusPlaceholder || "e.g. Escape from task demand, removal of aversive noise..."} />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">{portalT.spPlus || "SP+ (Positive Punishment — something added)"}</Label>
+              <Textarea value={form.consequences_sp_plus} onChange={(e) => update("consequences_sp_plus", e.target.value)} placeholder={portalT.spPlusPlaceholder || "e.g. Verbal reprimand, physical block..."} />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">{portalT.spMinus || "SP− (Negative Punishment — something removed)"}</Label>
+              <Textarea value={form.consequences_sp_minus} onChange={(e) => update("consequences_sp_minus", e.target.value)} placeholder={portalT.spMinusPlaceholder || "e.g. Loss of privileges, time-out from reinforcement..."} />
+            </div>
+          </div>
+
+          <div className="border-s-2 border-primary/30 ps-4 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">{portalT.formulation || "Formulation"}</h3>
+            <div>
+              <Label className="text-xs text-muted-foreground">{portalT.hypothesisedFunc || "Hypothesised Function"}</Label>
+              <Textarea value={form.hypothesised_function} onChange={(e) => update("hypothesised_function", e.target.value)} placeholder={portalT.hypothesisedFuncPlaceholder || "Based on the analysis, the behaviour appears to serve..."} />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">{portalT.replacementBeh || "Replacement Behaviour"}</Label>
+              <Textarea value={form.replacement_behaviour} onChange={(e) => update("replacement_behaviour", e.target.value)} placeholder={portalT.replacementBehPlaceholder || "Functionally equivalent alternative behaviour..."} />
             </div>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Additional Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any additional clinical observations..." />
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{staffT.additionalNotes || "Additional Notes"}</Label>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={staffT.additionalNotesPlaceholder || "Any additional clinical observations..."} />
           </div>
 
           <Button onClick={handleSubmit} disabled={saving} className="w-full">
-            {saving ? "Saving..." : "Submit Assessment"}
+            {saving ? (staffT.saving || "Saving...") : (portalT.submitAssessment || "Submit Assessment")}
           </Button>
         </CardContent>
       </Card>
 
-      <h2 className="text-lg font-serif text-foreground mb-2">Assessment History</h2>
+      <h2 className="text-lg font-serif text-foreground mb-2">{staffT.entryHistory || "Assessment History"}</h2>
       <EntryHistory
         clientId={clientId}
         toolType="functional_assessment"
-        toolTitle="Functional Assessment"
+        toolTitle={portalT.title || "Functional Assessment"}
         refreshKey={refreshKey}
         getPdfSections={(data) => {
           const d = data as Record<string, string>;

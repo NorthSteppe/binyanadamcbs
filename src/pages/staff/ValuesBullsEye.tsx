@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +21,18 @@ const domains = [
 ];
 
 const ValuesBullsEye = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).advancedModels || {};
+  const staffT = (t as any).staffClinical || {};
+
+    const domains = [
+        { key: "work_education", label: portalT.valWork || "Work / Education", desc: portalT.valWorkDesc || "Career, study, skill development" },
+        { key: "relationships", label: portalT.valRelations || "Relationships", desc: portalT.valRelationsDesc || "Intimate, family, social connections" },
+        { key: "personal_growth", label: portalT.valGrowth || "Personal Growth / Health", desc: portalT.valGrowthDesc || "Physical, emotional, spiritual wellbeing" },
+        { key: "leisure", label: portalT.valLeisure || "Leisure / Recreation", desc: portalT.valLeisureDesc || "Fun, hobbies, creativity, play" },
+    ];
+    
+
   const { user } = useAuth();
   const [clientId, setClientId] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -34,7 +47,7 @@ const ValuesBullsEye = () => {
   };
 
   const handleSubmit = async () => {
-    if (!clientId || !user) return toast.error("Select a client first");
+    if (!clientId || !user) return toast.error(staffT.selectClientFirst || "Select a client first");
     setSaving(true);
     const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
@@ -44,19 +57,19 @@ const ValuesBullsEye = () => {
       notes,
     });
     setSaving(false);
-    if (error) return toast.error("Failed to save");
-    toast.success("Values assessment saved");
+    if (error) return toast.error(staffT.failedToSave || "Failed to save");
+    toast.success(portalT.bullseyeSaved || "Values assessment saved");
     setValues(Object.fromEntries(domains.map((d) => [d.key, { importance: 5, consistency: 5, description: "" }])));
     setNotes("");
     setRefreshKey((k) => k + 1);
   };
 
   return (
-    <ClinicalToolLayout title="Values Bull's Eye" description="Assess values importance and consistency of action across key life domains" icon={Target}>
+    <ClinicalToolLayout title={portalT.bullseyeTitle || "Values Bull's Eye"} description={portalT.bullseyeDesc || "Assess values importance and consistency of action across key life domains"} icon={Target}>
       <Card className="border-border/50 mb-6">
         <CardContent className="pt-6 space-y-6">
           <div>
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Client</Label>
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{staffT.client || "Client"}</Label>
             <ClientSelector value={clientId} onChange={setClientId} />
           </div>
 
@@ -67,18 +80,18 @@ const ValuesBullsEye = () => {
                 <p className="text-xs text-muted-foreground">{domain.desc}</p>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">What matters to you in this area?</Label>
+                <Label className="text-xs text-muted-foreground">{portalT.whatMatters || "What matters to you in this area?"}</Label>
                 <Textarea
                   className="min-h-[60px]"
                   value={values[domain.key]?.description || ""}
                   onChange={(e) => updateDomain(domain.key, "description", e.target.value)}
-                  placeholder="Describe what you value..."
+                  placeholder={portalT.describeValue || "Describe what you value..."}
                 />
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <Label className="text-xs text-muted-foreground">Importance</Label>
+                    <Label className="text-xs text-muted-foreground">{portalT.importance || "Importance"}</Label>
                     <span className="text-xs font-semibold text-primary">{values[domain.key]?.importance}/10</span>
                   </div>
                   <Slider
@@ -89,7 +102,7 @@ const ValuesBullsEye = () => {
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <Label className="text-xs text-muted-foreground">Consistency of Action</Label>
+                    <Label className="text-xs text-muted-foreground">{portalT.consistency || "Consistency of Action"}</Label>
                     <span className="text-xs font-semibold text-primary">{values[domain.key]?.consistency}/10</span>
                   </div>
                   <Slider
@@ -103,21 +116,21 @@ const ValuesBullsEye = () => {
           ))}
 
           <div>
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Clinical Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observations about discrepancies, barriers, willingness..." />
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{portalT.clinicalNotes || "Clinical Notes"}</Label>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={portalT.clinicalNotesPlaceholder || "Observations about discrepancies, barriers, willingness..."} />
           </div>
 
           <Button onClick={handleSubmit} disabled={saving} className="w-full">
-            {saving ? "Saving..." : "Submit Values Assessment"}
+            {saving ? (staffT.saving || "Saving...") : (portalT.submitBullseye || "Submit Values Assessment")}
           </Button>
         </CardContent>
       </Card>
 
-      <h2 className="text-lg font-serif text-foreground mb-2">Assessment History</h2>
+      <h2 className="text-lg font-serif text-foreground mb-2">{portalT.assessmentHistory || "Assessment History"}</h2>
       <EntryHistory
         clientId={clientId}
         toolType="values_bullseye"
-        toolTitle="Values Bull's Eye"
+        toolTitle={portalT.bullseyeTitle || "Values Bull's Eye"}
         refreshKey={refreshKey}
         getPdfSections={(data) => {
           const d = data as Record<string, { importance: number; consistency: number; description: string }>;

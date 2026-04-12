@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Brain } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +23,20 @@ const processes = [
 ];
 
 const HexaflexTracker = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).advancedModels || {};
+  const staffT = (t as any).staffClinical || {};
+
+    const processes = [
+        { key: "acceptance", label: portalT.hexAcceptance || "Acceptance", desc: portalT.hexAcceptanceDesc || "Willingness to experience difficult thoughts and feelings without avoidance", opposite: portalT.hexAcceptanceOpp || "Experiential Avoidance" },
+        { key: "defusion", label: portalT.hexDefusion || "Cognitive Defusion", desc: portalT.hexDefusionDesc || "Ability to step back from thoughts and see them as mental events", opposite: portalT.hexDefusionOpp || "Cognitive Fusion" },
+        { key: "present_moment", label: portalT.hexPresent || "Present Moment Awareness", desc: portalT.hexPresentDesc || "Flexible attention to the here-and-now with openness", opposite: portalT.hexPresentOpp || "Dominance of Past/Future" },
+        { key: "self_as_context", label: portalT.hexSelf || "Self-as-Context", desc: portalT.hexSelfDesc || "A transcendent sense of self that observes experience", opposite: portalT.hexSelfOpp || "Attachment to Conceptualised Self" },
+        { key: "values", label: portalT.hexValues || "Values", desc: portalT.hexValuesDesc || "Clarity about what matters and provides direction for living", opposite: portalT.hexValuesOpp || "Lack of Values Clarity" },
+        { key: "committed_action", label: portalT.hexAction || "Committed Action", desc: portalT.hexActionDesc || "Taking effective action guided by values, even when difficult", opposite: portalT.hexActionOpp || "Inaction / Impulsivity" },
+    ];
+    
+
   const { user } = useAuth();
   const [clientId, setClientId] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -36,7 +51,7 @@ const HexaflexTracker = () => {
   };
 
   const handleSubmit = async () => {
-    if (!clientId || !user) return toast.error("Select a client first");
+    if (!clientId || !user) return toast.error(staffT.selectClientFirst || "Select a client first");
     setSaving(true);
     const { error } = await (supabase.from("clinical_entries") as any).insert({
       client_id: clientId,
@@ -46,8 +61,8 @@ const HexaflexTracker = () => {
       notes,
     });
     setSaving(false);
-    if (error) return toast.error("Failed to save");
-    toast.success("Hexaflex assessment saved");
+    if (error) return toast.error(staffT.failedToSave || "Failed to save");
+    toast.success(portalT.hexaflexSaved || "Hexaflex assessment saved");
     setRatings(Object.fromEntries(processes.map((p) => [p.key, { score: 5, observation: "" }])));
     setNotes("");
     setRefreshKey((k) => k + 1);
@@ -56,16 +71,16 @@ const HexaflexTracker = () => {
   const avgScore = Object.values(ratings).reduce((sum, r) => sum + r.score, 0) / processes.length;
 
   return (
-    <ClinicalToolLayout title="Hexaflex Tracker" description="Rate and track the six core ACT processes of psychological flexibility" icon={Brain}>
+    <ClinicalToolLayout title={portalT.hexaflexTitle || "Hexaflex Tracker"} description={portalT.hexaflexDesc || "Rate and track the six core ACT processes of psychological flexibility"} icon={Brain}>
       <Card className="border-border/50 mb-6">
         <CardContent className="pt-6 space-y-5">
           <div>
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Client</Label>
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{staffT.client || "Client"}</Label>
             <ClientSelector value={clientId} onChange={setClientId} />
           </div>
 
           <div className="bg-muted/50 rounded-lg p-4 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Overall Flexibility Score</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">{portalT.flexibilityScore || "Overall Flexibility Score"}</p>
             <p className="text-3xl font-bold text-primary">{avgScore.toFixed(1)}<span className="text-base font-normal text-muted-foreground">/10</span></p>
           </div>
 
@@ -99,27 +114,27 @@ const HexaflexTracker = () => {
           ))}
 
           <div>
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Summary Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Overall clinical impression, treatment priorities..." />
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{portalT.summaryNotes || "Summary Notes"}</Label>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={portalT.summaryPlaceholder || "Overall clinical impression, treatment priorities..."} />
           </div>
 
           <Button onClick={handleSubmit} disabled={saving} className="w-full">
-            {saving ? "Saving..." : "Submit Hexaflex Assessment"}
+            {saving ? (staffT.saving || "Saving...") : (portalT.submitHexaflex || "Submit Hexaflex Assessment")}
           </Button>
         </CardContent>
       </Card>
 
-      <h2 className="text-lg font-serif text-foreground mb-2">Assessment History</h2>
+      <h2 className="text-lg font-serif text-foreground mb-2">{portalT.assessmentHistory || "Assessment History"}</h2>
       <EntryHistory
         clientId={clientId}
         toolType="hexaflex"
-        toolTitle="Hexaflex Tracker"
+        toolTitle={portalT.hexaflexTitle || "Hexaflex Tracker"}
         refreshKey={refreshKey}
         getPdfSections={(data) => {
           const d = data as Record<string, { score: number; observation: string }>;
           return processes.map((p) => ({
             label: p.label,
-            value: d[p.key] ? `Score: ${d[p.key].score}/10\nObservation: ${d[p.key].observation || "—"}` : "",
+            value: d[p.key] ? `Score: ${d[p.key].score}/10\nObs: ${d[p.key].observation || "—"}` : "",
           }));
         }}
         renderEntry={(data, notes) => {

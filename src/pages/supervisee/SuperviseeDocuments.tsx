@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { FileText, Upload, Trash2, Download, File } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,9 @@ const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp
 const MAX_SIZE = 10 * 1024 * 1024;
 
 const SuperviseeDocuments = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).superviseeHub || {};
+
   const { user } = useAuth();
   const qc = useQueryClient();
   const [uploading, setUploading] = useState(false);
@@ -39,8 +43,8 @@ const SuperviseeDocuments = () => {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    if (!ALLOWED_TYPES.includes(file.type)) { toast.error("File type not allowed"); return; }
-    if (file.size > MAX_SIZE) { toast.error("File must be under 10MB"); return; }
+    if (!ALLOWED_TYPES.includes(file.type)) { toast.error(portalT.fileTypeNotAllowed || "File type not allowed"); return; }
+    if (file.size > MAX_SIZE) { toast.error(portalT.fileUnder10MB || "File must be under 10MB"); return; }
 
     setUploading(true);
     try {
@@ -61,9 +65,9 @@ const SuperviseeDocuments = () => {
 
       qc.invalidateQueries({ queryKey: ["supervisee-documents"] });
       setNotes("");
-      toast.success("Document uploaded");
+      toast.success(portalT.docUploaded || "Document uploaded");
     } catch (err: any) {
-      toast.error(err.message || "Upload failed");
+      toast.error(err.message || portalT.uploadFailed || "Upload failed");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -72,7 +76,7 @@ const SuperviseeDocuments = () => {
 
   const handleDownload = async (filePath: string, fileName: string) => {
     const { data, error } = await supabase.storage.from("client-documents").download(filePath);
-    if (error) { toast.error("Download failed"); return; }
+    if (error) { toast.error(portalT.downloadFailed || "Download failed"); return; }
     const url = URL.createObjectURL(data);
     const a = document.createElement("a");
     a.href = url;
@@ -89,7 +93,7 @@ const SuperviseeDocuments = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["supervisee-documents"] });
-      toast.success("Document deleted");
+      toast.success(portalT.docDeleted || "Document deleted");
     },
   });
 
@@ -102,35 +106,35 @@ const SuperviseeDocuments = () => {
             <div className="bg-primary/10 text-primary rounded-xl p-2.5">
               <FileText size={22} />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">My Documents</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{portalT.myDocsLabel || "My Documents"}</h1>
           </div>
 
           <div className="bg-card border border-border rounded-xl p-5 mb-6">
-            <h3 className="font-medium text-card-foreground mb-3">Upload Document</h3>
+            <h3 className="font-medium text-card-foreground mb-3">{portalT.uploadDocument || "Upload Document"}</h3>
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label>Notes (optional)</Label>
-                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Describe this document..." />
+                <Label>{portalT.notesOptional || "Notes (optional)"}</Label>
+                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder={portalT.describeDoc || "Describe this document..."} />
               </div>
               <div className="flex items-center gap-3">
                 <label className="cursor-pointer">
                   <Input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,.doc,.docx" disabled={uploading} />
                   <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition-colors">
                     <Upload size={16} />
-                    {uploading ? "Uploading..." : "Choose File"}
+                    {uploading ? (portalT.uploading || "Uploading...") : (portalT.chooseFile || "Choose File")}
                   </div>
                 </label>
-                <span className="text-xs text-muted-foreground">PDF, images, Word docs — max 10MB</span>
+                <span className="text-xs text-muted-foreground">{portalT.fileConstraints || "PDF, images, Word docs — max 10MB"}</span>
               </div>
             </div>
           </div>
 
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading documents...</div>
+            <div className="text-center py-12 text-muted-foreground">{portalT.loadingDocs || "Loading documents..."}</div>
           ) : docs.length === 0 ? (
             <div className="text-center py-12 bg-card border border-border rounded-xl">
               <File className="mx-auto mb-3 text-muted-foreground" size={36} />
-              <p className="text-muted-foreground">No documents yet.</p>
+              <p className="text-muted-foreground">{portalT.noDocsYet || "No documents yet."}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -143,7 +147,7 @@ const SuperviseeDocuments = () => {
                       {doc.notes && ` · ${doc.notes}`}
                     </p>
                   </div>
-                  <div className="flex gap-1 ml-3">
+                  <div className="flex gap-1 ms-3">
                     <Button size="icon" variant="ghost" onClick={() => handleDownload(doc.file_url, doc.file_name)}><Download size={16} /></Button>
                     <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deleteMutation.mutate(doc)}><Trash2 size={16} /></Button>
                   </div>
