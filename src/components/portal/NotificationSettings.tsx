@@ -69,7 +69,7 @@ const NotificationSettings = () => {
           user_id: user.id,
           title: "Test Notification",
           message: "This is a test notification from Binyan Adam CBS. If you see this, Telegram notifications are working! 🎉",
-          link: "/portal/dashboard",
+          link: "/portal",
         },
       });
       if (error) throw error;

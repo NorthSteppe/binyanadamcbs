@@ -41,20 +41,26 @@ Deno.serve(async (req) => {
     });
   }
 
-  const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
-    global: { headers: { Authorization: authHeader } },
-  });
   const token = authHeader.replace("Bearer ", "");
-  const { data: userData, error: authError } = await supabaseAuth.auth.getUser(token);
-  if (authError || !userData.user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const callerId = userData.user.id;
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+  // Allow DB-trigger / system calls made with the service-role key, or verify as a user JWT.
+  const isServiceCall = token === SUPABASE_SERVICE_ROLE_KEY;
+  let callerId: string | null = null;
+
+  if (!isServiceCall) {
+    const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (authError || !userData.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    callerId = userData.user.id;
+  }
 
   try {
     const { user_id, title, message, link } = await req.json();
@@ -66,8 +72,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only allow sending to yourself, unless caller is admin or team_member
-    if (user_id !== callerId) {
+    // System calls (service-role key from DB triggers) are fully trusted.
+    // User calls may only send to themselves unless they are admin or team_member.
+    if (!isServiceCall && callerId && user_id !== callerId) {
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
@@ -106,7 +113,7 @@ Deno.serve(async (req) => {
     const icon = title.includes("Session") ? "📅" : title.includes("Message") ? "💬" : title.includes("Task") ? "✅" : "🔔";
     let text = `${icon} <b>${escapeHtml(title)}</b>\n\n${escapeHtml(message || "")}`;
     if (link) {
-      text += `\n\n<a href="https://binyanadamcbs.lovable.app${link}">View in app →</a>`;
+      text += `\n\n<a href="https://bacbs.com${link}">View in app →</a>`;
     }
 
     // Send via Telegram gateway
