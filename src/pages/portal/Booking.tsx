@@ -33,7 +33,7 @@ const Booking = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const portalT = (t as any).portal || {};
+  const portalT = (t as any).portalBooking || {};
   const [searchParams] = useSearchParams();
 
   const [services, setServices] = useState<ServiceOption[]>([]);
@@ -121,10 +121,10 @@ const Booking = () => {
           <div className="container text-center">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto">
               <CheckCircle2 className="mx-auto text-primary mb-4" size={48} />
-              <h1 className="text-3xl mb-3">{portalT.bookingConfirmed || "Session Booked"}</h1>
-              <p className="text-muted-foreground mb-6">{portalT.bookingConfirmedText || "Your payment was received and we'll confirm your appointment shortly."}</p>
+              <h1 className="text-3xl mb-3">{portalT.bookingConfirmed}</h1>
+              <p className="text-muted-foreground mb-6">{portalT.bookingConfirmedText}</p>
               <Button onClick={resetForm} variant="outline" className="rounded-full">
-                {portalT.bookAnother || "Book Another"}
+                {portalT.bookAnother}
               </Button>
             </motion.div>
           </div>
@@ -142,10 +142,10 @@ const Booking = () => {
           <div className="container text-center">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto">
               <XCircle className="mx-auto text-destructive mb-4" size={48} />
-              <h1 className="text-3xl mb-3">Payment Cancelled</h1>
-              <p className="text-muted-foreground mb-6">Your payment was not completed. You can try again below.</p>
+              <h1 className="text-3xl mb-3">{portalT.paymentCancelled}</h1>
+              <p className="text-muted-foreground mb-6">{portalT.paymentCancelledText}</p>
               <Button onClick={resetForm} variant="outline" className="rounded-full">
-                Try Again
+                {portalT.tryAgain}
               </Button>
             </motion.div>
           </div>
@@ -163,21 +163,21 @@ const Booking = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-3xl md:text-4xl mb-2 flex items-center gap-3">
               <CalendarIcon className="text-primary" size={28} />
-              {portalT.bookSession || "Book a Session"}
+              {portalT.bookASession}
             </h1>
-            <p className="text-muted-foreground mb-8">{portalT.bookSubtitle || "Select a service, date, and time."}</p>
+            <p className="text-muted-foreground mb-8">{portalT.bookSubtitle}</p>
           </motion.div>
 
           {/* Step 1: Service selection */}
           <div className="mb-8">
-            <Label className="text-base font-semibold mb-3 block">1. Choose a Service</Label>
+            <Label className="text-base font-semibold mb-3 block">{portalT.step1}</Label>
             <div className="grid sm:grid-cols-2 gap-3">
               {services.map((svc) => (
                 <button
                   key={svc.id}
                   onClick={() => setSelectedService(svc)}
                   className={cn(
-                    "text-left p-5 rounded-xl border-2 transition-all",
+                    "text-start p-5 rounded-xl border-2 transition-all",
                     selectedService?.id === svc.id
                       ? "border-primary bg-primary/5"
                       : "border-border/50 bg-card hover:border-primary/30"
@@ -193,7 +193,7 @@ const Booking = () => {
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{svc.description}</p>
                   <p className="text-xs text-primary font-medium mt-2 flex items-center gap-1">
-                    <Clock size={12} /> {svc.duration_minutes} minutes
+                    <Clock size={12} /> {svc.duration_minutes} {portalT.minutes}
                   </p>
                 </button>
               ))}
@@ -203,7 +203,7 @@ const Booking = () => {
           {selectedService && (
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div>
-                <Label className="text-base font-semibold mb-3 block">2. Pick a Date</Label>
+                <Label className="text-base font-semibold mb-3 block">{portalT.step2}</Label>
                 <div className="bg-card rounded-xl border border-border/50 p-4 flex justify-center">
                   <Calendar
                     mode="single"
@@ -215,7 +215,7 @@ const Booking = () => {
                 </div>
               </div>
               <div>
-                <Label className="text-base font-semibold mb-3 block">3. Choose a Time</Label>
+                <Label className="text-base font-semibold mb-3 block">{portalT.step3}</Label>
                 <div className="grid grid-cols-3 gap-2">
                   {TIME_SLOTS.map((slot) => (
                     <button
@@ -238,12 +238,12 @@ const Booking = () => {
 
           {selectedService && selectedDate && selectedTime && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border/50 p-6">
-              <Label className="text-base font-semibold mb-3 block">4. Additional Notes (optional)</Label>
+              <Label className="text-base font-semibold mb-3 block">{portalT.step4}</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="rounded-xl mb-4"
-                placeholder="Anything you'd like to discuss..."
+                placeholder={portalT.notesPlaceholder}
               />
               <div className="bg-muted rounded-xl p-4 mb-4 text-sm">
                 <div className="flex justify-between items-start">
@@ -262,12 +262,12 @@ const Booking = () => {
                 {selectedService.price_cents > 0 ? (
                   <>
                     <CreditCard size={18} className="me-2" />
-                    {loading ? "Redirecting to payment..." : `Pay £${(selectedService.price_cents / 100).toFixed(2)} & Book`}
+                    {loading ? portalT.redirecting : (portalT.payAndBook || "").replace("{{price}}", (selectedService.price_cents / 100).toFixed(2))}
                   </>
                 ) : (
                   <>
                     <CalendarIcon size={18} className="me-2" />
-                    {loading ? "Booking..." : "Confirm Booking"}
+                    {loading ? portalT.booking : portalT.confirmBooking}
                   </>
                 )}
               </Button>

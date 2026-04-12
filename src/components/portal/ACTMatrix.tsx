@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 // Types
 interface MatrixEntry {
@@ -116,6 +117,9 @@ Guide conversationally. Ask one question at a time. Be empathetic but concise. W
 Start by warmly introducing the Matrix and asking about their values.`;
 
 export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
+  const { t } = useLanguage();
+  const portalT = (t as any).portalACT || {};
+
   const { user, isStaff } = useAuth();
   const userId = targetUserId || user?.id;
 
@@ -144,6 +148,17 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const chatRecognitionRef = useRef<any>(null);
   const { session } = useAuth();
+
+  const TRANSLATED_QUADRANTS = QUADRANTS.map(q => {
+    let label = q.label;
+    let prompt = q.prompt;
+    if (q.key === "committed_actions") { label = portalT.towardActions || q.label; prompt = portalT.towardActionsPrompt || q.prompt; }
+    if (q.key === "avoidance_behaviours") { label = portalT.awayBehaviours || q.label; prompt = portalT.awayBehavioursPrompt || q.prompt; }
+    if (q.key === "values_text") { label = portalT.values || q.label; prompt = portalT.valuesPrompt || q.prompt; }
+    if (q.key === "internal_obstacles") { label = portalT.internalObstacles || q.label; prompt = portalT.internalObstaclesPrompt || q.prompt; }
+    return { ...q, label, prompt };
+  });
+
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -486,7 +501,7 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
             {/* Axis Labels */}
             <div className="relative mb-2">
               <div className="text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                Observable Behaviour ↑
+                {portalT.observableBehaviour || "Observable Behaviour ↑"}
               </div>
             </div>
 
@@ -501,7 +516,7 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
                 </div>
               </div>
 
-              {QUADRANTS.map((q) => (
+              {TRANSLATED_QUADRANTS.map((q) => (
                 <div key={q.key} className={`rounded-xl border p-4 ${q.bgColor} transition-all`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className={`flex items-center gap-1.5 font-semibold text-sm ${q.color}`}>
@@ -521,7 +536,7 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
                   <Textarea
                     value={form[q.key]}
                     onChange={(e) => setForm((f) => ({ ...f, [q.key]: e.target.value }))}
-                    placeholder="Type or speak..."
+                    placeholder={portalT.typeOrSpeak || "Type or speak..."}
                     className="min-h-[80px] text-sm bg-background/60 resize-none"
                   />
                 </div>
@@ -529,16 +544,16 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
             </div>
 
             <div className="text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-1">
-              ↓ Inner Experience (Thoughts & Feelings)
+              {portalT.innerExperience || "↓ Inner Experience (Thoughts & Feelings)"}
             </div>
 
             {/* Notes */}
             <div className="mt-4">
-              <label className="text-sm font-medium text-foreground mb-1 block">Notes</label>
+              <label className="text-sm font-medium text-foreground mb-1 block">{portalT.notes || "Notes"}</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Additional notes or observations..."
+                placeholder={portalT.notesPlaceholder || "Additional notes or observations..."}
                 className="min-h-[60px] text-sm resize-none"
               />
             </div>
@@ -592,7 +607,7 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendChat()}
-                  placeholder="Type or use the mic..."
+                  placeholder={portalT.typeOrMic || "Type or use the mic..."}
                   className="flex-1 bg-background border border-input rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
                 />
                 <Button size="icon" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>
@@ -610,24 +625,23 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
                 <Loader2 className="animate-spin text-muted-foreground" />
               </div>
             ) : entries.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No entries yet.</p>
+              <p className="text-center text-muted-foreground py-8">{portalT.noEntries || "No entries yet."}</p>
             ) : (
               <div className="space-y-4">
                 {/* Trend summary */}
                 <div className="bg-card border border-border rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <TrendingUp size={16} className="text-primary" />
-                    <h3 className="text-sm font-semibold text-foreground">Progress Overview</h3>
+                    <h3 className="text-sm font-semibold text-foreground">{portalT.progressOverview || "Progress Overview"}</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2">
                       <CalendarDays size={14} className="text-muted-foreground" />
-                      <span className="text-muted-foreground">{entries.length} entries total</span>
+                      <span className="text-muted-foreground">{entries.length} {portalT.entriesTotal || "entries total"}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CalendarDays size={14} className="text-muted-foreground" />
-                      <span className="text-muted-foreground">
-                        Latest: {entries[0] ? format(new Date(entries[0].created_at), "dd MMM yyyy") : "—"}
+                      <span className="text-muted-foreground">{portalT.latest || "Latest:"} {entries[0] ? format(new Date(entries[0].created_at), "dd MMM yyyy") : "—"}
                       </span>
                     </div>
                   </div>
@@ -652,7 +666,7 @@ export default function ACTMatrix({ targetUserId }: { targetUserId?: string }) {
                       </div>
                     </summary>
                     <div className="px-4 pb-4 grid grid-cols-2 gap-3">
-                      {QUADRANTS.map((q) => (
+                      {TRANSLATED_QUADRANTS.map((q) => (
                         <div key={q.key} className={`rounded-lg border p-3 ${q.bgColor}`}>
                           <div className={`flex items-center gap-1 text-xs font-semibold mb-1 ${q.color}`}>
                             {q.icon} {q.label}

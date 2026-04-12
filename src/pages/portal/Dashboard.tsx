@@ -56,9 +56,9 @@ const DEV_TODOS: ClientTodo[] = [
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const getGreeting = () => {
   const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+  if (h < 12) return portalT.goodMorning || "Good morning";
+  if (h < 17) return portalT.goodAfternoon || "Good afternoon";
+  return portalT.goodEvening || "Good evening";
 };
 
 const formatDay = (iso: string) =>
@@ -139,7 +139,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const portalT = (t as any).portal || {};
+  const portalT = (t as any).portalDashboard || {};
   const firstName = profile?.full_name?.split(" ")[0] || (import.meta.env.DEV ? "Adam" : "");
 
   useEffect(() => {
@@ -299,7 +299,7 @@ const Dashboard = () => {
                 <Button variant="outline" size="sm" className="gap-2 rounded-full h-9 text-xs relative border-white/20 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm">
                   <Bell size={13} />
                   Messages
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 end-[-0.375rem] w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                     {unreadCount}
                   </span>
                 </Button>
@@ -326,7 +326,7 @@ const Dashboard = () => {
               icon: Calendar,
               accentColor: "#3b82f6",
               iconBg: "rgba(59,130,246,0.10)",
-              note: nextSession ? `Next: ${formatDay(nextSession.session_date)}` : "None scheduled",
+              note: nextSession ? `${portalT.nextSession}: ${formatDay(nextSession.session_date)}` : "None scheduled",
               to: "/portal/booking",
             },
             {
@@ -335,7 +335,7 @@ const Dashboard = () => {
               icon: ListTodo,
               accentColor: "#8b5cf6",
               iconBg: "rgba(139,92,246,0.10)",
-              note: `${completedTasks} of ${totalTasks} done`,
+              note: (portalT.tasksDone || "").replace("{{completed}}", completedTasks).replace("{{total}}", totalTasks),
               to: "/portal/productivity",
             },
             {
@@ -373,7 +373,7 @@ const Dashboard = () => {
                   transition-shadow duration-500 ease-out"
               >
                 <div
-                  className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
+                  className="absolute top-0 start-0 end-0 h-[3px] rounded-t-2xl"
                   style={{ background: stat.accentColor }}
                 />
                 <div className="flex items-start justify-between mb-3 pt-1">
@@ -389,7 +389,7 @@ const Dashboard = () => {
                 </div>
                 <p className="text-xs font-semibold text-foreground">{stat.label}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{stat.note}</p>
-                <p className="text-[10px] mt-2 font-medium" style={{ color: stat.accentColor }}>View →</p>
+                <p className="text-[10px] mt-2 font-medium" style={{ color: stat.accentColor }}>{portalT.viewArrow || "View &rarr;"}</p>
               </Link>
             </motion.div>
           ))}
@@ -402,15 +402,14 @@ const Dashboard = () => {
           <FloatCard className="lg:col-span-3 flex flex-col" delay={0.18}>
             <WidgetHeader
               icon={Calendar}
-              title="Upcoming Sessions"
+              title={portalT.upcomingSessions}
               subtitle={`${upcomingSessions.length} scheduled`}
               accentColor="#3b82f6"
               action={
                 <Link
                   to="/portal/productivity?tab=calendar"
                   className="text-[11px] text-primary font-medium flex items-center gap-1 hover:underline transition-colors duration-300"
-                >
-                  View calendar <ArrowRight size={11} />
+                >{portalT.viewCalendar}<ArrowRight size={11} />
                 </Link>
               }
             />
@@ -418,12 +417,11 @@ const Dashboard = () => {
               {upcomingSessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
                   <Calendar size={32} className="text-muted-foreground/25 mb-3" />
-                  <p className="text-sm font-medium text-foreground mb-1">No sessions yet</p>
-                  <p className="text-xs text-muted-foreground mb-4">Book your first session to get started.</p>
+                  <p className="text-sm font-medium text-foreground mb-1">{portalT.noSessionsYet}</p>
+                  <p className="text-xs text-muted-foreground mb-4">{portalT.bookFirstSession}</p>
                   <Link to="/portal/booking">
                     <Button size="sm" className="rounded-full gap-2 text-xs shadow-md">
-                      <Calendar size={12} /> Book a Session
-                    </Button>
+                      <Calendar size={12} />{portalT.bookASession}</Button>
                   </Link>
                 </div>
               ) : (
@@ -441,7 +439,7 @@ const Dashboard = () => {
                           </p>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground">{s.title || "Session"}</p>
+                          <p className="text-sm font-semibold text-foreground">{s.title || portalT.session}</p>
                           <p className="text-[11px] text-muted-foreground mt-0.5">
                             {formatDay(s.session_date)} · {formatTime(s.session_date)}
                             {s.duration_minutes ? ` · ${s.duration_minutes} min` : ""}
@@ -454,7 +452,7 @@ const Dashboard = () => {
                             ? "bg-amber-100 text-amber-700"
                             : "bg-black/[0.05] text-muted-foreground"
                         }`}>
-                          {days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days}d`}
+                          {days === 0 ? "Today" : days === 1 ? "Tomorrow" : (portalT.inDays || "").replace("{{days}}", days)}
                         </span>
                       </div>
                     );
@@ -464,8 +462,7 @@ const Dashboard = () => {
                       to="/portal/booking"
                       className="text-[11px] text-primary font-medium hover:underline flex items-center gap-1.5 transition-colors duration-300"
                     >
-                      <Calendar size={11} /> Book another session
-                    </Link>
+                      <Calendar size={11} />{portalT.bookAnotherSession}</Link>
                   </div>
                 </div>
               )}
@@ -476,8 +473,8 @@ const Dashboard = () => {
           <FloatCard className="lg:col-span-2 flex flex-col" delay={0.24}>
             <WidgetHeader
               icon={ListTodo}
-              title="My Tasks"
-              subtitle={`${completedTasks} of ${totalTasks} done`}
+              title={portalT.myTasks}
+              subtitle={(portalT.tasksDone || "").replace("{{completed}}", completedTasks).replace("{{total}}", totalTasks)}
               accentColor="#8b5cf6"
               action={
                 totalTasks > 0 ? (
@@ -496,8 +493,8 @@ const Dashboard = () => {
               {todos.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
                   <Sparkles size={28} className="text-muted-foreground/25 mb-3" />
-                  <p className="text-sm font-medium text-foreground">All caught up!</p>
-                  <p className="text-xs text-muted-foreground mt-1">Tasks from your therapist appear here.</p>
+                  <p className="text-sm font-medium text-foreground">{portalT.allCaughtUp}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{portalT.tasksFromTherapist}</p>
                 </div>
               ) : (
                 <div className="space-y-1.5 max-h-64 overflow-y-auto">
@@ -505,7 +502,7 @@ const Dashboard = () => {
                     <button
                       key={todo.id}
                       onClick={() => toggleTodo(todo)}
-                      className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-xl border transition-all duration-300 ${
+                      className={`w-full text-start flex items-start gap-3 px-3 py-2.5 rounded-xl border transition-all duration-300 ${
                         todo.is_completed
                           ? "border-transparent bg-black/[0.03] opacity-50"
                           : "border-black/[0.06] bg-white/50 hover:border-violet-300 hover:bg-violet-50/50"
@@ -522,7 +519,7 @@ const Dashboard = () => {
                         </p>
                         {todo.due_date && !todo.is_completed && (
                           <p className="text-[10px] text-amber-600 font-medium mt-0.5">
-                            Due {new Date(todo.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                            {portalT.due || "Due"} {new Date(todo.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                           </p>
                         )}
                       </div>
@@ -538,8 +535,8 @@ const Dashboard = () => {
         <FloatCard delay={0.3}>
           <WidgetHeader
             icon={TrendingUp}
-            title="Quick Actions"
-            subtitle="Jump to a section"
+            title={portalT.quickActions}
+            subtitle={portalT.jumpToSection}
             accentColor="#94a3b8"
           />
           <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -585,7 +582,7 @@ const Dashboard = () => {
                 style={{ background: item.bg }}
               >
                 {item.badge ? (
-                  <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-2 end-2 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                     {item.badge}
                   </span>
                 ) : null}
@@ -599,7 +596,7 @@ const Dashboard = () => {
                   <p className="text-xs font-semibold text-foreground">{item.label}</p>
                   <p className="text-[10px] text-muted-foreground truncate">{item.desc}</p>
                 </div>
-                <ChevronRight size={12} className="ml-auto text-muted-foreground/30 shrink-0" />
+                <ChevronRight size={12} className="ms-auto text-muted-foreground/30 shrink-0" />
               </Link>
             ))}
           </div>
@@ -609,8 +606,8 @@ const Dashboard = () => {
         <FloatCard delay={0.36}>
           <WidgetHeader
             icon={Files}
-            title="Documents"
-            subtitle="Shared files with your therapist"
+            title={portalT.documents}
+            subtitle={portalT.sharedFiles}
             accentColor="#64748b"
             action={
               <>
@@ -623,7 +620,7 @@ const Dashboard = () => {
                   disabled={uploading}
                 >
                   <Upload size={11} />
-                  {uploading ? "Uploading…" : "Upload"}
+                  {uploading ? (portalT.uploading) : (portalT.upload)}
                 </Button>
               </>
             }
@@ -632,8 +629,8 @@ const Dashboard = () => {
             {documents.length === 0 ? (
               <div className="text-center py-8">
                 <Files className="mx-auto h-7 w-7 text-muted-foreground/25 mb-3" />
-                <p className="text-sm font-medium text-foreground">No documents yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Upload files to share securely with your therapist.</p>
+                <p className="text-sm font-medium text-foreground">{portalT.noDocumentsYet}</p>
+                <p className="text-xs text-muted-foreground mt-1">{portalT.uploadFilesToShare}</p>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -651,7 +648,7 @@ const Dashboard = () => {
                         a.href = url; a.download = doc.file_name; a.click();
                         URL.revokeObjectURL(url);
                       }}
-                      className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                      className="flex items-center gap-3 flex-1 min-w-0 text-start"
                     >
                       <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                         <FileText size={14} className="text-blue-500" />
@@ -681,7 +678,7 @@ const Dashboard = () => {
           transition={{ duration: 0.6, delay: 0.42 }}
           className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-[11px] pb-4" style={{ color: "rgba(255,255,255,0.35)" }}
         >
-          <span className="font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>Need help?</span>
+          <span className="font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>{portalT.needHelp}</span>
           <a href="tel:+447715460054" className="flex items-center gap-1.5 hover:text-primary transition-colors duration-300">
             <Phone size={11} /> +44 7715 460054
           </a>

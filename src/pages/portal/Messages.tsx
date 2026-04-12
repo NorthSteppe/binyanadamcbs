@@ -36,7 +36,7 @@ const Messages = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
-  const portalT = (t as any).portal || {};
+  const portalT = (t as any).portalMessages || {};
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -248,12 +248,12 @@ const Messages = () => {
               </h2>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowNewChat(!!e.target.value); }}
-                    placeholder="Search or start new chat..."
-                    className="pl-9 rounded-full text-sm h-9"
+                    placeholder={portalT.searchPlaceholder || "Search or start new chat..."}
+                    className="ps-9 rounded-full text-sm h-9"
                   />
                 </div>
                 <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 rounded-full"
@@ -266,11 +266,11 @@ const Messages = () => {
             <div className="flex-1 overflow-y-auto">
               {showNewChat && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-4 pt-3 pb-1 font-medium">Start a conversation</p>
-                  {filteredUsers.length === 0 && <p className="text-xs text-muted-foreground text-center py-6">No users found</p>}
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-4 pt-3 pb-1 font-medium">{portalT.startConversation || "Start a conversation"}</p>
+                  {filteredUsers.length === 0 && <p className="text-xs text-muted-foreground text-center py-6">{portalT.noUsersFound || "No users found"}</p>}
                   {filteredUsers.map((u) => (
                     <button key={u.id} onClick={() => selectConversation(u)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left">
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-start">
                       <Avatar className="h-10 w-10 shrink-0">
                         <AvatarImage src={u.avatar_url || undefined} />
                         <AvatarFallback className="bg-primary/10 text-primary text-xs">{getInitials(u.full_name)}</AvatarFallback>
@@ -284,21 +284,21 @@ const Messages = () => {
               {!showNewChat && conversations.length === 0 && (
                 <div className="text-center py-12">
                   <MessageSquare className="mx-auto text-muted-foreground/30 mb-3" size={32} />
-                  <p className="text-xs text-muted-foreground">No conversations yet</p>
-                  <Button variant="link" size="sm" className="text-xs mt-1" onClick={() => setShowNewChat(true)}>Start a new chat</Button>
+                  <p className="text-xs text-muted-foreground">{portalT.noConversationsYet || "No conversations yet"}</p>
+                  <Button variant="link" size="sm" className="text-xs mt-1" onClick={() => setShowNewChat(true)}>{portalT.startNewChat || "Start a new chat"}</Button>
                 </div>
               )}
 
               {!showNewChat && conversations.map((conv) => (
                 <button key={conv.user.id} onClick={() => selectConversation(conv.user)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left ${selectedUser?.id === conv.user.id ? "bg-muted/70" : ""}`}>
+                  className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-start ${selectedUser?.id === conv.user.id ? "bg-muted/70" : ""}`}>
                   <div className="relative shrink-0">
                     <Avatar className="h-11 w-11">
                       <AvatarImage src={conv.user.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary/10 text-primary text-xs">{getInitials(conv.user.full_name)}</AvatarFallback>
                     </Avatar>
                     {conv.unreadCount > 0 && (
-                      <div className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                      <div className="absolute -top-0.5 end-[-0.125rem] w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
                         {conv.unreadCount}
                       </div>
                     )}
@@ -306,7 +306,7 @@ const Messages = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium text-foreground truncate">{conv.user.full_name}</p>
-                      <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{formatTime(conv.lastMessage.created_at)}</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0 ms-2">{formatTime(conv.lastMessage.created_at)}</span>
                     </div>
                     <div className="flex items-center gap-1 mt-0.5">
                       {conv.lastMessage.sender_id === user?.id && (
@@ -332,7 +332,7 @@ const Messages = () => {
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <MessageSquare className="mx-auto text-muted-foreground/20 mb-4" size={56} />
-                  <p className="text-muted-foreground text-sm">Select a conversation to start messaging</p>
+                  <p className="text-muted-foreground text-sm">{portalT.selectConversation || "Select a conversation to start messaging"}</p>
                 </div>
               </div>
             ) : (
@@ -352,10 +352,10 @@ const Messages = () => {
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{selectedUser.full_name}</p>
                     {otherTyping ? (
-                      <p className="text-[11px] text-primary font-medium animate-pulse">typing...</p>
+                      <p className="text-[11px] text-primary font-medium animate-pulse">{portalT.typing || "typing..."}</p>
                     ) : (
                       <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <Circle size={6} className="fill-green-500 text-green-500" /> Online
+                        <Circle size={6} className="fill-green-500 text-green-500" /> {portalT.online || "Online"}
                       </p>
                     )}
                   </div>
@@ -364,14 +364,14 @@ const Messages = () => {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
                   {chatMessages.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-10">No messages yet. Say hello!</p>
+                    <p className="text-xs text-muted-foreground text-center py-10">{portalT.noMessagesYet || "No messages yet. Say hello!"}</p>
                   )}
                   {chatMessages.map((msg) => {
                     const isMine = msg.sender_id === user?.id;
                     return (
                       <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                         <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
-                          isMine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted text-foreground rounded-bl-sm"
+                          isMine ? "bg-primary text-primary-foreground rounded-be-sm" : "bg-muted text-foreground rounded-es-sm"
                         }`}>
                           <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                           <div className={`flex items-center justify-end gap-1 mt-0.5 ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
@@ -392,7 +392,7 @@ const Messages = () => {
                   {/* Typing indicator bubble */}
                   {otherTyping && (
                     <div className="flex justify-start">
-                      <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1">
+                      <div className="bg-muted rounded-2xl rounded-es-sm px-4 py-3 flex items-center gap-1">
                         <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                         <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                         <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />

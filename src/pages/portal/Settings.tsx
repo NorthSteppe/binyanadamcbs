@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import NotificationSettings from "@/components/portal/NotificationSettings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -12,16 +13,25 @@ import { Settings as SettingsIcon, Moon, Sun, Monitor, Bell, Globe, LayoutDashbo
 import { motion } from "framer-motion";
 
 const WIDGET_OPTIONS = [
-  { id: "tasks", label: "My Tasks" },
-  { id: "calendar", label: "Calendar" },
-  { id: "messages", label: "Messages" },
+  { id: "tasks", label: setT.widgetTasks || "My Tasks" },
+  { id: "calendar", label: setT.widgetCalendar || "Calendar" },
+  { id: "messages", label: setT.widgetMessages || "Messages" },
   { id: "linear", label: "Practice Tasks (Linear)" },
-  { id: "notifications", label: "Recent Notifications" },
+  { id: "notifications", label: setT.widgetNotifications || "Recent Notifications" },
 ];
 
 const Settings = () => {
   const { prefs, updatePrefs } = usePreferences();
   const { isStaff } = useAuth();
+  const WIDGET_OPTIONS = [
+    { id: "tasks", label: setT.widgetTasks || "My Tasks" },
+    { id: "calendar", label: setT.widgetCalendar || "Calendar" },
+    { id: "messages", label: setT.widgetMessages || "Messages" },
+    { id: "linear", label: setT.widgetLinear || "Practice Tasks (Linear)" },
+    { id: "notifications", label: setT.widgetNotifications || "Recent Notifications" },
+  ];
+  const { t } = useLanguage();
+  const setT = (t as any).settings || {};
 
   const toggleWidget = (id: string) => {
     const current = prefs.dashboardWidgets;
@@ -40,9 +50,9 @@ const Settings = () => {
               <div className="bg-primary/10 text-primary rounded-xl p-2.5">
                 <SettingsIcon size={22} />
               </div>
-              <h1 className="text-3xl font-display tracking-tight text-foreground">Settings</h1>
+              <h1 className="text-3xl font-display tracking-tight text-foreground">{setT.title}</h1>
             </div>
-            <p className="text-muted-foreground mb-8 ml-14">Your preferences are saved automatically.</p>
+            <p className="text-muted-foreground mb-8 ms-14">{setT.subtitle}</p>
           </motion.div>
 
           <div className="space-y-6">
@@ -56,15 +66,15 @@ const Settings = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Label className="text-xs">Theme</Label>
+                  <Label className="text-xs">{setT.theme}</Label>
                   <Select value={prefs.theme} onValueChange={(v) => updatePrefs({ theme: v as any })}>
                     <SelectTrigger className="w-48">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="system">System Default</SelectItem>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="system">{setT.systemDefault}</SelectItem>
+                      <SelectItem value="light">{setT.light}</SelectItem>
+                      <SelectItem value="dark">{setT.dark}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -85,8 +95,8 @@ const Settings = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="he">עברית (Hebrew)</SelectItem>
+                    <SelectItem value="en">{setT.en}</SelectItem>
+                    <SelectItem value="he">{setT.he}</SelectItem>
                   </SelectContent>
                 </Select>
               </CardContent>
@@ -101,23 +111,23 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-xs text-muted-foreground">Choose how you want to receive notifications.</p>
+                <p className="text-xs text-muted-foreground">{setT.notificationDesc}</p>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">In-App Notifications</Label>
+                    <Label className="text-sm">{setT.notifyInApp}</Label>
                     <Switch checked={prefs.notifyInApp} onCheckedChange={(v) => updatePrefs({ notifyInApp: v })} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">Email Notifications</Label>
+                    <Label className="text-sm">{setT.notifyEmail}</Label>
                     <Switch checked={prefs.notifyEmail} onCheckedChange={(v) => updatePrefs({ notifyEmail: v })} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">Telegram Notifications</Label>
+                    <Label className="text-sm">{setT.notifyTelegram}</Label>
                     <Switch checked={prefs.notifyTelegram} onCheckedChange={(v) => updatePrefs({ notifyTelegram: v })} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">Browser Push Notifications</Label>
+                    <Label className="text-sm">{setT.notifyPush}</Label>
                     <Switch checked={prefs.notifyPush} onCheckedChange={(v) => updatePrefs({ notifyPush: v })} />
                   </div>
                 </div>
@@ -138,8 +148,8 @@ const Settings = () => {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-sm">Bottom Navigation Bar</Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">Show a floating nav bar at the bottom of the screen.</p>
+                    <Label className="text-sm">{setT.bottomNav}</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">{setT.bottomNavDesc}</p>
                   </div>
                   <Switch
                     checked={prefs.mobileBottomNav}
@@ -158,7 +168,7 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-muted-foreground mb-3">Choose which widgets appear on your dashboard.</p>
+                <p className="text-xs text-muted-foreground mb-3">{setT.dashboardDesc}</p>
                 <div className="space-y-2">
                   {WIDGET_OPTIONS.map(w => (
                     <div key={w.id} className="flex items-center gap-3">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Footer from "@/components/Footer";
 
 type SoundType = "fire" | "wind" | "water" | "rain" | "forest";
@@ -212,6 +213,17 @@ const soundCreators: Record<SoundType, (ctx: AudioContext, gain: GainNode) => { 
 };
 
 const MindfulnessSounds = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).portalMindfulness || {};
+
+  const sounds: SoundConfig[] = [
+    { id: "fire", label: portalT.fireTitle || "Crackling Fire", icon: Flame, color: "text-orange-500", bgGradient: "from-orange-950/40 to-red-950/20", description: portalT.fireDesc || "Warm crackling flames" },
+    { id: "wind", label: portalT.windTitle || "Gentle Wind", icon: Wind, color: "text-sky-400", bgGradient: "from-sky-950/40 to-blue-950/20", description: portalT.windDesc || "Soft breeze through trees" },
+    { id: "water", label: portalT.waterTitle || "Water Stream", icon: Waves, color: "text-cyan-400", bgGradient: "from-cyan-950/40 to-teal-950/20", description: portalT.waterDesc || "Flowing mountain stream" },
+    { id: "rain", label: portalT.rainTitle || "Rainfall", icon: CloudRain, color: "text-indigo-400", bgGradient: "from-indigo-950/40 to-slate-950/20", description: portalT.rainDesc || "Gentle rain on leaves" },
+    { id: "forest", label: portalT.forestTitle || "Forest Ambience", icon: Trees, color: "text-emerald-400", bgGradient: "from-emerald-950/40 to-green-950/20", description: portalT.forestDesc || "Birds and rustling leaves" },
+  ];
+
   const [activeSound, setActiveSound] = useState<SoundType | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(70);
@@ -308,15 +320,15 @@ const MindfulnessSounds = () => {
         <div className="container max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="text-center mb-10">
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Mindfulness Sounds</h1>
-              <p className="text-muted-foreground">Take a moment. Breathe. Listen.</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{portalT.title || "Mindfulness Sounds"}</h1>
+              <p className="text-muted-foreground">{portalT.subtitle || "Take a moment. Breathe. Listen."}</p>
             </div>
           </motion.div>
 
           {/* Timer selector */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <Timer size={16} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Duration:</span>
+            <span className="text-sm text-muted-foreground">{portalT.duration || "Duration:"}</span>
             <div className="flex gap-1.5">
               {TIMER_OPTIONS.map((m) => (
                 <Button
@@ -327,7 +339,7 @@ const MindfulnessSounds = () => {
                   onClick={() => setTimerMinutes(m)}
                   disabled={isPlaying}
                 >
-                  {m} min
+                  {m} {portalT.min || "min"}
                 </Button>
               ))}
             </div>
@@ -387,7 +399,7 @@ const MindfulnessSounds = () => {
                 >
                   <button
                     onClick={() => togglePlay(sound.id)}
-                    className={`w-full rounded-2xl border p-6 text-left transition-all hover:shadow-md ${
+                    className={`w-full rounded-2xl border p-6 text-start transition-all hover:shadow-md ${
                       isActive
                         ? "border-primary bg-primary/5 shadow-lg"
                         : "border-border/50 bg-card hover:border-primary/30"

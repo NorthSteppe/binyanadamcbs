@@ -3,14 +3,20 @@ import { motion } from "framer-motion";
 import { Wrench, Timer, Grid3x3, Headphones } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/i18n/LanguageContext";
 
-const clientTools = [
-  { label: "ACT Matrix", path: "/portal/toolkit/act-matrix", icon: Grid3x3, description: "Map your values, obstacles, and committed actions using the ACT framework." },
-  { label: "Pomodoro Timer", path: "/portal/toolkit/pomodoro", icon: Timer, description: "Stay focused with timed work and break intervals." },
-  { label: "Mindfulness Sounds", path: "/portal/toolkit/mindfulness", icon: Headphones, description: "Ambient nature sounds for relaxation and mindful breathing exercises." },
-];
+
 
 const Toolkit = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).portalToolkit || {};
+
+  const clientTools = [
+    { label: portalT.actMatrix || "ACT Matrix", path: "/portal/toolkit/act-matrix", icon: Grid3x3, description: portalT.actMatrixDesc || "Map your values, obstacles, and committed actions using the ACT framework." },
+    { label: portalT.pomodoro || "Pomodoro Timer", path: "/portal/toolkit/pomodoro", icon: Timer, description: portalT.pomodoroDesc || "Stay focused with timed work and break intervals." },
+    { label: portalT.mindfulness || "Mindfulness Sounds", path: "/portal/toolkit/mindfulness", icon: Headphones, description: portalT.mindfulnessDesc || "Ambient nature sounds for relaxation and mindful breathing exercises." },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -21,9 +27,9 @@ const Toolkit = () => {
               <div className="bg-primary/10 text-primary rounded-xl p-2.5">
                 <Wrench size={22} />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">Client Toolkit</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground">{portalT.toolkitTitle || "Client Toolkit"}</h1>
             </div>
-            <p className="text-muted-foreground mb-10 ml-14">Tools to support your focus and wellbeing.</p>
+            <p className="text-muted-foreground mb-10 ms-14">{portalT.toolkitSubtitle || "Tools to support your focus and wellbeing."}</p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 gap-4">

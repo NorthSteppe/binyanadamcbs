@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 type TimerMode = "focus" | "short-break" | "long-break";
 
@@ -35,6 +36,15 @@ const MODE_CONFIG: Record<TimerMode, { label: string; colorClass: string; ringCl
 };
 
 const PomodoroTimer = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).portalPomodoro || {};
+
+  const MODE_CONFIG: Record<TimerMode, { label: string; colorClass: string; ringClass: string }> = {
+    focus: { label: portalT.focus || "Focus", colorClass: "text-primary", ringClass: "stroke-primary" },
+    "short-break": { label: portalT.shortBreak || "Short Break", colorClass: "text-emerald-500", ringClass: "stroke-emerald-500" },
+    "long-break": { label: portalT.longBreak || "Long Break", colorClass: "text-blue-500", ringClass: "stroke-blue-500" },
+  };
+
   const [settings, setSettings] = useState<TimerSettings>(() => {
     const saved = localStorage.getItem("pomodoro-settings");
     return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
@@ -192,7 +202,7 @@ const PomodoroTimer = () => {
           className="rounded-full h-16 w-16 shadow-lg"
           onClick={() => setIsRunning(!isRunning)}
         >
-          {isRunning ? <Pause size={24} /> : <Play size={24} className="ml-0.5" />}
+          {isRunning ? <Pause size={24} /> : <Play size={24} className="ms-0.5" />}
         </Button>
         <Button variant="outline" size="icon" className="rounded-full h-12 w-12" onClick={() => setShowSettings(!showSettings)}>
           <Settings size={18} />
@@ -201,7 +211,7 @@ const PomodoroTimer = () => {
 
       {/* Pomodoro count */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Completed:</span>
+        <span className="text-sm text-muted-foreground">{portalT.completed || "Completed:"}</span>
         <div className="flex gap-1.5">
           {Array.from({ length: settings.longBreakInterval }).map((_, i) => (
             <div
@@ -212,7 +222,7 @@ const PomodoroTimer = () => {
             />
           ))}
         </div>
-        <span className="text-sm font-semibold text-foreground ml-1">{completedPomodoros}</span>
+        <span className="text-sm font-semibold text-foreground ms-1">{completedPomodoros}</span>
       </div>
 
       {/* Settings panel */}
@@ -226,7 +236,7 @@ const PomodoroTimer = () => {
           >
             <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-5">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-foreground">Timer Settings</h3>
+                <h3 className="font-semibold text-foreground">{portalT.timerSettings || "Timer Settings"}</h3>
                 <button onClick={() => setShowSettings(false)} className="text-muted-foreground hover:text-foreground">
                   <X size={16} />
                 </button>
@@ -234,7 +244,7 @@ const PomodoroTimer = () => {
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Focus Duration: {settings.focusMinutes} min</Label>
+                  <Label className="text-xs text-muted-foreground">{(portalT.focusDuration || "Focus Duration: {{min}} min").replace("{{min}}", settings.focusMinutes)}</Label>
                   <Slider
                     value={[settings.focusMinutes]}
                     onValueChange={([v]) => { setSettings(s => ({ ...s, focusMinutes: v })); if (mode === "focus" && !isRunning) setSecondsLeft(v * 60); }}
@@ -243,7 +253,7 @@ const PomodoroTimer = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Short Break: {settings.shortBreakMinutes} min</Label>
+                  <Label className="text-xs text-muted-foreground">{(portalT.shortBreakDuration || "Short Break: {{min}} min").replace("{{min}}", settings.shortBreakMinutes)}</Label>
                   <Slider
                     value={[settings.shortBreakMinutes]}
                     onValueChange={([v]) => { setSettings(s => ({ ...s, shortBreakMinutes: v })); if (mode === "short-break" && !isRunning) setSecondsLeft(v * 60); }}
@@ -252,7 +262,7 @@ const PomodoroTimer = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Long Break: {settings.longBreakMinutes} min</Label>
+                  <Label className="text-xs text-muted-foreground">{(portalT.longBreakDuration || "Long Break: {{min}} min").replace("{{min}}", settings.longBreakMinutes)}</Label>
                   <Slider
                     value={[settings.longBreakMinutes]}
                     onValueChange={([v]) => { setSettings(s => ({ ...s, longBreakMinutes: v })); if (mode === "long-break" && !isRunning) setSecondsLeft(v * 60); }}
@@ -261,7 +271,7 @@ const PomodoroTimer = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Long break every {settings.longBreakInterval} pomodoros</Label>
+                  <Label className="text-xs text-muted-foreground">{(portalT.longBreakEvery || "Long break every {{count}} pomodoros").replace("{{count}}", settings.longBreakInterval)}</Label>
                   <Slider
                     value={[settings.longBreakInterval]}
                     onValueChange={([v]) => setSettings(s => ({ ...s, longBreakInterval: v }))}
@@ -271,15 +281,15 @@ const PomodoroTimer = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">Auto-start breaks</Label>
+                  <Label className="text-xs text-muted-foreground">{portalT.autoStartBreaks || "Auto-start breaks"}</Label>
                   <Switch checked={settings.autoStartBreaks} onCheckedChange={(v) => setSettings(s => ({ ...s, autoStartBreaks: v }))} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">Auto-start focus</Label>
+                  <Label className="text-xs text-muted-foreground">{portalT.autoStartFocus || "Auto-start focus"}</Label>
                   <Switch checked={settings.autoStartFocus} onCheckedChange={(v) => setSettings(s => ({ ...s, autoStartFocus: v }))} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">Sound notification</Label>
+                  <Label className="text-xs text-muted-foreground">{portalT.soundNotification || "Sound notification"}</Label>
                   <Switch checked={settings.soundEnabled} onCheckedChange={(v) => setSettings(s => ({ ...s, soundEnabled: v }))} />
                 </div>
               </div>

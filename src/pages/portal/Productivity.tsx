@@ -9,8 +9,11 @@ import TaskBoard from "@/components/productivity/TaskBoard";
 import PersonalCalendar from "@/components/productivity/PersonalCalendar";
 import ProjectManager from "@/components/productivity/ProjectManager";
 import AISuggestionsPanel from "@/components/productivity/AISuggestionsPanel";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const Productivity = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).portalProductivity || {};
   const [searchParams] = useSearchParams();
   const [calendarFullscreen, setCalendarFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "board");
@@ -43,12 +46,8 @@ const Productivity = () => {
         <div className="container max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-1 flex items-center gap-3">
-              <LayoutDashboard className="text-primary" size={28} />
-              Productivity Hub
-            </h1>
-            <p className="text-muted-foreground mb-8">
-              Manage tasks, plan your day with AI, and stay focused — all in one place.
-            </p>
+              <LayoutDashboard className="text-primary" size={28} />{portalT.title || "Productivity Hub"}</h1>
+            <p className="text-muted-foreground mb-8">{portalT.subtitle || "Manage tasks, plan your day with AI, and stay focused — all in one place."}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -69,8 +68,8 @@ const Productivity = () => {
             <div className="lg:col-span-9">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
                 <TabsList className="bg-muted/50">
-                  <TabsTrigger value="board" className="gap-1.5"><ListTodo size={14} /> Board</TabsTrigger>
-                  <TabsTrigger value="calendar" className="gap-1.5"><Calendar size={14} /> Calendar</TabsTrigger>
+                  <TabsTrigger value="board" className="gap-1.5"><ListTodo size={14} /> {portalT.board || "Board"}</TabsTrigger>
+                  <TabsTrigger value="calendar" className="gap-1.5"><Calendar size={14} /> {portalT.calendar || "Calendar"}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="board">

@@ -32,7 +32,7 @@ const Resources = () => {
   const [filter, setFilter] = useState("all");
   const { t } = useLanguage();
   const { session, roles } = useAuth();
-  const portalT = (t as any).portal || {};
+  const portalT = (t as any).portalResources || {};
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -117,21 +117,21 @@ const Resources = () => {
               {session && (
                 <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
                   <DialogTrigger asChild>
-                    <Button className="gap-2"><Upload size={16} /> Upload Resource</Button>
+                    <Button className="gap-2"><Upload size={16} />{portalT.uploadResourceBtn || "Upload Resource"}</Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <DialogHeader><DialogTitle>Upload a Resource</DialogTitle></DialogHeader>
+                    <DialogHeader><DialogTitle>{portalT.uploadResourceTitle || "Upload a Resource"}</DialogTitle></DialogHeader>
                     <div className="space-y-3">
                       <div>
-                        <Label>Title</Label>
-                        <Input value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} placeholder="Resource title" />
+                        <Label>{portalT.titleLbl || "Title"}</Label>
+                        <Input value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} placeholder={portalT.titlePlaceholder || "Resource title"} />
                       </div>
                       <div>
-                        <Label>Description</Label>
-                        <Textarea value={newResource.description} onChange={(e) => setNewResource({ ...newResource, description: e.target.value })} placeholder="Brief description" rows={2} />
+                        <Label>{portalT.descriptionLbl || "Description"}</Label>
+                        <Textarea value={newResource.description} onChange={(e) => setNewResource({ ...newResource, description: e.target.value })} placeholder={portalT.descriptionPlaceholder || "Brief description"} rows={2} />
                       </div>
                       <div>
-                        <Label>Category</Label>
+                        <Label>{portalT.categoryLbl || "Category"}</Label>
                         <Select value={newResource.category} onValueChange={(v) => setNewResource({ ...newResource, category: v })}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -142,21 +142,21 @@ const Resources = () => {
                         </Select>
                       </div>
                       <div>
-                        <Label>File (optional)</Label>
+                        <Label>{portalT.fileLbl || "File (optional)"}</Label>
                         <Input
                           type="file"
                           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.txt,.xlsx,.pptx"
                           onChange={(e) => setFile(e.target.files?.[0] || null)}
                         />
-                        <p className="text-[10px] text-muted-foreground mt-1">PDF, Word, Images, Excel, PowerPoint (max 10MB)</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{portalT.fileHint || "PDF, Word, Images, Excel, PowerPoint (max 10MB)"}</p>
                       </div>
                       <div>
-                        <Label>External URL (optional)</Label>
+                        <Label>{portalT.urlLbl || "External URL (optional)"}</Label>
                         <Input value={newResource.external_url} onChange={(e) => setNewResource({ ...newResource, external_url: e.target.value })} placeholder="https://..." />
                       </div>
                       <Button className="w-full" onClick={handleUpload} disabled={!newResource.title.trim() || uploading}>
-                        {uploading ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Upload size={14} className="mr-1" />}
-                        {uploading ? "Uploading..." : "Upload Resource"}
+                        {uploading ? <Loader2 size={14} className="me-1 animate-spin" /> : <Upload size={14} className="me-1" />}
+                        {uploading ? (portalT.uploadingBtn || "Uploading...") : (portalT.uploadResourceBtn || "Upload Resource")}
                       </Button>
                     </div>
                   </DialogContent>
@@ -186,7 +186,7 @@ const Resources = () => {
               <p className="text-muted-foreground">{portalT.noResources || "No resources available yet."}</p>
               {session && (
                 <Button className="mt-4 gap-2" onClick={() => setUploadOpen(true)}>
-                  <Upload size={16} /> Upload your first resource
+                  <Upload size={16} /> {portalT.uploadFirst || "Upload your first resource"}
                 </Button>
               )}
             </div>
@@ -209,16 +209,16 @@ const Resources = () => {
                     <div className="flex gap-2 mt-auto items-center">
                       {resource.file_url && (
                         <Button asChild variant="outline" size="sm" className="rounded-full gap-2">
-                          <a href={resource.file_url} target="_blank" rel="noopener noreferrer"><Download size={14} /> Download</a>
+                          <a href={resource.file_url} target="_blank" rel="noopener noreferrer"><Download size={14} />{portalT.downloadBtn || "Download"}</a>
                         </Button>
                       )}
                       {resource.external_url && (
                         <Button asChild variant="outline" size="sm" className="rounded-full gap-2">
-                          <a href={resource.external_url} target="_blank" rel="noopener noreferrer"><ExternalLink size={14} /> View</a>
+                          <a href={resource.external_url} target="_blank" rel="noopener noreferrer"><ExternalLink size={14} />{portalT.viewBtn || "View"}</a>
                         </Button>
                       )}
                       {canDelete && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                        <Button variant="ghost" size="icon" className="h-8 w-8 ms-auto opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handleDelete(resource.id)}>
                           <Trash2 size={14} className="text-destructive" />
                         </Button>
