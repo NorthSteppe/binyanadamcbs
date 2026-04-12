@@ -54,13 +54,6 @@ const DEV_TODOS: ClientTodo[] = [
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const getGreeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return portalT.goodMorning || "Good morning";
-  if (h < 17) return portalT.goodAfternoon || "Good afternoon";
-  return portalT.goodEvening || "Good evening";
-};
-
 const formatDay = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 
@@ -141,6 +134,13 @@ const Dashboard = () => {
 
   const portalT = (t as any).portalDashboard || {};
   const firstName = profile?.full_name?.split(" ")[0] || (import.meta.env.DEV ? "Adam" : "");
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return portalT.goodMorning || "Good morning";
+    if (h < 17) return portalT.goodAfternoon || "Good afternoon";
+    return portalT.goodEvening || "Good evening";
+  };
 
   useEffect(() => {
     if (!user || import.meta.env.DEV) return;
@@ -298,7 +298,7 @@ const Dashboard = () => {
               <Link to="/portal/messages">
                 <Button variant="outline" size="sm" className="gap-2 rounded-full h-9 text-xs relative border-white/20 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm">
                   <Bell size={13} />
-                  Messages
+                  {portalT.messages || "Messages"}
                   <span className="absolute -top-1.5 end-[-0.375rem] w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                     {unreadCount}
                   </span>
@@ -308,7 +308,7 @@ const Dashboard = () => {
             <Link to="/portal/booking">
               <Button size="sm" className="gap-2 rounded-full h-9 text-xs shadow-md">
                 <Calendar size={13} />
-                Book Session
+                {portalT.bookSession || "Book Session"}
               </Button>
             </Link>
           </motion.div>
@@ -321,16 +321,16 @@ const Dashboard = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             {
-              label: "Sessions Ahead",
+              label: portalT.sessionsAhead || "Sessions Ahead",
               value: upcomingSessions.length,
               icon: Calendar,
               accentColor: "#3b82f6",
               iconBg: "rgba(59,130,246,0.10)",
-              note: nextSession ? `${portalT.nextSession}: ${formatDay(nextSession.session_date)}` : "None scheduled",
+              note: nextSession ? `${portalT.nextSession || "Next"}: ${formatDay(nextSession.session_date)}` : (portalT.noneScheduled || "None scheduled"),
               to: "/portal/booking",
             },
             {
-              label: "Pending Tasks",
+              label: portalT.pendingTasks || "Pending Tasks",
               value: todos.filter(t => !t.is_completed).length,
               icon: ListTodo,
               accentColor: "#8b5cf6",
@@ -339,21 +339,21 @@ const Dashboard = () => {
               to: "/portal/productivity",
             },
             {
-              label: "Messages",
+              label: portalT.messages || "Messages",
               value: unreadCount,
               icon: MessageSquare,
               accentColor: "#10b981",
               iconBg: "rgba(16,185,129,0.10)",
-              note: unreadCount > 0 ? "Unread waiting" : "All read",
+              note: unreadCount > 0 ? (portalT.unreadWaiting || "Unread waiting") : (portalT.allRead || "All read"),
               to: "/portal/messages",
             },
             {
-              label: "Documents",
+              label: portalT.documents || "Documents",
               value: documents.length,
               icon: Files,
               accentColor: "#f59e0b",
               iconBg: "rgba(245,158,11,0.10)",
-              note: "Shared securely",
+              note: portalT.sharedSecurely || "Shared securely",
               to: "#documents",
             },
           ].map((stat, i) => (
@@ -452,7 +452,7 @@ const Dashboard = () => {
                             ? "bg-amber-100 text-amber-700"
                             : "bg-black/[0.05] text-muted-foreground"
                         }`}>
-                          {days === 0 ? "Today" : days === 1 ? "Tomorrow" : (portalT.inDays || "").replace("{{days}}", days)}
+                          {days === 0 ? (portalT.today || "Today") : days === 1 ? (portalT.tomorrow || "Tomorrow") : (portalT.inDays || "").replace("{{days}}", days)}
                         </span>
                       </div>
                     );
@@ -543,8 +543,8 @@ const Dashboard = () => {
             {[
               {
                 to: "/portal/messages",
-                label: "Messages",
-                desc: unreadCount > 0 ? `${unreadCount} unread` : "Chat with therapist",
+                label: portalT.messages || "Messages",
+                desc: unreadCount > 0 ? `${unreadCount} ${portalT.unread || "unread"}` : (portalT.chatWithTherapist || "Chat with therapist"),
                 icon: MessageSquare,
                 color: "#10b981",
                 bg: "rgba(16,185,129,0.08)",
@@ -552,24 +552,24 @@ const Dashboard = () => {
               },
               {
                 to: "/portal/resources",
-                label: "Resources",
-                desc: "Notes & materials",
+                label: portalT.resources || "Resources",
+                desc: portalT.notesAndMaterials || "Notes & materials",
                 icon: BookOpen,
                 color: "#f59e0b",
                 bg: "rgba(245,158,11,0.08)",
               },
               {
                 to: "/portal/toolkit",
-                label: "Toolkit",
-                desc: "Exercises & tools",
+                label: portalT.toolkit || "Toolkit",
+                desc: portalT.exercisesAndTools || "Exercises & tools",
                 icon: Timer,
                 color: "#ef4444",
                 bg: "rgba(239,68,68,0.08)",
               },
               {
                 to: "/portal/productivity",
-                label: "Task Board",
-                desc: "All tasks & calendar",
+                label: portalT.taskBoard || "Task Board",
+                desc: portalT.allTasksAndCalendar || "All tasks & calendar",
                 icon: ListTodo,
                 color: "#8b5cf6",
                 bg: "rgba(139,92,246,0.08)",

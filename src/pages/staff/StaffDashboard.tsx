@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,36 +22,43 @@ interface StaffTodo {
   due_date: string | null; assigned_to: string; created_by: string; created_at: string;
 }
 
-const getGreeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-};
 
-const clinicalTools = [
-  { label: "Calendar", path: "/staff/calendar", icon: Calendar, description: "View and manage all sessions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
-  { label: "Clinical Tools", path: "/staff/clinical-tools", icon: ClipboardList, description: "CBS data collection tools", accentColor: "#8b5cf6", iconBg: "rgba(139,92,246,0.10)" },
-  { label: "Client To-Dos", path: "/staff/todos", icon: ListTodo, description: "Manage client task lists", accentColor: "#f59e0b", iconBg: "rgba(245,158,11,0.10)" },
-  { label: "ACT Matrix", path: "/staff/toolkit/act-matrix", icon: Wrench, description: "ACT Matrix for clients", accentColor: "#10b981", iconBg: "rgba(16,185,129,0.10)" },
-  { label: "Business Planner", path: "/planner", icon: Briefcase, description: "Financials, TME matrix, and roadmap", accentColor: "#6366f1", iconBg: "rgba(99,102,241,0.10)" },
-];
-
-const workspaceTools = [
-  { label: "Productivity Hub", path: "/staff/productivity", icon: BarChart3, description: "Task board, calendar & AI", accentColor: "#6366f1", iconBg: "rgba(99,102,241,0.10)" },
-  { label: "Resources", path: "/staff/resources", icon: BookOpen, description: "Resource library", accentColor: "#f59e0b", iconBg: "rgba(245,158,11,0.10)" },
-  { label: "Toolkit", path: "/staff/toolkit", icon: Timer, description: "Pomodoro, ACT Matrix & more", accentColor: "#ef4444", iconBg: "rgba(239,68,68,0.10)" },
-  { label: "Messages", path: "/staff/messages", icon: MessageSquare, description: "Secure messaging", accentColor: "#10b981", iconBg: "rgba(16,185,129,0.10)" },
-  { label: "Booking", path: "/staff/booking", icon: Calendar, description: "Manage your sessions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
-  { label: "Settings", path: "/settings", icon: Settings, description: "Preferences & notifications", accentColor: "#94a3b8", iconBg: "rgba(148,163,184,0.10)" },
-];
 
 const StaffDashboard = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).staffHub || {};
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return portalT.goodMorning || "Good morning";
+    if (h < 17) return portalT.goodAfternoon || "Good afternoon";
+    return portalT.goodEvening || "Good evening";
+  };
+
   const { profile, user } = useAuth();
   const { prefs } = usePreferences();
   const [myTasks, setMyTasks] = useState<StaffTodo[]>([]);
   const [stats, setStats] = useState({ upcomingSessions: 0, pendingStaffTodos: 0, pendingClientTodos: 0, loading: true });
   const firstName = profile?.full_name?.split(" ")[0] || "";
+
+    const clinicalTools = [
+        { label: portalT.calLabel || "Calendar", path: "/staff/calendar", icon: Calendar, description: portalT.calDesc || "View and manage all sessions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
+        { label: portalT.toolsLabel || "Clinical Tools", path: "/staff/clinical-tools", icon: ClipboardList, description: portalT.toolsDesc || "CBS data collection tools", accentColor: "#8b5cf6", iconBg: "rgba(139,92,246,0.10)" },
+        { label: portalT.clientTodosLabel || "Client To-Dos", path: "/staff/todos", icon: ListTodo, description: portalT.clientTodosDesc || "Manage client task lists", accentColor: "#f59e0b", iconBg: "rgba(245,158,11,0.10)" },
+        { label: portalT.matrixLabel || "ACT Matrix", path: "/staff/toolkit/act-matrix", icon: Wrench, description: portalT.matrixDesc || "ACT Matrix for clients", accentColor: "#10b981", iconBg: "rgba(16,185,129,0.10)" },
+        { label: portalT.plannerLabel || "Business Planner", path: "/planner", icon: Briefcase, description: portalT.plannerDesc || "Financials, TME matrix, and roadmap", accentColor: "#6366f1", iconBg: "rgba(99,102,241,0.10)" },
+    ];
+    
+
+    const workspaceTools = [
+        { label: portalT.prodLabel || "Productivity Hub", path: "/staff/productivity", icon: BarChart3, description: portalT.prodDesc || "Task board, calendar & AI", accentColor: "#6366f1", iconBg: "rgba(99,102,241,0.10)" },
+        { label: portalT.resourcesLabel || "Resources", path: "/staff/resources", icon: BookOpen, description: portalT.resourcesDesc || "Resource library", accentColor: "#f59e0b", iconBg: "rgba(245,158,11,0.10)" },
+        { label: portalT.toolkitLabel || "Toolkit", path: "/staff/toolkit", icon: Timer, description: portalT.toolkitDesc || "Pomodoro, ACT Matrix & more", accentColor: "#ef4444", iconBg: "rgba(239,68,68,0.10)" },
+        { label: portalT.msgLabel || "Messages", path: "/staff/messages", icon: MessageSquare, description: portalT.msgDesc || "Secure messaging", accentColor: "#10b981", iconBg: "rgba(16,185,129,0.10)" },
+        { label: portalT.bookingLabel || "Booking", path: "/staff/booking", icon: Calendar, description: portalT.bookingDesc || "Manage your sessions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
+        { label: portalT.settingsLabel || "Settings", path: "/settings", icon: Settings, description: portalT.settingsDesc || "Preferences & notifications", accentColor: "#94a3b8", iconBg: "rgba(148,163,184,0.10)" },
+    ];
+    
 
   const fetchMyTasks = useCallback(async () => {
     if (!user) return;
@@ -98,9 +106,9 @@ const StaffDashboard = () => {
         {/* Stats */}
         {!stats.loading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <StatTile label="Upcoming Sessions" value={stats.upcomingSessions} note="Scheduled in future" icon={Calendar} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} to="/staff/calendar" />
-            <StatTile label="My Tasks" value={stats.pendingStaffTodos} note="Incomplete staff to-dos" icon={ListTodo} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} to="/staff/staff-todos" />
-            <StatTile label="Client Homework" value={stats.pendingClientTodos} note="Pending from clients" icon={ClipboardList} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} to="/staff/todos" />
+            <StatTile label={portalT.upSessions || "Upcoming Sessions"} value={stats.upcomingSessions} note={portalT.upSessionsNote || "Scheduled in future"} icon={Calendar} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} to="/staff/calendar" />
+            <StatTile label={portalT.myTasks || "My Tasks"} value={stats.pendingStaffTodos} note={portalT.myTasksNote || "Incomplete staff to-dos"} icon={ListTodo} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} to="/staff/staff-todos" />
+            <StatTile label={portalT.clientHw || "Client Homework"} value={stats.pendingClientTodos} note={portalT.clientHwNote || "Pending from clients"} icon={ClipboardList} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} to="/staff/todos" />
           </div>
         )}
 
@@ -108,7 +116,7 @@ const StaffDashboard = () => {
         <div className="grid lg:grid-cols-2 gap-5">
           {/* Clinical Tools */}
           <FloatCard delay={0.18} className="flex flex-col">
-            <WidgetHeader icon={ClipboardList} title="Clinical Tools" subtitle="Client-facing clinical work" accentColor="#3b82f6" />
+            <WidgetHeader icon={ClipboardList} title={portalT.clinicalToolsSection || "Clinical Tools"} subtitle={portalT.clinicalToolsSub || "Client-facing clinical work"} accentColor="#3b82f6" />
             <div className="p-4 space-y-2 flex-1">
               {clinicalTools.map((tool, i) => (
                 <motion.div
@@ -139,7 +147,7 @@ const StaffDashboard = () => {
 
           {/* My Workspace */}
           <FloatCard delay={0.22} className="flex flex-col">
-            <WidgetHeader icon={Users} title="My Workspace" subtitle="Personal tools & settings" accentColor="#8b5cf6" />
+            <WidgetHeader icon={Users} title={portalT.myWorkspaceSection || "My Workspace"} subtitle={portalT.myWorkspaceSub || "Personal tools & settings"} accentColor="#8b5cf6" />
             <div className="p-4 space-y-2 flex-1">
               {workspaceTools.map((tool, i) => (
                 <motion.div
@@ -174,20 +182,19 @@ const StaffDashboard = () => {
           <FloatCard delay={0.28} className="flex flex-col">
             <WidgetHeader
               icon={ListTodo}
-              title="My Tasks"
-              subtitle={`${myTasks.length} pending`}
+              title={portalT.myTasks || "My Tasks"}
+              subtitle={`${myTasks.length} ${portalT.pendingTasks || "pending"}`}
               accentColor="#f59e0b"
               action={
                 <Link to="/staff/staff-todos">
-                  <Button variant="ghost" size="sm" className="text-xs gap-1 h-7 rounded-full">
-                    View all <ArrowRight size={11} />
+                  <Button variant="ghost" size="sm" className="text-xs gap-1 h-7 rounded-full"> {portalT.viewAll || "View all"} <ArrowRight size={11} />
                   </Button>
                 </Link>
               }
             />
             <div className="p-5">
               {myTasks.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No pending tasks assigned to you.</p>
+                <p className="text-sm text-muted-foreground text-center py-6">{portalT.noPendingTasks || "No pending tasks assigned to you."}</p>
               ) : (
                 <div className="space-y-1.5">
                   {myTasks.map((task) => (
@@ -204,8 +211,7 @@ const StaffDashboard = () => {
                         <p className="text-[13px] font-medium text-foreground truncate">{task.title}</p>
                         {task.due_date && (
                           <p className="text-[10px] text-amber-600 flex items-center gap-1 mt-0.5">
-                            <Clock size={9} />
-                            Due {new Date(task.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                            <Clock size={9} />{portalT.due || "Due"} {new Date(task.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                           </p>
                         )}
                       </div>
@@ -220,7 +226,7 @@ const StaffDashboard = () => {
         {/* Linear / Practice Tasks */}
         {showWidget("linear") && (
           <FloatCard delay={0.33}>
-            <WidgetHeader icon={BarChart3} title="Practice Tasks" subtitle="Team task board" accentColor="#6366f1" />
+            <WidgetHeader icon={BarChart3} title={portalT.practiceTasks || "Practice Tasks"} subtitle={portalT.practiceTasksSub || "Team task board"} accentColor="#6366f1" />
             <div className="p-5">
               <LinearTasksPanel />
             </div>
@@ -233,9 +239,7 @@ const StaffDashboard = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="pb-4"
           style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px" }}
-        >
-          Therapist Portal · Binyan Adam CBS
-        </motion.div>
+        >{portalT.portalFooter || "Therapist Portal · Binyan Adam CBS"}</motion.div>
       </div>
 
       <Footer />

@@ -418,7 +418,7 @@ const MindfulnessSounds = () => {
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
                         </span>
-                        Playing
+                        {portalT.playing || "Playing"}
                       </Badge>
                     )}
                   </button>
@@ -429,8 +429,7 @@ const MindfulnessSounds = () => {
 
           <div className="mt-10 text-center">
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              These ambient sounds are generated in real-time using your browser. No internet connection is needed once loaded. 
-              Find a comfortable position, close your eyes, and focus on your breath.
+              {portalT.footerNote || "These ambient sounds are generated in real-time using your browser. No internet connection is needed once loaded. Find a comfortable position, close your eyes, and focus on your breath."}
             </p>
           </div>
         </div>

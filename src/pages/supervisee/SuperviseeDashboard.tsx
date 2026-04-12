@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,23 +12,26 @@ import {
   METAL_BG, FloatCard, WidgetHeader, StatTile, PortalTopBar,
 } from "@/components/portal/PortalShell";
 
-const getGreeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-};
-
-const tools = [
-  { label: "Case Logs", path: "/supervisee/case-logs", icon: ClipboardList, description: "Log session details, targets, and interventions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
-  { label: "My Documents", path: "/supervisee/documents", icon: FileText, description: "Upload and view supervision documents", accentColor: "#8b5cf6", iconBg: "rgba(139,92,246,0.10)" },
-  { label: "Calendar", path: "/supervisee/calendar", icon: Calendar, description: "View your session schedule", accentColor: "#10b981", iconBg: "rgba(16,185,129,0.10)" },
-  { label: "Clinical Tools", path: "/supervisee/clinical-tools", icon: Wrench, description: "ABC data sheets, functional assessments & more", accentColor: "#f59e0b", iconBg: "rgba(245,158,11,0.10)" },
-  { label: "Resources", path: "/supervisee/resources", icon: BookOpen, description: "Access shared learning resources", accentColor: "#ef4444", iconBg: "rgba(239,68,68,0.10)" },
-  { label: "My To-Dos", path: "/supervisee/todos", icon: ListTodo, description: "Track your supervision tasks", accentColor: "#6366f1", iconBg: "rgba(99,102,241,0.10)" },
-];
-
 const SuperviseeDashboard = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).superviseeHub || {};
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return portalT.goodMorning || "Good morning";
+    if (h < 17) return portalT.goodAfternoon || "Good afternoon";
+    return portalT.goodEvening || "Good evening";
+  };
+
+  const tools = [
+    { label: portalT.caseLogsLabel || "Case Logs", path: "/supervisee/case-logs", icon: ClipboardList, description: portalT.caseLogsDesc || "Log session details, targets, and interventions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
+    { label: portalT.myDocsLabel || "My Documents", path: "/supervisee/documents", icon: FileText, description: portalT.myDocsDesc || "Upload and view supervision documents", accentColor: "#8b5cf6", iconBg: "rgba(139,92,246,0.10)" },
+    { label: portalT.calendarLabel || "Calendar", path: "/supervisee/calendar", icon: Calendar, description: portalT.calendarDesc || "View your session schedule", accentColor: "#10b981", iconBg: "rgba(16,185,129,0.10)" },
+    { label: portalT.clinicalToolsLabel || "Clinical Tools", path: "/supervisee/clinical-tools", icon: Wrench, description: portalT.clinicalToolsDesc || "ABC data sheets, functional assessments & more", accentColor: "#f59e0b", iconBg: "rgba(245,158,11,0.10)" },
+    { label: portalT.resourcesLabel || "Resources", path: "/supervisee/resources", icon: BookOpen, description: portalT.resourcesDesc || "Access shared learning resources", accentColor: "#ef4444", iconBg: "rgba(239,68,68,0.10)" },
+    { label: portalT.myTodosLabel || "My To-Dos", path: "/supervisee/todos", icon: ListTodo, description: portalT.myTodosDesc || "Track your supervision tasks", accentColor: "#6366f1", iconBg: "rgba(99,102,241,0.10)" },
+  ];
+
   const { profile, user } = useAuth();
   const [stats, setStats] = useState({ caseLogs: 0, documents: 0, pendingTodos: 0, loading: true });
   const firstName = profile?.full_name?.split(" ")[0] || "";
@@ -59,15 +63,15 @@ const SuperviseeDashboard = () => {
         {/* Stats */}
         {!stats.loading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <StatTile label="Case Logs" value={stats.caseLogs} note="Total sessions logged" icon={ClipboardList} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} to="/supervisee/case-logs" />
-            <StatTile label="Documents" value={stats.documents} note="Uploaded supervision files" icon={FileText} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} to="/supervisee/documents" />
-            <StatTile label="Pending To-Dos" value={stats.pendingTodos} note="Tasks to complete" icon={ListTodo} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} to="/supervisee/todos" />
+            <StatTile label={portalT.caseLogsLabel || "Case Logs"} value={stats.caseLogs} note={portalT.caseLogsNote || "Total sessions logged"} icon={ClipboardList} accentColor="#3b82f6" iconBg="rgba(59,130,246,0.10)" delay={0} to="/supervisee/case-logs" />
+            <StatTile label={portalT.myDocsLabel || "My Documents"} value={stats.documents} note={portalT.myDocsNote || "Uploaded supervision files"} icon={FileText} accentColor="#8b5cf6" iconBg="rgba(139,92,246,0.10)" delay={0.07} to="/supervisee/documents" />
+            <StatTile label={portalT.myTodosLabel || "Pending To-Dos"} value={stats.pendingTodos} note={portalT.myTodosNote || "Tasks to complete"} icon={ListTodo} accentColor="#f59e0b" iconBg="rgba(245,158,11,0.10)" delay={0.14} to="/supervisee/todos" />
           </div>
         )}
 
         {/* Tools grid */}
         <FloatCard delay={0.18}>
-          <WidgetHeader icon={Wrench} title="Your Tools" subtitle="Everything in one place" accentColor="#3b82f6" />
+          <WidgetHeader icon={Wrench} title={portalT.yourTools || "Your Tools"} subtitle={portalT.everythingInOnePlace || "Everything in one place"} accentColor="#3b82f6" />
           <div className="p-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {tools.map((tool, i) => (
               <motion.div
@@ -99,7 +103,7 @@ const SuperviseeDashboard = () => {
 
         {/* Notification settings */}
         <FloatCard delay={0.36}>
-          <WidgetHeader icon={Settings} title="Notification Settings" accentColor="#94a3b8" />
+          <WidgetHeader icon={Settings} title={portalT.notificationSettings || "Notification Settings"} accentColor="#94a3b8" />
           <div className="p-5">
             <NotificationSettings />
           </div>
@@ -111,9 +115,7 @@ const SuperviseeDashboard = () => {
           transition={{ duration: 0.6, delay: 0.42 }}
           className="pb-4"
           style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px" }}
-        >
-          Supervisee Portal · Binyan Adam CBS
-        </motion.div>
+        >{portalT.portalFooter || "Supervisee Portal · Binyan Adam CBS"}</motion.div>
       </div>
 
       <Footer />

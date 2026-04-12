@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Plus, ClipboardList, ChevronDown, ChevronRight, Trash2, Edit, Save, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,9 @@ const emptyLog = {
 };
 
 const CaseLogs = () => {
+  const { t } = useLanguage();
+  const portalT = (t as any).superviseeHub || {};
+
   const { user } = useAuth();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -56,6 +60,16 @@ const CaseLogs = () => {
   const [form, setForm] = useState(emptyLog);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  
+    const SESSION_TYPES = [
+        { value: "direct", label: portalT.typeDirect || "Direct Service" },
+        { value: "indirect", label: portalT.typeIndirect || "Indirect Service" },
+        { value: "supervision", label: portalT.typeSupervision || "Supervision Meeting" },
+        { value: "assessment", label: portalT.typeAssessment || "Assessment" },
+        { value: "parent_training", label: portalT.typeParent || "Parent/Caregiver Training" },
+        { value: "observation", label: portalT.typeObservation || "Observation" },
+    ];
+    
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ["supervisee-case-logs"],
     queryFn: async () => {
@@ -85,7 +99,7 @@ const CaseLogs = () => {
       setShowForm(false);
       setEditingId(null);
       setForm(emptyLog);
-      toast.success(editingId ? "Case log updated" : "Case log created");
+      toast.success(editingId ? portalT.logUpdated || "Case log updated" : portalT.logCreated || "Case log created");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -97,7 +111,7 @@ const CaseLogs = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["supervisee-case-logs"] });
-      toast.success("Case log deleted");
+      toast.success(portalT.logDeleted || "Case log deleted");
     },
   });
 
@@ -134,10 +148,10 @@ const CaseLogs = () => {
               <div className="bg-primary/10 text-primary rounded-xl p-2.5">
                 <ClipboardList size={22} />
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Case Logs</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{portalT.caseLogsLabel || "Case Logs"}</h1>
             </div>
             <Button onClick={() => { setForm(emptyLog); setEditingId(null); setShowForm(true); }} className="gap-2">
-              <Plus size={16} /> New Log
+              <Plus size={16} /> {portalT.newLog || "New Log"}
             </Button>
           </div>
 
@@ -146,7 +160,7 @@ const CaseLogs = () => {
           ) : logs.length === 0 ? (
             <div className="text-center py-16 bg-card border border-border rounded-2xl">
               <ClipboardList className="mx-auto mb-3 text-muted-foreground" size={40} />
-              <p className="text-muted-foreground">No case logs yet. Start logging your client sessions.</p>
+              <p className="text-muted-foreground">{portalT.noLogs || "No case logs yet. Start logging your client sessions."}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -173,15 +187,9 @@ const CaseLogs = () => {
                     <div className="px-4 pb-4 border-t border-border pt-3 space-y-3 text-sm">
                       {log.diagnosis && <div><span className="font-medium text-foreground">Diagnosis:</span> <span className="text-muted-foreground">{log.diagnosis}</span></div>}
                       {log.setting && <div><span className="font-medium text-foreground">Setting:</span> <span className="text-muted-foreground">{log.setting}</span></div>}
-                      {log.targets_addressed && <div><span className="font-medium text-foreground">Targets Addressed:</span><p className="text-muted-foreground whitespace-pre-wrap mt-1">{log.targets_addressed}</p></div>}
-                      {log.interventions_used && <div><span className="font-medium text-foreground">Interventions Used:</span><p className="text-muted-foreground whitespace-pre-wrap mt-1">{log.interventions_used}</p></div>}
-                      {log.client_response && <div><span className="font-medium text-foreground">Client Response:</span><p className="text-muted-foreground whitespace-pre-wrap mt-1">{log.client_response}</p></div>}
-                      {log.data_summary && <div><span className="font-medium text-foreground">Data Summary:</span><p className="text-muted-foreground whitespace-pre-wrap mt-1">{log.data_summary}</p></div>}
-                      {log.next_steps && <div><span className="font-medium text-foreground">Next Steps:</span><p className="text-muted-foreground whitespace-pre-wrap mt-1">{log.next_steps}</p></div>}
-                      {log.supervision_notes && <div><span className="font-medium text-foreground">Supervision Notes:</span><p className="text-muted-foreground whitespace-pre-wrap mt-1">{log.supervision_notes}</p></div>}
-                      <div className="flex gap-2 pt-2">
-                        <Button size="sm" variant="outline" onClick={() => openEdit(log)} className="gap-1"><Edit size={14} /> Edit</Button>
-                        <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(log.id)} className="gap-1"><Trash2 size={14} /> Delete</Button>
+                      <div className="flex gap-2 pt-1">
+                        <Button size="sm" variant="outline" onClick={() => openEdit(log)} className="gap-1"><Edit size={13} />{portalT.edit || "Edit"}</Button>
+                        <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(log.id)} className="gap-1"><Trash2 size={13} />{portalT.delete || "Delete"}</Button>
                       </div>
                     </div>
                   )}
@@ -193,16 +201,16 @@ const CaseLogs = () => {
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingId ? "Edit Case Log" : "New Case Log"}</DialogTitle>
+                <DialogTitle>{editingId ? (portalT.editLog || "Edit Case Log") : (portalT.newLogTitle || "New Case Log")}</DialogTitle>
               </DialogHeader>
               <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Client Name</Label>
+                    <Label>{portalT.clientName || "Client Name"}</Label>
                     <Input value={form.client_name} onChange={(e) => updateField("client_name", e.target.value)} required />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Client Age</Label>
+                    <Label>{portalT.clientAge || "Client Age"}</Label>
                     <Input value={form.client_age} onChange={(e) => updateField("client_age", e.target.value)} />
                   </div>
                   <div className="space-y-1.5">
@@ -210,11 +218,11 @@ const CaseLogs = () => {
                     <Input value={form.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Session Date & Time</Label>
+                    <Label>{portalT.sessionDateTime || "Session Date & Time"}</Label>
                     <Input type="datetime-local" value={form.session_date} onChange={(e) => updateField("session_date", e.target.value)} required />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Session Type</Label>
+                    <Label>{portalT.sessionType || "Session Type"}</Label>
                     <Select value={form.session_type} onValueChange={(v) => updateField("session_type", v)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -223,52 +231,52 @@ const CaseLogs = () => {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Duration (minutes)</Label>
+                    <Label>{portalT.durationMinutes || "Duration (minutes)"}</Label>
                     <Input type="number" value={form.duration_minutes} onChange={(e) => updateField("duration_minutes", parseInt(e.target.value) || 0)} />
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label>Setting (e.g. clinic, home, school)</Label>
+                    <Label>{portalT.settingPlaceholder || "Setting (e.g. clinic, home, school)"}</Label>
                     <Input value={form.setting} onChange={(e) => updateField("setting", e.target.value)} />
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Targets Addressed</Label>
-                  <Textarea value={form.targets_addressed} onChange={(e) => updateField("targets_addressed", e.target.value)} rows={3} placeholder="List behavioural targets worked on during the session..." />
+                  <Label>{portalT.targetsAddressed || "Targets Addressed"}</Label>
+                  <Textarea value={form.targets_addressed} onChange={(e) => updateField("targets_addressed", e.target.value)} rows={3} placeholder={portalT.targetsPlaceholder || "List behavioural targets worked on during the session..."} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Interventions Used</Label>
-                  <Textarea value={form.interventions_used} onChange={(e) => updateField("interventions_used", e.target.value)} rows={3} placeholder="DTT, NET, FCT, antecedent strategies, etc." />
+                  <Label>{portalT.interventionsUsed || "Interventions Used"}</Label>
+                  <Textarea value={form.interventions_used} onChange={(e) => updateField("interventions_used", e.target.value)} rows={3} placeholder={portalT.interventionsPlaceholder || "DTT, NET, FCT, antecedent strategies, etc."} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Client Response</Label>
-                  <Textarea value={form.client_response} onChange={(e) => updateField("client_response", e.target.value)} rows={3} placeholder="How did the client respond? Prompt levels, engagement, challenging behaviours..." />
+                  <Label>{portalT.clientResponse || "Client Response"}</Label>
+                  <Textarea value={form.client_response} onChange={(e) => updateField("client_response", e.target.value)} rows={3} placeholder={portalT.responsePlaceholder || "How did the client respond? Prompt levels, engagement, challenging behaviours..."} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Data Summary</Label>
-                  <Textarea value={form.data_summary} onChange={(e) => updateField("data_summary", e.target.value)} rows={2} placeholder="Trial data, frequency counts, duration data, percentage correct..." />
+                  <Label>{portalT.dataSummary || "Data Summary"}</Label>
+                  <Textarea value={form.data_summary} onChange={(e) => updateField("data_summary", e.target.value)} rows={2} placeholder={portalT.dataPlaceholder || "Trial data, frequency counts, duration data, percentage correct..."} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Next Steps / Recommendations</Label>
-                  <Textarea value={form.next_steps} onChange={(e) => updateField("next_steps", e.target.value)} rows={2} placeholder="Plan for next session, changes to intervention..." />
+                  <Label>{portalT.nextSteps || "Next Steps / Recommendations"}</Label>
+                  <Textarea value={form.next_steps} onChange={(e) => updateField("next_steps", e.target.value)} rows={2} placeholder={portalT.nextStepsPlaceholder || "Plan for next session, changes to intervention..."} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Supervision Notes</Label>
-                  <Textarea value={form.supervision_notes} onChange={(e) => updateField("supervision_notes", e.target.value)} rows={2} placeholder="Questions for supervisor, areas to discuss..." />
+                  <Label>{portalT.supervisionNotes || "Supervision Notes"}</Label>
+                  <Textarea value={form.supervision_notes} onChange={(e) => updateField("supervision_notes", e.target.value)} rows={2} placeholder={portalT.supervisionPlaceholder || "Questions for supervisor, areas to discuss..."} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Status</Label>
+                  <Label>{portalT.status || "Status"}</Label>
                   <Select value={form.status} onValueChange={(v) => updateField("status", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="submitted">Submitted for Review</SelectItem>
+                      <SelectItem value="draft">{portalT.statusDraft || "Draft"}</SelectItem>
+                      <SelectItem value="submitted">{portalT.statusSubmitted || "Submitted for Review"}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
-                  <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowForm(false)}>{portalT.cancel || "Cancel"}</Button>
                   <Button type="submit" disabled={saveMutation.isPending}>
-                    {saveMutation.isPending ? "Saving..." : editingId ? "Update Log" : "Create Log"}
+                    {saveMutation.isPending ? "Saving..." : editingId ? (portalT.updateLog || "Update Log") : (portalT.createLog || "Create Log")}
                   </Button>
                 </div>
               </form>
