@@ -116,6 +116,19 @@ Deno.serve(async (req) => {
       text += `\n\n<a href="https://bacbs.com${link}">View in app →</a>`;
     }
 
+    // Build inline keyboard — deep link into relevant section + quick-check buttons
+    const appUrl = link ? `https://bacbs.com${link}` : "https://bacbs.com/portal";
+    const replyMarkup = {
+      inline_keyboard: [
+        [{ text: `${icon} Open in App`, url: appUrl }],
+        [
+          { text: "📅 Sessions", callback_data: "cmd:sessions" },
+          { text: "✅ Tasks",    callback_data: "cmd:tasks"    },
+          { text: "📊 Status",   callback_data: "cmd:status"   },
+        ],
+      ],
+    };
+
     // Send via Telegram gateway
     const response = await fetch(`${GATEWAY_URL}/sendMessage`, {
       method: "POST",
@@ -129,6 +142,7 @@ Deno.serve(async (req) => {
         text,
         parse_mode: "HTML",
         disable_web_page_preview: true,
+        reply_markup: replyMarkup,
       }),
     });
 
