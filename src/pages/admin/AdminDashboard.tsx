@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, Calendar, Users, UserPlus, ImageIcon, FileEdit,
   UserCog, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen, FileText,
-  ListTodo, Settings, Bot, ChevronRight,
+  ListTodo, Settings, Bot, ChevronRight, Brain,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -25,6 +25,14 @@ const getGreeting = () => {
 };
 
 const categories = [
+  {
+    title: "Clinical Tools",
+    accentColor: "#0ea5e9",
+    iconBg: "rgba(14,165,233,0.10)",
+    tools: [
+      { label: "FBA Report Tool", path: "/admin/fba-report", icon: Brain, description: "ACT-informed, constructional Functional Behaviour Assessment report builder" },
+    ],
+  },
   {
     title: "AI Assistant",
     accentColor: "#6366f1",
