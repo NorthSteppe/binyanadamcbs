@@ -37,9 +37,22 @@
     --radius: 1rem;
 
     /* Glass tokens */
-    --glass-bg: 0 0% 100% / 0.88;
-    --glass-border: 0 0% 100% / 0.3;
-    --glass-blur: 20px;
+    --glass-bg: 0 0% 100% / 0.72;
+    --glass-border: 0 0% 100% / 0.45;
+    --glass-border-inner: 0 0% 100% / 0.6;
+    --glass-blur: 24px;
+    --glass-shadow: 0 2px 24px -4px hsla(0, 0%, 0%, 0.08),
+                    0 8px 40px -8px hsla(0, 0%, 0%, 0.06),
+                    inset 0 1px 0 0 hsla(0, 0%, 100%, 0.5);
+    --glass-shadow-lg: 0 4px 32px -6px hsla(0, 0%, 0%, 0.12),
+                       0 12px 48px -12px hsla(0, 0%, 0%, 0.1),
+                       inset 0 1px 0 0 hsla(0, 0%, 100%, 0.6);
+
+    --card: 0 0% 100% / 0.65;
+    --card-border: 0 0% 100% / 0.5;
+    --card-shadow: 0 2px 20px -4px hsla(0, 0%, 0%, 0.07),
+                   0 8px 36px -8px hsla(0, 0%, 0%, 0.05),
+                   inset 0 1px 0 0 hsla(0, 0%, 100%, 0.45);
 
     /* Service mode tokens */
     --education: 220 65% 54%;
@@ -101,8 +114,21 @@
     --input: 0 0% 16%;
     --ring: 0 0% 85%;
 
-    --glass-bg: 0 0% 8% / 0.88;
-    --glass-border: 0 0% 100% / 0.1;
+    --glass-bg: 0 0% 12% / 0.68;
+    --glass-border: 0 0% 100% / 0.12;
+    --glass-border-inner: 0 0% 100% / 0.08;
+    --glass-shadow: 0 2px 24px -4px hsla(0, 0%, 0%, 0.3),
+                    0 8px 40px -8px hsla(0, 0%, 0%, 0.25),
+                    inset 0 1px 0 0 hsla(0, 0%, 100%, 0.08);
+    --glass-shadow-lg: 0 4px 32px -6px hsla(0, 0%, 0%, 0.4),
+                       0 12px 48px -12px hsla(0, 0%, 0%, 0.3),
+                       inset 0 1px 0 0 hsla(0, 0%, 100%, 0.1);
+
+    --card: 0 0% 10% / 0.6;
+    --card-border: 0 0% 100% / 0.08;
+    --card-shadow: 0 2px 20px -4px hsla(0, 0%, 0%, 0.3),
+                   0 8px 36px -8px hsla(0, 0%, 0%, 0.2),
+                   inset 0 1px 0 0 hsla(0, 0%, 100%, 0.06);
 
     --education: 220 65% 60%;
     --education-light: 220 30% 12%;
@@ -176,9 +202,18 @@
   /* Apple-style glass effect */
   .glass {
     background: hsl(var(--glass-bg));
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
     border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-lg {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(32px) saturate(1.8);
+    -webkit-backdrop-filter: blur(32px) saturate(1.8);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--glass-shadow-lg);
   }
 
   /* Glass title text effect */
@@ -212,8 +247,8 @@
     @apply transition-all duration-300;
   }
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px -12px hsl(var(--foreground) / 0.12);
+    transform: translateY(-3px) scale(1.005);
+    box-shadow: var(--glass-shadow-lg);
   }
 
   /* Consistent eyebrow/tagline label style */
