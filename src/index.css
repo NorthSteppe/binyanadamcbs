@@ -202,9 +202,18 @@
   /* Apple-style glass effect */
   .glass {
     background: hsl(var(--glass-bg));
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
     border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-lg {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(32px) saturate(1.8);
+    -webkit-backdrop-filter: blur(32px) saturate(1.8);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--glass-shadow-lg);
   }
 
   /* Glass title text effect */
@@ -238,8 +247,8 @@
     @apply transition-all duration-300;
   }
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px -12px hsl(var(--foreground) / 0.12);
+    transform: translateY(-3px) scale(1.005);
+    box-shadow: var(--glass-shadow-lg);
   }
 
   /* Consistent eyebrow/tagline label style */
