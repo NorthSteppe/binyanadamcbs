@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
   if (!supabaseUrl || !supabaseServiceKey) {
     return new Response(JSON.stringify({ error: 'Server config error' }), {
@@ -21,6 +22,31 @@ Deno.serve(async (req) => {
     })
   }
 
+  // --- Authentication: require a valid JWT ---
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
+  })
+
+  const token = authHeader.replace('Bearer ', '')
+  const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token)
+  if (claimsError || !claimsData?.claims) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  const callerId = claimsData.claims.sub as string
+
+  // --- Parse & validate body ---
   let body: { user_id: string; title: string; message: string; link?: string }
   try {
     body = await req.json()
@@ -38,10 +64,27 @@ Deno.serve(async (req) => {
     })
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+  // --- Authorization: only admins/team_members can send to other users ---
+  const serviceClient = createClient(supabaseUrl, supabaseServiceKey)
 
-  // Get user email from auth
-  const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(body.user_id)
+  if (body.user_id !== callerId) {
+    const { data: roleData } = await serviceClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', callerId)
+      .in('role', ['admin', 'team_member'])
+      .limit(1)
+
+    if (!roleData || roleData.length === 0) {
+      return new Response(JSON.stringify({ error: 'Forbidden: insufficient privileges' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
+  // --- Get user email from auth ---
+  const { data: { user }, error: userError } = await serviceClient.auth.admin.getUserById(body.user_id)
   if (userError || !user?.email) {
     console.error('Could not find user email', { user_id: body.user_id, error: userError })
     return new Response(JSON.stringify({ error: 'User not found' }), {
@@ -50,10 +93,10 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Send via transactional email system
+  // --- Send via transactional email system ---
   const idempotencyKey = `notification-${body.user_id}-${Date.now()}`
 
-  const { error: sendError } = await supabase.functions.invoke('send-transactional-email', {
+  const { error: sendError } = await serviceClient.functions.invoke('send-transactional-email', {
     body: {
       templateName: 'notification',
       recipientEmail: user.email,
