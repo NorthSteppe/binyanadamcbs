@@ -99,7 +99,15 @@ import TMEMatrix from "./pages/planner/matrix/TMEMatrix";
 import ComplianceRoadmap from "./pages/planner/roadmap/ComplianceRoadmap";
 import AdminOperations from "./pages/planner/admin/AdminOperations";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const AppLoader = ({ children }: { children: React.ReactNode }) => {
   const { loading } = useAuth();
