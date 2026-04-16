@@ -89,6 +89,7 @@ const ProactiveAssistant = () => {
   const { session, user, profile, isAdmin, isTeamMember } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
