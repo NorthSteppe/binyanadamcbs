@@ -9,6 +9,7 @@ import { EditModeProvider } from "@/hooks/useEditMode";
 import { PreferencesProvider } from "@/hooks/usePreferences";
 
 import EditModeToggle from "@/components/editable/EditModeToggle";
+import { RouteErrorBoundary } from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import StaffRoute from "@/components/StaffRoute";
@@ -134,6 +135,7 @@ const App = () => (
             <BrowserRouter>
               <AppLoader>
                 <ScrollToTop />
+                <RouteErrorBoundary>
                 <Routes>
                   {/* Public */}
                   <Route path="/" element={<Index />} />
@@ -242,6 +244,7 @@ const App = () => (
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </RouteErrorBoundary>
                 <ProactiveAssistant />
                 <MobileBottomNav />
                 <SwipeBackDetector />
