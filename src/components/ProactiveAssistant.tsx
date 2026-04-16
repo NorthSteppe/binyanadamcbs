@@ -205,13 +205,15 @@ const ProactiveAssistant = () => {
 
   const greeting = buildGreeting();
 
-  // Auto-popup after delay
+  // Auto-popup after delay — on mobile only show the bubble, never auto-open
   useEffect(() => {
     if (!isEnabled || !greetingReady) return;
     const dismissed = sessionStorage.getItem(STORAGE_KEY);
     if (dismissed) return;
     const timer = setTimeout(() => {
       setShowBubble(true);
+      // On mobile, never auto-open the full panel — it blocks navigation
+      if (isMobile) return;
       const openTimer = setTimeout(() => {
         setOpen(true);
         setShowBubble(false);
@@ -219,7 +221,7 @@ const ProactiveAssistant = () => {
       return () => clearTimeout(openTimer);
     }, delay);
     return () => clearTimeout(timer);
-  }, [isEnabled, delay, greetingReady]);
+  }, [isEnabled, delay, greetingReady, isMobile]);
 
   // Send greeting when first opened
   useEffect(() => {
