@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, Calendar, Users, UserPlus, ImageIcon, FileEdit,
   UserCog, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen, FileText,
-  ListTodo, Settings, Bot, ChevronRight, Brain,
+  ListTodo, Settings, Bot, ChevronRight, Brain, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -39,6 +39,7 @@ const categories = [
     iconBg: "rgba(99,102,241,0.10)",
     tools: [
       { label: "Assistant Manager", path: "/admin/assistant", icon: Bot, description: "Configure greetings, toggle on/off, review conversations" },
+      { label: "Story Engine", path: "/admin/story-engine", icon: Sparkles, description: "Upload raw notes; AI fictionalises and publishes daily blog posts" },
     ],
   },
   {
