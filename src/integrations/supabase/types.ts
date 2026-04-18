@@ -1522,6 +1522,51 @@ export type Database = {
         }
         Relationships: []
       }
+      story_sources: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          file_name: string
+          file_path: string
+          file_size_bytes: number
+          generated_post_id: string | null
+          id: string
+          processed_at: string | null
+          status: string
+          updated_at: string
+          uploaded_by: string
+          voice_used: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          file_name: string
+          file_path: string
+          file_size_bytes?: number
+          generated_post_id?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_by: string
+          voice_used?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          file_name?: string
+          file_path?: string
+          file_size_bytes?: number
+          generated_post_id?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_by?: string
+          voice_used?: string | null
+        }
+        Relationships: []
+      }
       supervisee_case_logs: {
         Row: {
           client_age: string
