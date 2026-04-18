@@ -29,6 +29,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import Unsubscribe from "./pages/Unsubscribe";
+import SearchPage from "./pages/Search";
 import ScrollToTop from "./components/ScrollToTop";
 // Client portal
 import Dashboard from "./pages/portal/Dashboard";
@@ -155,6 +156,7 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
+                  <Route path="/search" element={<SearchPage />} />
                   {/* Blog / Insights */}
                   <Route path="/insights" element={<InsightsHub />} />
                   <Route path="/insights/article/:slug" element={<ArticlePage />} />
