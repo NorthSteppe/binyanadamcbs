@@ -92,6 +92,7 @@ import NoteTemplates from "./pages/admin/NoteTemplates";
 import ManualClients from "./pages/admin/ManualClients";
 import AssistantManager from "./pages/admin/AssistantManager";
 import FBAReportTool from "./pages/admin/FBAReportTool";
+import StoryEngine from "./pages/admin/StoryEngine";
 
 // Business Planner
 import PlannerLayout from "./components/planner/PlannerLayout";
@@ -196,6 +197,7 @@ const App = () => (
                   <Route path="/admin/manual-clients" element={<AdminRoute><ManualClients /></AdminRoute>} />
                   <Route path="/admin/assistant" element={<AdminRoute><AssistantManager /></AdminRoute>} />
                   <Route path="/admin/fba-report" element={<AdminRoute><FBAReportTool /></AdminRoute>} />
+                  <Route path="/admin/story-engine" element={<AdminRoute><StoryEngine /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
