@@ -4,7 +4,6 @@ import { Search as SearchIcon, FileText, Calendar, BookOpen, Users, ListTodo, Me
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -99,7 +98,7 @@ const Search = () => {
         .or(`name.ilike.${like},role.ilike.${like},bio.ilike.${like}`)
         .limit(10);
 
-      const queries: Promise<any>[] = [blogQ, coursesQ, teamQ];
+      const queries: any[] = [blogQ, coursesQ, teamQ];
 
       // Authenticated: RLS filters per user
       if (user) {

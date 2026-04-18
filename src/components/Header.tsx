@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, X, LogIn, UserPlus2 } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, Globe, LogOut, LayoutDashboard, Shield, Users, X, LogIn, UserPlus2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +10,7 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
   const { user, isAdmin, isTeamMember, isSupervisee, isStaff, signOut } = useAuth();
 
@@ -161,6 +162,15 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
         <div className="hidden lg:flex items-center gap-1.5">
           <Button
             variant="ghost"
+            size="icon"
+            onClick={() => navigate("/search")}
+            aria-label="Search"
+            className="text-muted-foreground hover:text-foreground rounded-full h-8 w-8"
+          >
+            <Search size={16} />
+          </Button>
+          <Button
+            variant="ghost"
             size="sm"
             onClick={toggleLanguage}
             className="text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-full h-8 px-3"
@@ -223,6 +233,9 @@ const Header = ({ hidelogo = false }: { hidelogo?: boolean }) => {
 
         {/* Mobile */}
         <div className="lg:hidden flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/search")} aria-label="Search" className="text-muted-foreground rounded-full">
+            <Search size={18} />
+          </Button>
           {user && <NotificationBell />}
           <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-muted-foreground rounded-full">
             <Globe size={18} />
