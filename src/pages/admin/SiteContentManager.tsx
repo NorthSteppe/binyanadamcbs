@@ -1,12 +1,24 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSiteContent, useUpdateSiteContent, SiteContent } from "@/hooks/useSiteContent";
+import { useEditMode } from "@/hooks/useEditMode";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Save } from "lucide-react";
+import { Upload, Save, Wand2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+
+const PUBLIC_PAGES: { label: string; path: string }[] = [
+  { label: "Landing", path: "/" },
+  { label: "About", path: "/about" },
+  { label: "Therapy", path: "/therapy" },
+  { label: "Education", path: "/education" },
+  { label: "Families", path: "/families" },
+  { label: "Organisations", path: "/organisations" },
+  { label: "Supervision", path: "/supervision" },
+];
 
 const PAGE_LABELS: Record<string, string> = {
   about: "About Page",
@@ -106,6 +118,14 @@ const SiteContentRow = ({ item }: { item: SiteContent }) => {
 
 const SiteContentManager = () => {
   const { data: items, isLoading } = useSiteContent();
+  const { setEditMode } = useEditMode();
+  const navigate = useNavigate();
+
+  const launchEditor = (path: string) => {
+    setEditMode(true);
+    navigate(path);
+    toast.success("Live editor enabled — click any text or image to style it");
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -113,7 +133,35 @@ const SiteContentManager = () => {
       <div className="container py-24 flex-1">
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl text-foreground mb-1">Site Content Manager</h1>
-          <p className="text-muted-foreground">Edit images and quotes shown across the website.</p>
+          <p className="text-muted-foreground">Edit images, quotes, and visual styling across the website.</p>
+        </div>
+
+        {/* Live editor launcher */}
+        <div className="mb-10 p-6 rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-card">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Wand2 className="text-primary" size={18} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">PowerPoint-style Live Editor</h2>
+              <p className="text-sm text-muted-foreground">
+                Open any public page in edit mode. Hover any heading, paragraph, or image to change font, size, weight, color, alignment, width, position, rotation, opacity — or replace/remove images entirely. Changes save automatically.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {PUBLIC_PAGES.map((p) => (
+              <Button
+                key={p.path}
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => launchEditor(p.path)}
+              >
+                <ExternalLink size={13} /> Edit {p.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {isLoading && <p className="text-muted-foreground">Loading…</p>}
