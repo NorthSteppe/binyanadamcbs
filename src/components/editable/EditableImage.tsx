@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import { useEditMode } from "@/hooks/useEditMode";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload } from "lucide-react";
+import { Upload, Sliders } from "lucide-react";
 import { toast } from "sonner";
+import ImageStylePopover, { ImageStyle } from "./ImageStylePopover";
 
 interface EditableImageProps {
   contentKey: string;
@@ -19,11 +20,24 @@ const EditableImage = ({
   className = "",
   imgClassName = "",
 }: EditableImageProps) => {
-  const { editMode, getImageOverride, saveOverride } = useEditMode();
+  const { editMode, getImageOverride, getStyleOverride, saveOverride } = useEditMode();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [showOverlay, setShowOverlay] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [popoverAnchor, setPopoverAnchor] = useState<{ x: number; y: number } | null>(null);
 
   const displaySrc = getImageOverride(contentKey) || defaultSrc;
+  const imgStyle = getStyleOverride(contentKey) as ImageStyle;
+
+  const wrapperJustify =
+    imgStyle.align === "center" ? "justify-center" :
+    imgStyle.align === "right" ? "justify-end" : "justify-start";
+
+  const styleObject: React.CSSProperties = {
+    width: imgStyle.width ? `${imgStyle.width}%` : "100%",
+    transform: `translate(${imgStyle.offsetX ?? 0}px, ${imgStyle.offsetY ?? 0}px) rotate(${imgStyle.rotation ?? 0}deg)`,
+    opacity: imgStyle.opacity ?? 1,
+    objectFit: imgStyle.objectFit ?? "cover",
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -38,44 +52,68 @@ const EditableImage = ({
       const { data: urlData } = supabase.storage
         .from("hero-images")
         .getPublicUrl(path);
-      saveOverride(contentKey, alt, "image", urlData.publicUrl);
+      saveOverride({ key: contentKey, value: alt, type: "image", imageUrl: urlData.publicUrl });
+      toast.success("Image replaced");
     } catch (err: any) {
       toast.error(err.message);
     } finally {
       if (fileRef.current) fileRef.current.value = "";
-      setShowOverlay(false);
     }
+  };
+
+  const removeImage = () => {
+    saveOverride({ key: contentKey, imageUrl: "" });
+    toast.success("Image reset to default");
   };
 
   if (!editMode) {
     return (
-      <div className={className}>
-        <img src={displaySrc} alt={alt} className={imgClassName} />
+      <div className={`flex ${wrapperJustify} ${className}`}>
+        <img src={displaySrc} alt={alt} className={imgClassName} style={styleObject} />
       </div>
     );
   }
 
+  const openPopover = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = triggerRef.current?.getBoundingClientRect();
+    setPopoverAnchor({ x: (rect?.right ?? e.clientX) + 8, y: (rect?.top ?? e.clientY) });
+  };
+
   return (
-    <div
-      className={`relative group/img ${className}`}
-      onClick={() => setShowOverlay(true)}
-    >
-      <img src={displaySrc} alt={alt} className={imgClassName} />
+    <div className={`relative group/img flex ${wrapperJustify} ${className}`}>
+      <img src={displaySrc} alt={alt} className={imgClassName} style={styleObject} />
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-      
-      {/* Always-visible edit badge on mobile, hover on desktop */}
-      <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2 shadow-lg z-40 md:opacity-0 md:group-hover/img:opacity-100 transition-opacity">
-        <Upload size={14} />
+
+      <div className="absolute top-2 right-2 flex gap-1 z-40">
+        <button
+          ref={triggerRef}
+          onClick={openPopover}
+          className="bg-card border border-border text-foreground rounded-full p-2 shadow-lg md:opacity-0 md:group-hover/img:opacity-100 transition-opacity"
+          title="Image style"
+        >
+          <Sliders size={13} />
+        </button>
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg md:opacity-0 md:group-hover/img:opacity-100 transition-opacity"
+          title="Replace image"
+        >
+          <Upload size={13} />
+        </button>
       </div>
 
-      {/* Full overlay — visible on hover (desktop) or tap (mobile) */}
-      <div
-        onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}
-        className={`absolute inset-0 bg-black/50 transition-opacity cursor-pointer flex flex-col items-center justify-center gap-2 z-40 ${showOverlay ? "opacity-100" : "opacity-0 md:group-hover/img:opacity-100"}`}
-      >
-        <Upload size={28} className="text-white" />
-        <span className="text-white text-sm font-medium">Tap to replace image</span>
-      </div>
+      {popoverAnchor && (
+        <ImageStylePopover
+          anchor={popoverAnchor}
+          initial={imgStyle}
+          onChange={(s) => saveOverride({ key: contentKey, styleJson: s })}
+          onUpload={() => fileRef.current?.click()}
+          onRemove={removeImage}
+          onReset={() => saveOverride({ key: contentKey, styleJson: {} })}
+          onClose={() => setPopoverAnchor(null)}
+        />
+      )}
     </div>
   );
 };
