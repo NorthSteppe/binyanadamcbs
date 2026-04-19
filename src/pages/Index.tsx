@@ -50,11 +50,13 @@ const Index = () => {
             className="max-w-2xl"
           >
             {/* Logo */}
-            <div className="mb-8">
-              <img
-                src="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
+            <div className={`mb-8 transition-opacity duration-500 ${showBigLogo ? "opacity-100" : "opacity-0"}`}>
+              <EditableImage
+                contentKey="landing.logo"
+                defaultSrc="/lovable-uploads/ed0abcc5-2b9d-4294-a3b6-3d6945c02959.png"
                 alt="Binyan Adam"
-                className={`h-12 md:h-14 transition-opacity duration-500 mix-blend-multiply dark:mix-blend-screen dark:invert ${showBigLogo ? "opacity-100" : "opacity-0"}`}
+                className="h-12 md:h-14 w-auto inline-block"
+                imgClassName="h-12 md:h-14 w-auto mix-blend-multiply dark:mix-blend-screen dark:invert"
               />
             </div>
 
