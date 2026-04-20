@@ -46,6 +46,7 @@ import Productivity from "./pages/portal/Productivity";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import ClientDetail from "./pages/admin/ClientDetail";
+import ClientsOverview from "./pages/admin/ClientsOverview";
 import TeamRequests from "./pages/admin/TeamRequests";
 import HeroImageManager from "./pages/admin/HeroImageManager";
 import SiteContentManager from "./pages/admin/SiteContentManager";
@@ -179,7 +180,8 @@ const App = () => (
                   {/* Admin portal */}
                   <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                   <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
-                  <Route path="/admin/clients/:clientId" element={<AdminRoute><ClientDetail /></AdminRoute>} />
+                  <Route path="/admin/clients" element={<StaffRoute><ClientsOverview /></StaffRoute>} />
+                  <Route path="/admin/clients/:clientId" element={<StaffRoute><ClientDetail /></StaffRoute>} />
                   <Route path="/admin/team-requests" element={<AdminRoute><TeamRequests /></AdminRoute>} />
                   <Route path="/admin/hero-images" element={<AdminRoute><HeroImageManager /></AdminRoute>} />
                   <Route path="/admin/site-content" element={<AdminRoute><SiteContentManager /></AdminRoute>} />

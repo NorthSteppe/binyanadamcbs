@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
 import { toast } from "sonner";
 
 const ClientDetail = () => {
@@ -143,7 +144,7 @@ const ClientDetail = () => {
       <Header />
       <section className="pt-28 pb-20">
         <div className="container max-w-4xl">
-          <Link to="/admin/users" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <Link to="/admin/clients" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft size={14} /> Back to Clients
           </Link>
 
@@ -158,13 +159,24 @@ const ClientDetail = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="notes" className="space-y-6">
+          <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="rounded-full">
+              <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>
               <TabsTrigger value="notes" className="rounded-full">Documentation</TabsTrigger>
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="overview">
+              <div className="bg-card border border-border/50 rounded-2xl p-6">
+                <h2 className="text-lg font-semibold mb-4">Client overview</h2>
+                <p className="text-xs text-muted-foreground mb-5">
+                  Manual fields (stage, tags, risk, summary). Everything else on this page is auto-populated.
+                </p>
+                {clientId && <ClientOverviewPanel clientId={clientId} />}
+              </div>
+            </TabsContent>
 
             <TabsContent value="notes">
               <div className="flex items-center justify-between mb-4">

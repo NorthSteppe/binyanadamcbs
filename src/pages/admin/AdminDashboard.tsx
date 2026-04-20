@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, Calendar, Users, UserPlus, ImageIcon, FileEdit,
   UserCog, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen, FileText,
-  ListTodo, Settings, Bot, ChevronRight, Brain, Sparkles,
+  ListTodo, Settings, Bot, ChevronRight, Brain, Sparkles, ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -30,6 +30,7 @@ const categories = [
     accentColor: "#0ea5e9",
     iconBg: "rgba(14,165,233,0.10)",
     tools: [
+      { label: "Clients Overview", path: "/admin/clients", icon: ClipboardList, description: "Auto-populated dashboard of every client — sessions, notes, risk, engagement" },
       { label: "FBA Report Tool", path: "/admin/fba-report", icon: Brain, description: "ACT-informed, constructional Functional Behaviour Assessment report builder" },
     ],
   },
