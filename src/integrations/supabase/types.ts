@@ -636,6 +636,42 @@ export type Database = {
         }
         Relationships: []
       }
+      client_overview: {
+        Row: {
+          client_id: string
+          created_at: string
+          internal_summary: string
+          risk_level: string
+          risk_note: string
+          stage: string
+          tags: string[]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          internal_summary?: string
+          risk_level?: string
+          risk_note?: string
+          stage?: string
+          tags?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          internal_summary?: string
+          risk_level?: string
+          risk_note?: string
+          stage?: string
+          tags?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       client_todos: {
         Row: {
           client_id: string
