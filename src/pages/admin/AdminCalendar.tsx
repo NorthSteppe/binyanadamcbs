@@ -1091,6 +1091,16 @@ const AdminCalendar = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <label className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/50">
+                    <span className="text-[11px] text-muted-foreground leading-tight">
+                      Email Stripe payment link to client
+                      <span className="block text-[10px] opacity-70">Requires service with Stripe price, or a custom amount.</span>
+                    </span>
+                    <Switch
+                      checked={newSession.send_payment_link}
+                      onCheckedChange={(v) => setNewSession({ ...newSession, send_payment_link: v })}
+                    />
+                  </label>
                 </div>
 
                 <div>
