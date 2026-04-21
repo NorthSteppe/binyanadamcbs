@@ -22,6 +22,10 @@ interface ClientRow {
   full_name: string;
   avatar_url: string | null;
   created_at: string;
+  is_manual?: boolean;
+  manual_email?: string;
+  manual_phone?: string;
+  manual_notes?: string;
   // sessions
   session_count: number;
   upcoming_count: number;
