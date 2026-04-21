@@ -19,6 +19,7 @@ export interface TeamMember {
   user_id: string | null;
   long_bio: string;
   profile_image_url: string | null;
+  default_session_rate_cents: number;
 }
 
 export const useTeamMembers = () =>
