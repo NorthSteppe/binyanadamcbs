@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { generateMeetingLink, type MeetingPlatform } from "@/utils/meetingLinks";
 
 interface ServiceOption {
   id: string;
@@ -40,6 +41,7 @@ const Booking = () => {
   const [selectedService, setSelectedService] = useState<ServiceOption | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState("");
+  const [platform, setPlatform] = useState<MeetingPlatform>("in_person");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
