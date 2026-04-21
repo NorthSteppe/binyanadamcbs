@@ -25,7 +25,7 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { service_option_id, date, time, description } = await req.json();
+    const { service_option_id, date, time, description, meeting_platform, meeting_url } = await req.json();
     if (!service_option_id) throw new Error("Missing service_option_id");
 
     // Fetch the service option to get stripe_price_id
@@ -62,6 +62,8 @@ serve(async (req) => {
         time: time || "",
         description: description || "",
         duration_minutes: String(svc.duration_minutes),
+        meeting_platform: meeting_platform || "",
+        meeting_url: meeting_url || "",
       },
       success_url: `${req.headers.get("origin")}/portal/booking?success=true`,
       cancel_url: `${req.headers.get("origin")}/portal/booking?canceled=true`,
