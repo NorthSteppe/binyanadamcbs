@@ -425,6 +425,23 @@ const AdminCalendar = () => {
       });
     }
     toast.success(dates.length > 1 ? `${dates.length} recurring sessions created` : "Session created");
+
+    // Optionally email a Stripe payment link to the client for the first session
+    if (newSession.send_payment_link && firstSession?.id) {
+      try {
+        const { data: linkData, error: linkErr } = await supabase.functions.invoke("send-payment-link", {
+          body: { session_id: firstSession.id },
+        });
+        if (linkErr || (linkData as any)?.error) {
+          toast.error(`Payment link: ${(linkData as any)?.error || linkErr?.message || "failed"}`);
+        } else {
+          toast.success(`Payment link emailed to ${(linkData as any)?.sent_to || "client"}`);
+        }
+      } catch (e: any) {
+        toast.error(`Payment link failed: ${e.message}`);
+      }
+    }
+
     setCreateOpen(false);
     setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false });
     qc.invalidateQueries({ queryKey: ["team_sessions"] });
@@ -1091,6 +1108,16 @@ const AdminCalendar = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <label className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/50">
+                    <span className="text-[11px] text-muted-foreground leading-tight">
+                      Email Stripe payment link to client
+                      <span className="block text-[10px] opacity-70">Requires service with Stripe price, or a custom amount.</span>
+                    </span>
+                    <Switch
+                      checked={newSession.send_payment_link}
+                      onCheckedChange={(v) => setNewSession({ ...newSession, send_payment_link: v })}
+                    />
+                  </label>
                 </div>
 
                 <div>

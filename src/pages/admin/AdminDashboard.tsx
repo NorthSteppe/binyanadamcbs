@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, Calendar, Users, UserPlus, ImageIcon, FileEdit,
   UserCog, KeyRound, Pencil, GraduationCap, ShieldAlert, BarChart3, BookOpen, FileText,
-  ListTodo, Settings, Bot, ChevronRight, Brain, Sparkles, ClipboardList,
+  ListTodo, Settings, Bot, ChevronRight, Brain, Sparkles, ClipboardList, DollarSign,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -80,6 +80,7 @@ const categories = [
       { label: "Service Options", path: "/admin/service-options", icon: Settings, description: "Define session types, durations, and pricing" },
       { label: "Calendar", path: "/admin/calendar", icon: Calendar, description: "View and manage all scheduled sessions" },
       { label: "Note Templates", path: "/admin/note-templates", icon: FileText, description: "Design session note templates for voice transcription" },
+      { label: "Therapist Payouts", path: "/admin/payouts", icon: DollarSign, description: "Track per-session and batch payouts owed to therapists" },
       { label: "Course Manager", path: "/admin/courses", icon: GraduationCap, description: "Create and manage online courses, lessons, and videos" },
     ],
   },

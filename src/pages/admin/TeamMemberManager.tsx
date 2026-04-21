@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Save, Plus, Trash2, Linkedin, Globe, Twitter, Award, PenLine, UserCircle, Image } from "lucide-react";
+import { Upload, Save, Plus, Trash2, Linkedin, Globe, Twitter, Award, PenLine, UserCircle, Image, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserOption {
@@ -39,6 +39,7 @@ const TeamMemberRow = ({ member, users }: { member: TeamMember; users: UserOptio
     social_twitter: member.social_twitter,
     social_website: member.social_website,
     user_id: member.user_id || "",
+    default_session_rate_cents: member.default_session_rate_cents || 0,
   });
 
   const set = (key: string, value: any) => setForm((f) => ({ ...f, [key]: value }));
@@ -121,6 +122,24 @@ const TeamMemberRow = ({ member, users }: { member: TeamMember; users: UserOptio
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">Link this profile to a user account to connect their login with this team page.</p>
+      </div>
+
+      {/* Default session rate */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium flex items-center gap-2"><DollarSign size={14} className="text-primary" /> Default Session Rate (Therapist Payout)</Label>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">£</span>
+          <Input
+            type="number"
+            step="0.01"
+            min={0}
+            value={(form.default_session_rate_cents / 100).toFixed(2)}
+            onChange={(e) => set("default_session_rate_cents", Math.round(parseFloat(e.target.value || "0") * 100))}
+            className="max-w-[180px]"
+          />
+          <span className="text-sm text-muted-foreground">per session</span>
+        </div>
+        <p className="text-xs text-muted-foreground">Default amount paid to this therapist per session. Admins can override on individual sessions in the calendar.</p>
       </div>
 
       {/* Profile Page Image */}
