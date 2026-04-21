@@ -158,6 +158,23 @@ const AdminCalendar = () => {
     },
   });
 
+  // Service options for booking
+  const { data: serviceOptions = [] } = useQuery({
+    queryKey: ["service_options_active"],
+    queryFn: async () => {
+      const { data } = await supabase.from("service_options").select("id,name,duration_minutes,price_cents,stripe_price_id").eq("is_active", true).order("display_order");
+      return data || [];
+    },
+  });
+
+  // Team members with default rate (for therapist payout)
+  const { data: teamMembersWithRates = [] } = useQuery({
+    queryKey: ["team_members_rates"],
+    queryFn: async () => {
+      const { data } = await supabase.from("team_members" as any).select("id,name,user_id,default_session_rate_cents").eq("is_active", true);
+      return (data as any) || [];
+    },
+  });
   // Fetch sessions
   const { data: sessions = [] } = useQuery({
     queryKey: ["team_sessions", rangeStart.toISOString(), rangeEnd.toISOString()],
