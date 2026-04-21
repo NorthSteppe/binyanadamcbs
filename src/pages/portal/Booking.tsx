@@ -116,6 +116,7 @@ const Booking = () => {
     setSelectedService(null);
     setSelectedDate(undefined);
     setSelectedTime("");
+    setPlatform("in_person");
     setDescription("");
     // Clear URL params
     window.history.replaceState({}, "", "/portal/booking");
