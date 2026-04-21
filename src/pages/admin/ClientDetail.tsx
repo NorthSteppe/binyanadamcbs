@@ -1,15 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling, Save } from "lucide-react";
 import ClientFinancialTab from "@/components/admin/ClientFinancialTab";
-import ReactMarkdown from "react-markdown";
+import VoiceRecorder from "@/components/VoiceRecorder";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +16,90 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
 import { toast } from "sonner";
+
+// Per-session notes editor with voice transcription
+const SessionRow = ({ session, onSaved }: { session: any; onSaved: () => void }) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<string>(session.notes ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("sessions")
+      .update({ notes: draft })
+      .eq("id", session.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Failed to save notes: " + error.message);
+      return;
+    }
+    toast.success("Session notes saved");
+    setEditing(false);
+    onSaved();
+  };
+
+  const handleVoiceTranscript = (text: string) => {
+    setDraft((prev) => (prev ? prev + (prev.endsWith(" ") ? "" : " ") + text : text));
+  };
+
+  return (
+    <div className="bg-card border border-border/50 rounded-2xl p-4 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Clock size={16} className="text-primary shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate">{session.title}</p>
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(session.session_date), "EEE, MMM d, yyyy · HH:mm")} · {session.duration_minutes} min
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Badge
+            variant={session.status === "completed" ? "default" : session.status === "cancelled" ? "destructive" : "secondary"}
+            className="capitalize text-xs"
+          >
+            {session.status}
+          </Badge>
+          {!editing && (
+            <Button size="sm" variant="outline" className="rounded-full gap-1.5" onClick={() => { setDraft(session.notes ?? ""); setEditing(true); }}>
+              <Pencil size={12} /> {session.notes ? "Edit notes" : "Add notes"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {!editing && session.notes && (
+        <div className="text-sm text-muted-foreground whitespace-pre-wrap border-t border-border/40 pt-3">
+          {session.notes}
+        </div>
+      )}
+
+      {editing && (
+        <div className="space-y-2 border-t border-border/40 pt-3">
+          <Textarea
+            placeholder="Type session notes here, or use voice transcription below…"
+            rows={6}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <VoiceRecorder onTranscript={handleVoiceTranscript} />
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={saving}>
+                <X size={14} className="mr-1" /> Cancel
+              </Button>
+              <Button size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
+                <Save size={14} /> {saving ? "Saving…" : "Save Notes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ClientDetail = () => {
   const { clientId: rawId } = useParams<{ clientId: string }>();
@@ -32,8 +115,6 @@ const ClientDetail = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [todos, setTodos] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
-  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [newNote, setNewNote] = useState({ title: "", content: "", category: "general" });
   const [todoDialogOpen, setTodoDialogOpen] = useState(false);
   const [newTodo, setNewTodo] = useState({ title: "", description: "" });
   const [uploading, setUploading] = useState(false);
@@ -112,30 +193,6 @@ const ClientDetail = () => {
     fetchData();
   };
 
-  const handleAddNote = async () => {
-    if (!newNote.title || !user) return;
-    const { error } = await supabase.from("client_notes").insert({
-      ...targetCols,
-      author_id: user.id,
-      title: newNote.title,
-      content: newNote.content,
-      category: newNote.category,
-    } as any);
-    if (error) {
-      toast.error("Failed to add note: " + error.message);
-    } else {
-      toast.success("Note added");
-      setNoteDialogOpen(false);
-      setNewNote({ title: "", content: "", category: "general" });
-      fetchData();
-    }
-  };
-
-  const handleDeleteNote = async (noteId: string) => {
-    await supabase.from("client_notes").delete().eq("id", noteId);
-    fetchData();
-  };
-
   const handleAddTodo = async () => {
     if (!newTodo.title || !user) return;
     const { error } = await supabase.from("client_todos").insert({
@@ -199,7 +256,6 @@ const ClientDetail = () => {
     );
   }
 
-  const noteCategories = ["general", "session-note", "assessment", "plan", "correspondence", "report"];
 
   return (
     <div className="min-h-screen bg-background">
@@ -267,10 +323,9 @@ const ClientDetail = () => {
             </div>
           </div>
 
-          <Tabs defaultValue={isManual ? "notes" : "overview"} className="space-y-6">
+          <Tabs defaultValue={isManual ? "sessions" : "overview"} className="space-y-6">
             <TabsList className="rounded-full flex-wrap h-auto">
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
-              <TabsTrigger value="notes" className="rounded-full">Documentation</TabsTrigger>
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
               <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
@@ -289,61 +344,6 @@ const ClientDetail = () => {
               </TabsContent>
             )}
 
-            <TabsContent value="notes">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Documentation & Notes</h2>
-                <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="rounded-full gap-2"><Plus size={14} /> Add Note</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Add Client Note</DialogTitle></DialogHeader>
-                    <div className="space-y-4 mt-4">
-                      <Input placeholder="Note title" value={newNote.title} onChange={(e) => setNewNote({ ...newNote, title: e.target.value })} />
-                      <Select value={newNote.category} onValueChange={(v) => setNewNote({ ...newNote, category: v })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {noteCategories.map((c) => (
-                            <SelectItem key={c} value={c}>{c.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Textarea placeholder="Note content..." rows={6} value={newNote.content} onChange={(e) => setNewNote({ ...newNote, content: e.target.value })} />
-                      <Button onClick={handleAddNote} className="w-full rounded-full">Save Note</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-              {notes.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl border border-border/50">
-                  No documentation yet. Add your first note above.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {notes.map((note) => (
-                    <div key={note.id} className="bg-card border border-border/50 rounded-2xl p-5">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <p className="font-semibold text-card-foreground">{note.title}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-[10px]">{note.category.replace("-", " ")}</Badge>
-                            <span className="text-[10px] text-muted-foreground">{format(new Date(note.created_at), "MMM d, yyyy · HH:mm")}</span>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive" onClick={() => handleDeleteNote(note.id)}>
-                          Delete
-                        </Button>
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-3 prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{note.content}</ReactMarkdown>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
             <TabsContent value="sessions">
               <h2 className="text-lg font-semibold mb-4">Session History</h2>
               {sessions.length === 0 ? (
@@ -351,20 +351,7 @@ const ClientDetail = () => {
               ) : (
                 <div className="space-y-3">
                   {sessions.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between bg-card border border-border/50 rounded-2xl p-4">
-                      <div className="flex items-center gap-3">
-                        <Clock size={16} className="text-primary" />
-                        <div>
-                          <p className="text-sm font-medium">{s.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(s.session_date), "EEE, MMM d, yyyy · HH:mm")} · {s.duration_minutes} min
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant={s.status === "completed" ? "default" : s.status === "cancelled" ? "destructive" : "secondary"} className="capitalize text-xs">
-                        {s.status}
-                      </Badge>
-                    </div>
+                    <SessionRow key={s.id} session={s} onSaved={fetchData} />
                   ))}
                 </div>
               )}
