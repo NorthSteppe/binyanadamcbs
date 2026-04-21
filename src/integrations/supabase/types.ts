@@ -1542,11 +1542,22 @@ export type Database = {
           meeting_platform: string | null
           meeting_url: string | null
           notes: string | null
+          paid_at: string | null
+          paid_confirmed_by: string | null
           payment_method: string
           plaud_recording_id: string | null
+          price_cents: number
           recurrence_parent_id: string | null
+          service_option_id: string | null
           session_date: string
           status: string
+          therapist_id: string | null
+          therapist_paid: boolean
+          therapist_paid_at: string | null
+          therapist_paid_by: string | null
+          therapist_payout_batch_id: string | null
+          therapist_payout_method: string
+          therapist_rate_cents: number
           title: string
         }
         Insert: {
@@ -1561,11 +1572,22 @@ export type Database = {
           meeting_platform?: string | null
           meeting_url?: string | null
           notes?: string | null
+          paid_at?: string | null
+          paid_confirmed_by?: string | null
           payment_method?: string
           plaud_recording_id?: string | null
+          price_cents?: number
           recurrence_parent_id?: string | null
+          service_option_id?: string | null
           session_date: string
           status?: string
+          therapist_id?: string | null
+          therapist_paid?: boolean
+          therapist_paid_at?: string | null
+          therapist_paid_by?: string | null
+          therapist_payout_batch_id?: string | null
+          therapist_payout_method?: string
+          therapist_rate_cents?: number
           title: string
         }
         Update: {
@@ -1580,11 +1602,22 @@ export type Database = {
           meeting_platform?: string | null
           meeting_url?: string | null
           notes?: string | null
+          paid_at?: string | null
+          paid_confirmed_by?: string | null
           payment_method?: string
           plaud_recording_id?: string | null
+          price_cents?: number
           recurrence_parent_id?: string | null
+          service_option_id?: string | null
           session_date?: string
           status?: string
+          therapist_id?: string | null
+          therapist_paid?: boolean
+          therapist_paid_at?: string | null
+          therapist_paid_by?: string | null
+          therapist_payout_batch_id?: string | null
+          therapist_payout_method?: string
+          therapist_rate_cents?: number
           title?: string
         }
         Relationships: [
@@ -1600,6 +1633,13 @@ export type Database = {
             columns: ["recurrence_parent_id"]
             isOneToOne: false
             referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_service_option_id_fkey"
+            columns: ["service_option_id"]
+            isOneToOne: false
+            referencedRelation: "service_options"
             referencedColumns: ["id"]
           },
         ]
@@ -1859,6 +1899,7 @@ export type Database = {
           bio: string
           created_at: string
           credentials: string
+          default_session_rate_cents: number
           display_order: number
           id: string
           initials: string
@@ -1880,6 +1921,7 @@ export type Database = {
           bio?: string
           created_at?: string
           credentials?: string
+          default_session_rate_cents?: number
           display_order?: number
           id?: string
           initials?: string
@@ -1901,6 +1943,7 @@ export type Database = {
           bio?: string
           created_at?: string
           credentials?: string
+          default_session_rate_cents?: number
           display_order?: number
           id?: string
           initials?: string
@@ -1943,6 +1986,45 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      therapist_payout_batches: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          notes: string
+          payment_date: string
+          payment_method: string
+          reference: string
+          therapist_id: string
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string
+          payment_date?: string
+          payment_method?: string
+          reference?: string
+          therapist_id: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string
+          payment_date?: string
+          payment_method?: string
+          reference?: string
+          therapist_id?: string
+          total_cents?: number
+          updated_at?: string
         }
         Relationships: []
       }

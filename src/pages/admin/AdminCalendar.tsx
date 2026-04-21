@@ -89,7 +89,7 @@ const AdminCalendar = () => {
   const [dayDetailOpen, setDayDetailOpen] = useState(false);
 
   // New session form
-  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], recurrence: "none" as string, recurrence_count: 4 });
+  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], recurrence: "none" as string, recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false });
   // New task form
   const [newTask, setNewTask] = useState({ title: "", assigned_to: "", description: "" });
   // Edit session form
@@ -158,6 +158,23 @@ const AdminCalendar = () => {
     },
   });
 
+  // Service options for booking
+  const { data: serviceOptions = [] } = useQuery({
+    queryKey: ["service_options_active"],
+    queryFn: async () => {
+      const { data } = await supabase.from("service_options").select("id,name,duration_minutes,price_cents,stripe_price_id").eq("is_active", true).order("display_order");
+      return data || [];
+    },
+  });
+
+  // Team members with default rate (for therapist payout)
+  const { data: teamMembersWithRates = [] } = useQuery({
+    queryKey: ["team_members_rates"],
+    queryFn: async () => {
+      const { data } = await supabase.from("team_members" as any).select("id,name,user_id,default_session_rate_cents").eq("is_active", true);
+      return (data as any) || [];
+    },
+  });
   // Fetch sessions
   const { data: sessions = [] } = useQuery({
     queryKey: ["team_sessions", rangeStart.toISOString(), rangeEnd.toISOString()],
@@ -362,6 +379,10 @@ const AdminCalendar = () => {
       meeting_url: newSession.meeting_url || null,
       attendee_ids: newSession.attendee_ids,
       is_paid: false,
+      service_option_id: newSession.service_option_id || null,
+      price_cents: newSession.price_cents || 0,
+      therapist_id: newSession.therapist_id || null,
+      therapist_rate_cents: newSession.therapist_rate_cents || 0,
     } as any;
 
     // Calculate dates for recurring sessions
@@ -398,14 +419,14 @@ const AdminCalendar = () => {
     // Send invite notifications to attendees
     for (const aid of newSession.attendee_ids) {
       await supabase.rpc("create_notification", {
-        _user_id: aid, _type: "session", _title: "Session Invite",
-        _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}${dates.length > 1 ? ` (recurring × ${dates.length})` : ""}`,
+        _user_id: aid, _type: "session", _title: "Session Invitation",
+        _message: `You have been invited to "${newSession.title}"`,
         _link: "/admin/calendar",
       });
     }
     toast.success(dates.length > 1 ? `${dates.length} recurring sessions created` : "Session created");
     setCreateOpen(false);
-    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4 });
+    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false });
     qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
@@ -990,6 +1011,88 @@ const AdminCalendar = () => {
                     <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." className="h-8 text-sm" />
                   </div>
                 </div>
+
+                {/* Service & pricing */}
+                <div className="border border-border/50 rounded-lg p-2.5 space-y-2 bg-muted/30">
+                  <Label className="flex items-center gap-1.5 text-xs"><DollarSign size={12} /> Service & pricing</Label>
+                  <Select
+                    value={newSession.service_option_id || "custom"}
+                    onValueChange={(v) => {
+                      if (v === "custom") {
+                        setNewSession({ ...newSession, service_option_id: "" });
+                      } else {
+                        const svc = serviceOptions.find((s: any) => s.id === v);
+                        if (svc) {
+                          setNewSession({
+                            ...newSession,
+                            service_option_id: svc.id,
+                            price_cents: svc.price_cents,
+                            duration_minutes: svc.duration_minutes,
+                            title: newSession.title || svc.name,
+                          });
+                        }
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select service" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="custom">Custom (no service)</SelectItem>
+                      {serviceOptions.map((s: any) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} — £{(s.price_cents / 100).toFixed(2)} · {s.duration_minutes}min
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Client price (£)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={(newSession.price_cents / 100).toFixed(2)}
+                        onChange={(e) => setNewSession({ ...newSession, price_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                        className="h-7 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Therapist payout (£)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={(newSession.therapist_rate_cents / 100).toFixed(2)}
+                        onChange={(e) => setNewSession({ ...newSession, therapist_rate_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                        className="h-7 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <Select
+                    value={newSession.therapist_id || "none"}
+                    onValueChange={(v) => {
+                      if (v === "none") {
+                        setNewSession({ ...newSession, therapist_id: "" });
+                      } else {
+                        const tm = teamMembersWithRates.find((t: any) => t.user_id === v);
+                        setNewSession({
+                          ...newSession,
+                          therapist_id: v,
+                          therapist_rate_cents: newSession.therapist_rate_cents || (tm?.default_session_rate_cents || 0),
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Therapist delivering session" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No therapist assigned</SelectItem>
+                      {teamMembersWithRates.filter((t: any) => t.user_id).map((t: any) => (
+                        <SelectItem key={t.user_id} value={t.user_id}>
+                          {t.name} {t.default_session_rate_cents ? `(£${(t.default_session_rate_cents / 100).toFixed(0)} default)` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <Label className="text-xs flex items-center gap-1 mb-1"><UserPlus size={10} /> Invite Therapists</Label>
                   <div className="grid grid-cols-2 gap-1 max-h-[80px] overflow-y-auto border border-border/50 rounded-lg p-1.5">
