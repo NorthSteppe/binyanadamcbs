@@ -21,6 +21,7 @@ import {
 import { METAL_BG } from "@/components/portal/PortalShell";
 import { toast } from "sonner";
 import { useLanguage } from "@/i18n/LanguageContext";
+import FBAIntakeManager from "@/components/clinical/FBAIntakeManager";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -683,6 +684,9 @@ const FBAReportTool = () => {
 
   const renderStep1 = () => (
     <div className="space-y-4">
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+        <FBAIntakeManager />
+      </div>
       <SectionTitle>{t.fbaTool.steps.clientInfo}</SectionTitle>
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label={t.fbaTool.form.clientName}>
