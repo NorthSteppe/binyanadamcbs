@@ -80,6 +80,7 @@ const categories = [
       { label: "Service Options", path: "/admin/service-options", icon: Settings, description: "Define session types, durations, and pricing" },
       { label: "Calendar", path: "/admin/calendar", icon: Calendar, description: "View and manage all scheduled sessions" },
       { label: "Note Templates", path: "/admin/note-templates", icon: FileText, description: "Design session note templates for voice transcription" },
+      { label: "Therapist Payouts", path: "/admin/payouts", icon: DollarSign, description: "Track per-session and batch payouts owed to therapists" },
       { label: "Course Manager", path: "/admin/courses", icon: GraduationCap, description: "Create and manage online courses, lessons, and videos" },
     ],
   },
