@@ -193,30 +193,6 @@ const ClientDetail = () => {
     fetchData();
   };
 
-  const handleAddNote = async () => {
-    if (!newNote.title || !user) return;
-    const { error } = await supabase.from("client_notes").insert({
-      ...targetCols,
-      author_id: user.id,
-      title: newNote.title,
-      content: newNote.content,
-      category: newNote.category,
-    } as any);
-    if (error) {
-      toast.error("Failed to add note: " + error.message);
-    } else {
-      toast.success("Note added");
-      setNoteDialogOpen(false);
-      setNewNote({ title: "", content: "", category: "general" });
-      fetchData();
-    }
-  };
-
-  const handleDeleteNote = async (noteId: string) => {
-    await supabase.from("client_notes").delete().eq("id", noteId);
-    fetchData();
-  };
-
   const handleAddTodo = async () => {
     if (!newTodo.title || !user) return;
     const { error } = await supabase.from("client_todos").insert({
