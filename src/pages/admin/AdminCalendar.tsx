@@ -30,7 +30,7 @@ import {
   parseISO, differenceInMinutes,
 } from "date-fns";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -61,11 +61,20 @@ type ClientProfile = { id: string; full_name: string };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-const statusColors: Record<string, string> = {
-  scheduled: "hsl(var(--primary))",
-  completed: "#22c55e",
-  cancelled: "#ef4444",
-  "no-show": "#eab308",
+// Event color palette: paid=green, unpaid=red, free=purple, task=blue
+const EVENT_COLORS = {
+  paid: "#16a34a",      // green-600
+  unpaid: "#dc2626",    // red-600
+  free: "#9333ea",      // purple-600
+  task: "#2563eb",      // blue-600
+  cancelled: "#94a3b8", // slate-400
+  completed: "#16a34a", // green-600
+};
+
+const getSessionColor = (s: { status?: string; is_paid?: boolean; price_cents?: number }) => {
+  if (s.status === "cancelled") return EVENT_COLORS.cancelled;
+  if ((s.price_cents ?? 0) === 0) return EVENT_COLORS.free;
+  return s.is_paid ? EVENT_COLORS.paid : EVENT_COLORS.unpaid;
 };
 
 const AdminCalendar = () => {
