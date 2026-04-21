@@ -57,6 +57,7 @@ import UnifiedUserManagement from "./pages/admin/UnifiedUserManagement";
 import AuthSettings from "./pages/admin/AuthSettings";
 import SecurityDashboard from "./pages/admin/SecurityDashboard";
 import BusinessDashboard from "./pages/admin/BusinessDashboard";
+import TherapistPayouts from "./pages/admin/TherapistPayouts";
 // Staff portal
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffACTMatrix from "./pages/staff/StaffACTMatrix";
@@ -197,6 +198,7 @@ const App = () => (
                   <Route path="/admin/courses" element={<AdminRoute><CourseManager /></AdminRoute>} />
                   <Route path="/admin/courses/:courseId/lessons" element={<AdminRoute><CourseLessonManager /></AdminRoute>} />
                   <Route path="/admin/business" element={<AdminRoute><BusinessDashboard /></AdminRoute>} />
+                  <Route path="/admin/payouts" element={<AdminRoute><TherapistPayouts /></AdminRoute>} />
                   <Route path="/admin/blog" element={<AdminRoute><BlogManager /></AdminRoute>} />
                   <Route path="/admin/badges" element={<AdminRoute><BadgeManager /></AdminRoute>} />
                   <Route path="/admin/note-templates" element={<AdminRoute><NoteTemplates /></AdminRoute>} />
