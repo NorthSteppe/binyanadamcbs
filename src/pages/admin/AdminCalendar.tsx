@@ -73,8 +73,9 @@ const EVENT_COLORS = {
 
 const getSessionColor = (s: { status?: string; is_paid?: boolean; price_cents?: number }) => {
   if (s.status === "cancelled") return EVENT_COLORS.cancelled;
+  if (s.is_paid) return EVENT_COLORS.paid;
   if ((s.price_cents ?? 0) === 0) return EVENT_COLORS.free;
-  return s.is_paid ? EVENT_COLORS.paid : EVENT_COLORS.unpaid;
+  return EVENT_COLORS.unpaid;
 };
 
 const AdminCalendar = () => {
