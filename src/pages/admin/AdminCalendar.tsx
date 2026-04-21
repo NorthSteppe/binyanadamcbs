@@ -71,10 +71,12 @@ const EVENT_COLORS = {
   completed: "#16a34a", // green-600
 };
 
-const getSessionColor = (s: { status?: string; is_paid?: boolean; price_cents?: number }) => {
+const getSessionColor = (s: { status?: string; is_paid?: boolean; price_cents?: number; service_option_id?: string | null }) => {
   if (s.status === "cancelled") return EVENT_COLORS.cancelled;
   if (s.is_paid) return EVENT_COLORS.paid;
-  if ((s.price_cents ?? 0) === 0) return EVENT_COLORS.free;
+  // Purple ("free") only when an explicit service was chosen and it costs £0.
+  // £0 with no service = unpriced booking → treat as unpaid (red) so it gets attention.
+  if (s.service_option_id && (s.price_cents ?? 0) === 0) return EVENT_COLORS.free;
   return EVENT_COLORS.unpaid;
 };
 
