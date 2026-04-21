@@ -1435,7 +1435,7 @@ const AdminCalendar = () => {
 
       {/* ===== EDIT SESSION DIALOG ===== */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Session</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div><Label>Title</Label><Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} /></div>
@@ -1499,6 +1499,85 @@ const AdminCalendar = () => {
                   </label>
                 ))}
               </div>
+            </div>
+            {/* Service & pricing */}
+            <div className="border border-border/50 rounded-lg p-3 space-y-2 bg-muted/30">
+              <Label className="flex items-center gap-1.5 text-xs"><DollarSign size={12} /> Service & pricing</Label>
+              <Select
+                value={editForm.service_option_id || "custom"}
+                onValueChange={(v) => {
+                  if (v === "custom") {
+                    setEditForm({ ...editForm, service_option_id: "" });
+                  } else {
+                    const svc = serviceOptions.find((s: any) => s.id === v);
+                    if (svc) {
+                      setEditForm({
+                        ...editForm,
+                        service_option_id: svc.id,
+                        price_cents: svc.price_cents,
+                        duration_minutes: svc.duration_minutes,
+                      });
+                    }
+                  }
+                }}
+              >
+                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select service" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="custom">Custom (no service)</SelectItem>
+                  {serviceOptions.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name} — £{(s.price_cents / 100).toFixed(2)} · {s.duration_minutes}min
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Client price (£)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={(editForm.price_cents / 100).toFixed(2)}
+                    onChange={(e) => setEditForm({ ...editForm, price_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                    className="h-7 text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Therapist payout (£)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={(editForm.therapist_rate_cents / 100).toFixed(2)}
+                    onChange={(e) => setEditForm({ ...editForm, therapist_rate_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                    className="h-7 text-xs"
+                  />
+                </div>
+              </div>
+              <Select
+                value={editForm.therapist_id || "none"}
+                onValueChange={(v) => {
+                  if (v === "none") {
+                    setEditForm({ ...editForm, therapist_id: "" });
+                  } else {
+                    const tm = teamMembersWithRates.find((t: any) => t.user_id === v);
+                    setEditForm({
+                      ...editForm,
+                      therapist_id: v,
+                      therapist_rate_cents: editForm.therapist_rate_cents || (tm?.default_session_rate_cents || 0),
+                    });
+                  }
+                }}
+              >
+                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Therapist delivering session" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No therapist assigned</SelectItem>
+                  {teamMembersWithRates.filter((t: any) => t.user_id).map((t: any) => (
+                    <SelectItem key={t.user_id} value={t.user_id}>
+                      {t.name} {t.default_session_rate_cents ? `(£${(t.default_session_rate_cents / 100).toFixed(0)} default)` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div><Label>Notes</Label><Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={2} /></div>
             <Button className="w-full" onClick={handleUpdate}>Save Changes</Button>
