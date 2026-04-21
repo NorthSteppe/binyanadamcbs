@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroCarousel from "@/components/HeroCarousel";
 import BadgeMarquee from "@/components/BadgeMarquee";
+import LandingCalendarWidget from "@/components/LandingCalendarWidget";
 import EditableText from "@/components/editable/EditableText";
 import EditableImage from "@/components/editable/EditableImage";
 import { motion } from "framer-motion";
@@ -129,6 +130,9 @@ const Index = () => {
 
       {/* Badge marquee */}
       <BadgeMarquee />
+
+      {/* Personal calendar for signed-in users */}
+      {user && <LandingCalendarWidget />}
 
       {/* Blog CTA */}
       <section className="py-16 md:py-24">
