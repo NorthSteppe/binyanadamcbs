@@ -996,6 +996,8 @@ const AdminCalendar = () => {
               </div>
             </div>
           )}
+            </div>
+          </div>
         </div>
       </section>
       {!isFullscreen && <Footer />}
