@@ -370,6 +370,11 @@ const ClientDetail = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="financial">
+              <h2 className="text-lg font-semibold mb-4">Financial Overview</h2>
+              <ClientFinancialTab clientId={realClientId} manualClientId={manualClientId} isManual={isManual} />
+            </TabsContent>
+
             <TabsContent value="todos">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Client Tasks & Homework</h2>
