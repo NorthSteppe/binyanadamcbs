@@ -115,8 +115,6 @@ const ClientDetail = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [todos, setTodos] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
-  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [newNote, setNewNote] = useState({ title: "", content: "", category: "general" });
   const [todoDialogOpen, setTodoDialogOpen] = useState(false);
   const [newTodo, setNewTodo] = useState({ title: "", description: "" });
   const [uploading, setUploading] = useState(false);
