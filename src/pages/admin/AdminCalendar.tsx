@@ -105,7 +105,7 @@ const AdminCalendar = () => {
   // New task form
   const [newTask, setNewTask] = useState({ title: "", assigned_to: "", description: "" });
   // Edit session form
-  const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[] });
+  const [editForm, setEditForm] = useState({ title: "", session_date: "", session_time: "09:00", duration_minutes: 60, description: "", status: "scheduled", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0 });
   const [editSessionId, setEditSessionId] = useState("");
   const [pasteNotes, setPasteNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -511,8 +511,13 @@ const AdminCalendar = () => {
     }
   };
 
-  const openEdit = (event: CalendarEvent) => {
+  const openEdit = async (event: CalendarEvent) => {
     if (event.type !== "session") return;
+    const { data: full } = await supabase
+      .from("sessions")
+      .select("service_option_id, price_cents, therapist_id, therapist_rate_cents")
+      .eq("id", event.id)
+      .maybeSingle();
     setEditSessionId(event.id);
     setEditForm({
       title: event.title,
@@ -524,6 +529,10 @@ const AdminCalendar = () => {
       meeting_platform: event.meetingPlatform || "",
       meeting_url: event.meetingUrl || "",
       attendee_ids: event.attendeeIds || [],
+      service_option_id: (full as any)?.service_option_id || "",
+      price_cents: (full as any)?.price_cents || 0,
+      therapist_id: (full as any)?.therapist_id || "",
+      therapist_rate_cents: (full as any)?.therapist_rate_cents || 0,
     });
     setEditOpen(true);
     setDetailOpen(false);
@@ -537,6 +546,10 @@ const AdminCalendar = () => {
       meeting_platform: editForm.meeting_platform || null,
       meeting_url: editForm.meeting_url || null,
       attendee_ids: editForm.attendee_ids,
+      service_option_id: editForm.service_option_id || null,
+      price_cents: editForm.price_cents || 0,
+      therapist_id: editForm.therapist_id || null,
+      therapist_rate_cents: editForm.therapist_rate_cents || 0,
     } as any).eq("id", editSessionId);
     if (error) toast.error("Failed to update");
     else { toast.success("Session updated"); setEditOpen(false); qc.invalidateQueries({ queryKey: ["team_sessions"] }); }
