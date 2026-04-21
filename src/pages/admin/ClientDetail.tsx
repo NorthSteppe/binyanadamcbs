@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling } from "lucide-react";
+import ClientFinancialTab from "@/components/admin/ClientFinancialTab";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -267,10 +268,11 @@ const ClientDetail = () => {
           </div>
 
           <Tabs defaultValue={isManual ? "notes" : "overview"} className="space-y-6">
-            <TabsList className="rounded-full">
+            <TabsList className="rounded-full flex-wrap h-auto">
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="notes" className="rounded-full">Documentation</TabsTrigger>
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
+              <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
             </TabsList>
@@ -366,6 +368,11 @@ const ClientDetail = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="financial">
+              <h2 className="text-lg font-semibold mb-4">Financial Overview</h2>
+              <ClientFinancialTab clientId={realClientId} manualClientId={manualClientId} isManual={isManual} />
             </TabsContent>
 
             <TabsContent value="todos">
