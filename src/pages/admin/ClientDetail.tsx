@@ -256,7 +256,6 @@ const ClientDetail = () => {
     );
   }
 
-  const noteCategories = ["general", "session-note", "assessment", "plan", "correspondence", "report"];
 
   return (
     <div className="min-h-screen bg-background">
