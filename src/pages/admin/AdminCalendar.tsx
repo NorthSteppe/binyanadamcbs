@@ -1011,6 +1011,88 @@ const AdminCalendar = () => {
                     <Input value={newSession.meeting_url} onChange={(e) => setNewSession({ ...newSession, meeting_url: e.target.value })} placeholder="https://..." className="h-8 text-sm" />
                   </div>
                 </div>
+
+                {/* Service & pricing */}
+                <div className="border border-border/50 rounded-lg p-2.5 space-y-2 bg-muted/30">
+                  <Label className="flex items-center gap-1.5 text-xs"><DollarSign size={12} /> Service & pricing</Label>
+                  <Select
+                    value={newSession.service_option_id || "custom"}
+                    onValueChange={(v) => {
+                      if (v === "custom") {
+                        setNewSession({ ...newSession, service_option_id: "" });
+                      } else {
+                        const svc = serviceOptions.find((s: any) => s.id === v);
+                        if (svc) {
+                          setNewSession({
+                            ...newSession,
+                            service_option_id: svc.id,
+                            price_cents: svc.price_cents,
+                            duration_minutes: svc.duration_minutes,
+                            title: newSession.title || svc.name,
+                          });
+                        }
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select service" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="custom">Custom (no service)</SelectItem>
+                      {serviceOptions.map((s: any) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} — £{(s.price_cents / 100).toFixed(2)} · {s.duration_minutes}min
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Client price (£)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={(newSession.price_cents / 100).toFixed(2)}
+                        onChange={(e) => setNewSession({ ...newSession, price_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                        className="h-7 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Therapist payout (£)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={(newSession.therapist_rate_cents / 100).toFixed(2)}
+                        onChange={(e) => setNewSession({ ...newSession, therapist_rate_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                        className="h-7 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <Select
+                    value={newSession.therapist_id || "none"}
+                    onValueChange={(v) => {
+                      if (v === "none") {
+                        setNewSession({ ...newSession, therapist_id: "" });
+                      } else {
+                        const tm = teamMembersWithRates.find((t: any) => t.user_id === v);
+                        setNewSession({
+                          ...newSession,
+                          therapist_id: v,
+                          therapist_rate_cents: newSession.therapist_rate_cents || (tm?.default_session_rate_cents || 0),
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Therapist delivering session" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No therapist assigned</SelectItem>
+                      {teamMembersWithRates.filter((t: any) => t.user_id).map((t: any) => (
+                        <SelectItem key={t.user_id} value={t.user_id}>
+                          {t.name} {t.default_session_rate_cents ? `(£${(t.default_session_rate_cents / 100).toFixed(0)} default)` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <Label className="text-xs flex items-center gap-1 mb-1"><UserPlus size={10} /> Invite Therapists</Label>
                   <div className="grid grid-cols-2 gap-1 max-h-[80px] overflow-y-auto border border-border/50 rounded-lg p-1.5">
