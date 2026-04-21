@@ -1,16 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling, NotebookPen, Save } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling, Save } from "lucide-react";
 import ClientFinancialTab from "@/components/admin/ClientFinancialTab";
 import VoiceRecorder from "@/components/VoiceRecorder";
-import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +16,90 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
 import { toast } from "sonner";
+
+// Per-session notes editor with voice transcription
+const SessionRow = ({ session, onSaved }: { session: any; onSaved: () => void }) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<string>(session.notes ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("sessions")
+      .update({ notes: draft })
+      .eq("id", session.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Failed to save notes: " + error.message);
+      return;
+    }
+    toast.success("Session notes saved");
+    setEditing(false);
+    onSaved();
+  };
+
+  const handleVoiceTranscript = (text: string) => {
+    setDraft((prev) => (prev ? prev + (prev.endsWith(" ") ? "" : " ") + text : text));
+  };
+
+  return (
+    <div className="bg-card border border-border/50 rounded-2xl p-4 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Clock size={16} className="text-primary shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate">{session.title}</p>
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(session.session_date), "EEE, MMM d, yyyy · HH:mm")} · {session.duration_minutes} min
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Badge
+            variant={session.status === "completed" ? "default" : session.status === "cancelled" ? "destructive" : "secondary"}
+            className="capitalize text-xs"
+          >
+            {session.status}
+          </Badge>
+          {!editing && (
+            <Button size="sm" variant="outline" className="rounded-full gap-1.5" onClick={() => { setDraft(session.notes ?? ""); setEditing(true); }}>
+              <Pencil size={12} /> {session.notes ? "Edit notes" : "Add notes"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {!editing && session.notes && (
+        <div className="text-sm text-muted-foreground whitespace-pre-wrap border-t border-border/40 pt-3">
+          {session.notes}
+        </div>
+      )}
+
+      {editing && (
+        <div className="space-y-2 border-t border-border/40 pt-3">
+          <Textarea
+            placeholder="Type session notes here, or use voice transcription below…"
+            rows={6}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <VoiceRecorder onTranscript={handleVoiceTranscript} />
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={saving}>
+                <X size={14} className="mr-1" /> Cancel
+              </Button>
+              <Button size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
+                <Save size={14} /> {saving ? "Saving…" : "Save Notes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ClientDetail = () => {
   const { clientId: rawId } = useParams<{ clientId: string }>();
