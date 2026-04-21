@@ -163,8 +163,47 @@ const ClientsOverview = () => {
           };
         });
 
+        // 3. Fetch manual clients (records without a real linked user account)
+        let manualQuery = supabase
+          .from("manual_clients")
+          .select("id, full_name, email, phone, notes, created_at, created_by, linked_user_id")
+          .is("linked_user_id", null);
+        if (!isAdmin && user) {
+          manualQuery = manualQuery.eq("created_by", user.id);
+        }
+        const { data: manualData } = await manualQuery;
+        const manualRows: ClientRow[] = (manualData ?? []).map((m) => ({
+          id: `manual:${m.id}`,
+          full_name: m.full_name || "Unnamed",
+          avatar_url: null,
+          created_at: m.created_at,
+          is_manual: true,
+          manual_email: m.email,
+          manual_phone: m.phone,
+          manual_notes: m.notes,
+          session_count: 0,
+          upcoming_count: 0,
+          last_session: null,
+          next_session: null,
+          unpaid_count: 0,
+          note_count: 0,
+          document_count: 0,
+          clinical_entry_count: 0,
+          todo_pending: 0,
+          message_count: 0,
+          course_count: 0,
+          stage: "new",
+          tags: [],
+          risk_level: "low",
+          risk_note: "",
+          internal_summary: m.notes ?? "",
+          assignees: [],
+        }));
+
+        const combined = [...enriched, ...manualRows];
+
         // Sort: high risk first, then upcoming sessions soonest, then name.
-        enriched.sort((a, b) => {
+        combined.sort((a, b) => {
           const riskRank = { high: 0, medium: 1, low: 2 } as const;
           if (riskRank[a.risk_level] !== riskRank[b.risk_level]) {
             return riskRank[a.risk_level] - riskRank[b.risk_level];
@@ -175,7 +214,7 @@ const ClientsOverview = () => {
           return a.full_name.localeCompare(b.full_name);
         });
 
-        setRows(enriched);
+        setRows(combined);
       } finally {
         setLoading(false);
       }
