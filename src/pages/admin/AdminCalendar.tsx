@@ -30,7 +30,7 @@ import {
   parseISO, differenceInMinutes,
 } from "date-fns";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -61,11 +61,20 @@ type ClientProfile = { id: string; full_name: string };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-const statusColors: Record<string, string> = {
-  scheduled: "hsl(var(--primary))",
-  completed: "#22c55e",
-  cancelled: "#ef4444",
-  "no-show": "#eab308",
+// Event color palette: paid=green, unpaid=red, free=purple, task=blue
+const EVENT_COLORS = {
+  paid: "#16a34a",      // green-600
+  unpaid: "#dc2626",    // red-600
+  free: "#9333ea",      // purple-600
+  task: "#2563eb",      // blue-600
+  cancelled: "#94a3b8", // slate-400
+  completed: "#16a34a", // green-600
+};
+
+const getSessionColor = (s: { status?: string; is_paid?: boolean; price_cents?: number }) => {
+  if (s.status === "cancelled") return EVENT_COLORS.cancelled;
+  if ((s.price_cents ?? 0) === 0) return EVENT_COLORS.free;
+  return s.is_paid ? EVENT_COLORS.paid : EVENT_COLORS.unpaid;
 };
 
 const AdminCalendar = () => {
@@ -260,7 +269,7 @@ const AdminCalendar = () => {
         result.push({
           id: s.id, title: s.title, start,
           end: new Date(start.getTime() + (s.duration_minutes || 60) * 60000),
-          type: "session", color: statusColors[s.status] || statusColors.scheduled,
+          type: "session", color: getSessionColor(s),
           status: s.status, description: s.description,
           clientName: nameMap.get(clientId) || "Unknown",
           clientId: clientId,
@@ -711,16 +720,22 @@ const AdminCalendar = () => {
             </div>
           </div>
 
-          {/* Filters */}
+          {/* Filters & Legend */}
           <div className="flex flex-wrap items-center gap-4 text-xs mb-3">
             <label className="flex items-center gap-1.5 cursor-pointer">
               <Switch checked={showSessions} onCheckedChange={setShowSessions} className="scale-75" />
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColors.scheduled }} />Sessions</span>
+              <span>Sessions</span>
             </label>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <Switch checked={showTasks} onCheckedChange={setShowTasks} className="scale-75" />
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" />Tasks</span>
+              <span>Tasks</span>
             </label>
+            <div className="flex items-center gap-3 ml-auto">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.paid }} />Paid</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.unpaid }} />Unpaid</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.free }} />Free</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.task }} />Task</span>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -730,12 +745,34 @@ const AdminCalendar = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate(1)}><ChevronRight size={18} /></Button>
           </div>
 
+          {/* 3D Glossy calendar shell — matches landing widget aesthetic */}
+          <div
+            className="relative rounded-3xl overflow-hidden"
+            style={{
+              background: "linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%)",
+              boxShadow: `
+                0 1px 0 0 hsla(0, 0%, 100%, 0.6) inset,
+                0 -1px 0 0 hsla(0, 0%, 0%, 0.04) inset,
+                0 30px 60px -20px hsla(0, 0%, 0%, 0.18),
+                0 18px 36px -18px hsla(0, 0%, 0%, 0.22),
+                0 4px 8px -4px hsla(0, 0%, 0%, 0.08)
+              `,
+              border: "1px solid hsl(var(--border))",
+            }}
+          >
+            {/* Glossy top sheen */}
+            <div
+              className="absolute inset-x-0 top-0 h-24 pointer-events-none opacity-50 z-0"
+              style={{ background: "linear-gradient(180deg, hsla(0,0%,100%,0.5) 0%, transparent 100%)" }}
+            />
+            <div className="relative z-10 p-3 md:p-5">
+
           {/* ===== MONTH VIEW ===== */}
           {viewMode === "month" && (
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-              <div className="grid grid-cols-7 border-b border-border/30">
+            <div className="overflow-hidden">
+              <div className="grid grid-cols-7 mb-2">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-2">{d}</div>
+                  <div key={d} className="text-center text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 font-medium py-2">{d}</div>
                 ))}
               </div>
               <div className="grid grid-cols-7">
@@ -755,14 +792,14 @@ const AdminCalendar = () => {
                       onDragOver={(e) => handleDragOver(e, `month-${key}`)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, day)}
-                      className={`min-h-[90px] border-b border-r border-border/20 p-1.5 cursor-pointer transition-colors
-                        ${isT ? "bg-primary/5" : "hover:bg-muted/30"}
-                        ${!isCur ? "opacity-40" : ""}
-                        ${isOver ? "bg-primary/10" : ""}
-                        ${dayHolidays.some(h => h.isYomTov) ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}`}
+                      className={`min-h-[96px] m-0.5 rounded-2xl p-1.5 cursor-pointer transition-all duration-300
+                        ${isT ? "bg-primary/10 ring-1 ring-primary/30 shadow-[0_4px_12px_-4px_hsla(0,0%,0%,0.12)]" : "hover:bg-muted/60 hover:shadow-[0_4px_12px_-4px_hsla(0,0%,0%,0.08)] hover:-translate-y-0.5"}
+                        ${!isCur ? "opacity-30" : ""}
+                        ${isOver ? "bg-primary/15 ring-2 ring-primary/40" : ""}
+                        ${dayHolidays.some(h => h.isYomTov) ? "bg-amber-50/60 dark:bg-amber-950/20" : ""}`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className={`text-[11px] font-medium ${isT ? "text-primary" : "text-muted-foreground"}`}>{format(day, "d")}</span>
+                        <span className={`text-[11px] font-semibold ${isT ? "text-primary" : "text-foreground/80"}`}>{format(day, "d")}</span>
                         <span className="text-[9px] text-muted-foreground/60 font-light" dir="rtl">{hebDay}</span>
                       </div>
                       {dayHolidays.length > 0 && (
@@ -775,20 +812,23 @@ const AdminCalendar = () => {
                           {dayHolidays.length > 2 && <span className="text-[7px] text-muted-foreground">+{dayHolidays.length - 2}</span>}
                         </div>
                       )}
-                      <div className="mt-0.5 space-y-0.5">
+                      <div className="mt-1 space-y-0.5">
                         {dayEvents.slice(0, maxEv).map((ev) => (
                           <div
                             key={ev.id} draggable
                             onDragStart={(e) => handleDragStart(e, ev)}
                             onDragEnd={handleDragEnd}
                             onClick={(e) => handleEventClick(e, ev)}
-                            className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 flex items-center justify-between"
-                            style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
+                            className="text-[9px] px-1.5 py-0.5 rounded-md truncate cursor-grab active:cursor-grabbing hover:opacity-90 hover:shadow-sm transition-all flex items-center justify-between font-medium"
+                            style={{
+                              backgroundColor: `${ev.color}1f`,
+                              color: ev.color,
+                              borderLeft: `2px solid ${ev.color}`,
+                            }}
                           >
                             <span className="truncate">{ev.type === "session" && format(ev.start, "HH:mm") + " "}{ev.clientName || ev.title}</span>
                             <span className="flex items-center gap-0.5 shrink-0">
-                              {isAdmin && ev.type === "session" && !ev.isPaid && <DollarSign size={7} className="text-destructive" />}
-                              {ev.plaudRecordingId && <Sparkles size={8} className="ml-0.5 text-primary opacity-80" />}
+                              {ev.plaudRecordingId && <Sparkles size={8} className="ml-0.5 opacity-80" />}
                             </span>
                           </div>
                         ))}
@@ -805,7 +845,7 @@ const AdminCalendar = () => {
 
           {/* ===== WEEK VIEW ===== */}
           {viewMode === "week" && (
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+            <div className="overflow-hidden rounded-2xl">
               <div className="grid grid-cols-[50px_repeat(7,1fr)] border-b border-border bg-muted/30">
                 <div className="p-1" />
                 {days.map((day) => {
@@ -887,7 +927,7 @@ const AdminCalendar = () => {
 
           {/* ===== DAY VIEW ===== */}
           {viewMode === "day" && (
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+            <div className="overflow-hidden rounded-2xl">
               {/* Day view header with Hebrew date and holidays */}
               {(() => {
                 const dayHolidays = getAllHolidays(currentDate);
@@ -959,6 +999,8 @@ const AdminCalendar = () => {
               </div>
             </div>
           )}
+            </div>
+          </div>
         </div>
       </section>
       {!isFullscreen && <Footer />}
