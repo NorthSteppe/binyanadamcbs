@@ -269,7 +269,7 @@ const AdminCalendar = () => {
         result.push({
           id: s.id, title: s.title, start,
           end: new Date(start.getTime() + (s.duration_minutes || 60) * 60000),
-          type: "session", color: statusColors[s.status] || statusColors.scheduled,
+          type: "session", color: getSessionColor(s),
           status: s.status, description: s.description,
           clientName: nameMap.get(clientId) || "Unknown",
           clientId: clientId,
@@ -720,16 +720,22 @@ const AdminCalendar = () => {
             </div>
           </div>
 
-          {/* Filters */}
+          {/* Filters & Legend */}
           <div className="flex flex-wrap items-center gap-4 text-xs mb-3">
             <label className="flex items-center gap-1.5 cursor-pointer">
               <Switch checked={showSessions} onCheckedChange={setShowSessions} className="scale-75" />
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColors.scheduled }} />Sessions</span>
+              <span>Sessions</span>
             </label>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <Switch checked={showTasks} onCheckedChange={setShowTasks} className="scale-75" />
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" />Tasks</span>
+              <span>Tasks</span>
             </label>
+            <div className="flex items-center gap-3 ml-auto">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.paid }} />Paid</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.unpaid }} />Unpaid</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.free }} />Free</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS.task }} />Task</span>
+            </div>
           </div>
 
           {/* Navigation */}
