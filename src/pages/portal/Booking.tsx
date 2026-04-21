@@ -246,6 +246,39 @@ const Booking = () => {
           )}
 
           {selectedService && selectedDate && selectedTime && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border/50 p-6 mb-6">
+              <Label className="text-base font-semibold mb-3 block">{portalT.stepPlatform || "4. Meeting Format"}</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                {([
+                  { id: "in_person", label: portalT.platformInPerson || "In-person", Icon: MapPin },
+                  { id: "zoom", label: portalT.platformZoom || "Zoom", Icon: Video },
+                  { id: "teams", label: portalT.platformTeams || "Teams", Icon: Video },
+                  { id: "google_meet", label: portalT.platformMeet || "Meet", Icon: Video },
+                ] as const).map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setPlatform(id)}
+                    className={cn(
+                      "py-3 px-2 rounded-xl border-2 text-xs font-medium flex flex-col items-center gap-1.5 transition-all",
+                      platform === id
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border/50 bg-card text-muted-foreground hover:border-primary/30"
+                    )}
+                  >
+                    <Icon size={18} className={platform === id ? "text-primary" : ""} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {platform !== "in_person" && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-2">
+                  <Link2 size={11} /> {portalT.platformHint || "A join link will be generated automatically."}
+                </p>
+              )}
+            </motion.div>
+          )}
+
+          {selectedService && selectedDate && selectedTime && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border/50 p-6">
               <Label className="text-base font-semibold mb-3 block">{portalT.step4}</Label>
               <Textarea
@@ -261,6 +294,11 @@ const Booking = () => {
                     <p className="text-muted-foreground">
                       {selectedDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at {selectedTime} · {selectedService.duration_minutes} min
                     </p>
+                    {platform !== "in_person" && (
+                      <p className="text-primary text-xs mt-1 flex items-center gap-1">
+                        <Video size={11} /> {platform === "zoom" ? "Zoom" : platform === "teams" ? "Microsoft Teams" : "Google Meet"}
+                      </p>
+                    )}
                   </div>
                   {selectedService.price_cents > 0 && (
                     <p className="text-lg font-bold text-primary">£{(selectedService.price_cents / 100).toFixed(2)}</p>
