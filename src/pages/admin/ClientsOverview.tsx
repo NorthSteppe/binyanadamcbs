@@ -318,12 +318,8 @@ const ClientsOverview = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {filtered.map((c) => (
-                <Link
-                  key={c.id}
-                  to={`/admin/clients/${c.id}`}
-                  className="block bg-white/95 backdrop-blur rounded-2xl border border-black/5 hover:border-primary/30 hover:shadow-lg transition-all p-5"
-                >
+              {filtered.map((c) => {
+                const inner = (
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
                     <div className="shrink-0">
@@ -340,9 +336,15 @@ const ClientsOverview = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-base">{c.full_name}</p>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${STAGE_COLORS[c.stage]}`}>
-                          {c.stage}
-                        </span>
+                        {c.is_manual ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full border bg-slate-500/10 text-slate-700 border-slate-500/30">
+                            manual
+                          </span>
+                        ) : (
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full border ${STAGE_COLORS[c.stage]}`}>
+                            {c.stage}
+                          </span>
+                        )}
                         {c.risk_level !== "low" && (
                           <span className={`text-[10px] flex items-center gap-1 ${RISK_COLORS[c.risk_level]}`}>
                             <AlertTriangle size={10} /> {c.risk_level} risk
@@ -356,13 +358,15 @@ const ClientsOverview = () => {
                       </div>
 
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Client since {format(new Date(c.created_at), "MMM yyyy")}
+                        {c.is_manual ? "Added" : "Client since"} {format(new Date(c.created_at), "MMM yyyy")}
                         {c.next_session && (
                           <> · Next: {format(new Date(c.next_session), "EEE d MMM, HH:mm")}</>
                         )}
                         {!c.next_session && c.last_session && (
                           <> · Last: {format(new Date(c.last_session), "d MMM yyyy")}</>
                         )}
+                        {c.is_manual && c.manual_email && <> · {c.manual_email}</>}
+                        {c.is_manual && c.manual_phone && <> · {c.manual_phone}</>}
                       </p>
 
                       {c.tags.length > 0 && (
@@ -379,23 +383,46 @@ const ClientsOverview = () => {
                         </p>
                       )}
 
-                      {/* Auto signals */}
-                      <div className="flex gap-3 flex-wrap mt-3 text-[11px] text-muted-foreground">
-                        <span className="flex items-center gap-1"><Calendar size={11} /> {c.session_count} sessions</span>
-                        <span className="flex items-center gap-1"><FileText size={11} /> {c.note_count} notes</span>
-                        <span className="flex items-center gap-1"><BookOpen size={11} /> {c.clinical_entry_count} clinical</span>
-                        <span className="flex items-center gap-1"><ListTodo size={11} /> {c.todo_pending} pending</span>
-                        <span className="flex items-center gap-1"><MessageSquare size={11} /> {c.message_count} msgs</span>
-                        {c.course_count > 0 && (
-                          <span className="flex items-center gap-1"><CheckCircle2 size={11} /> {c.course_count} course{c.course_count > 1 ? "s" : ""}</span>
-                        )}
-                      </div>
+                      {!c.is_manual && (
+                        <div className="flex gap-3 flex-wrap mt-3 text-[11px] text-muted-foreground">
+                          <span className="flex items-center gap-1"><Calendar size={11} /> {c.session_count} sessions</span>
+                          <span className="flex items-center gap-1"><FileText size={11} /> {c.note_count} notes</span>
+                          <span className="flex items-center gap-1"><BookOpen size={11} /> {c.clinical_entry_count} clinical</span>
+                          <span className="flex items-center gap-1"><ListTodo size={11} /> {c.todo_pending} pending</span>
+                          <span className="flex items-center gap-1"><MessageSquare size={11} /> {c.message_count} msgs</span>
+                          {c.course_count > 0 && (
+                            <span className="flex items-center gap-1"><CheckCircle2 size={11} /> {c.course_count} course{c.course_count > 1 ? "s" : ""}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
-                    <ChevronRight size={16} className="text-muted-foreground/40 shrink-0 mt-2" />
+                    {!c.is_manual && <ChevronRight size={16} className="text-muted-foreground/40 shrink-0 mt-2" />}
                   </div>
-                </Link>
-              ))}
+                );
+
+                if (c.is_manual) {
+                  return (
+                    <Link
+                      key={c.id}
+                      to="/admin/manual-clients"
+                      className="block bg-white/95 backdrop-blur rounded-2xl border border-black/5 hover:border-primary/30 hover:shadow-lg transition-all p-5"
+                    >
+                      {inner}
+                    </Link>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={c.id}
+                    to={`/admin/clients/${c.id}`}
+                    className="block bg-white/95 backdrop-blur rounded-2xl border border-black/5 hover:border-primary/30 hover:shadow-lg transition-all p-5"
+                  >
+                    {inner}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
