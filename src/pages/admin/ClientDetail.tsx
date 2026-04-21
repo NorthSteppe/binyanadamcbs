@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, ListTodo, CheckCircle2, Circle, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,9 +18,15 @@ import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
 import { toast } from "sonner";
 
 const ClientDetail = () => {
-  const { clientId } = useParams<{ clientId: string }>();
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<{ full_name: string; created_at: string } | null>(null);
+  const { clientId: rawId } = useParams<{ clientId: string }>();
+  const { user, isAdmin } = useAuth();
+
+  // Manual client routing: /admin/clients/manual:<uuid>
+  const isManual = rawId?.startsWith("manual:") ?? false;
+  const manualClientId = isManual ? rawId!.slice("manual:".length) : null;
+  const realClientId = isManual ? null : rawId ?? null;
+
+  const [profile, setProfile] = useState<{ full_name: string; created_at: string; email?: string; phone?: string; linked_user_id?: string | null } | null>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
   const [todos, setTodos] = useState<any[]>([]);
@@ -32,35 +38,90 @@ const ClientDetail = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Rename
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
+  const [canRename, setCanRename] = useState(false);
+
   const fetchData = async () => {
-    if (!clientId) return;
-    const [profileRes, sessionsRes, notesRes, todosRes, docsRes] = await Promise.all([
-      supabase.from("profiles").select("full_name, created_at").eq("id", clientId).single(),
-      supabase.from("sessions").select("*").eq("client_id", clientId).order("session_date", { ascending: false }),
-      supabase.from("client_notes").select("*").eq("client_id", clientId).order("created_at", { ascending: false }),
-      supabase.from("client_todos").select("*").eq("client_id", clientId).order("created_at", { ascending: false }),
-      supabase.from("client_documents").select("*").eq("client_id", clientId).order("created_at", { ascending: false }),
-    ]);
-    if (profileRes.data) setProfile(profileRes.data);
-    if (sessionsRes.data) setSessions(sessionsRes.data);
-    if (notesRes.data) setNotes(notesRes.data);
-    if (todosRes.data) setTodos(todosRes.data);
-    if (docsRes.data) setDocuments(docsRes.data);
+    if (!rawId) return;
+
+    if (isManual && manualClientId) {
+      const [mcRes, sessionsRes, notesRes, todosRes, docsRes] = await Promise.all([
+        supabase.from("manual_clients").select("full_name, email, phone, created_at, linked_user_id, created_by").eq("id", manualClientId).single(),
+        supabase.from("sessions").select("*").eq("manual_client_id", manualClientId).order("session_date", { ascending: false }),
+        supabase.from("client_notes").select("*").eq("manual_client_id", manualClientId).order("created_at", { ascending: false }),
+        supabase.from("client_todos").select("*").eq("manual_client_id", manualClientId).order("created_at", { ascending: false }),
+        supabase.from("client_documents").select("*").eq("manual_client_id", manualClientId).order("created_at", { ascending: false }),
+      ]);
+      if (mcRes.data) {
+        setProfile({
+          full_name: mcRes.data.full_name,
+          created_at: mcRes.data.created_at,
+          email: mcRes.data.email,
+          phone: mcRes.data.phone,
+          linked_user_id: mcRes.data.linked_user_id,
+        });
+        // Manual: creator or admin can rename
+        setCanRename(isAdmin || mcRes.data.created_by === user?.id);
+      }
+      if (sessionsRes.data) setSessions(sessionsRes.data);
+      if (notesRes.data) setNotes(notesRes.data);
+      if (todosRes.data) setTodos(todosRes.data);
+      if (docsRes.data) setDocuments(docsRes.data);
+    } else if (realClientId) {
+      const [profileRes, sessionsRes, notesRes, todosRes, docsRes, assignRes] = await Promise.all([
+        supabase.from("profiles").select("full_name, created_at").eq("id", realClientId).single(),
+        supabase.from("sessions").select("*").eq("client_id", realClientId).order("session_date", { ascending: false }),
+        supabase.from("client_notes").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
+        supabase.from("client_todos").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
+        supabase.from("client_documents").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
+        supabase.from("client_assignments").select("assignee_id").eq("client_id", realClientId),
+      ]);
+      if (profileRes.data) setProfile(profileRes.data);
+      if (sessionsRes.data) setSessions(sessionsRes.data);
+      if (notesRes.data) setNotes(notesRes.data);
+      if (todosRes.data) setTodos(todosRes.data);
+      if (docsRes.data) setDocuments(docsRes.data);
+      const isAssigned = (assignRes.data ?? []).some((a) => a.assignee_id === user?.id);
+      setCanRename(isAdmin || isAssigned);
+    }
   };
 
-  useEffect(() => { fetchData(); }, [clientId]);
+  useEffect(() => { fetchData(); }, [rawId]);
+
+  const targetCols = isManual
+    ? { manual_client_id: manualClientId }
+    : { client_id: realClientId };
+
+  const handleSaveName = async () => {
+    if (!nameDraft.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+    if (isManual && manualClientId) {
+      const { error } = await supabase.from("manual_clients").update({ full_name: nameDraft.trim() }).eq("id", manualClientId);
+      if (error) return toast.error("Failed: " + error.message);
+    } else if (realClientId) {
+      const { error } = await supabase.from("profiles").update({ full_name: nameDraft.trim() }).eq("id", realClientId);
+      if (error) return toast.error("Failed: " + error.message);
+    }
+    toast.success("Name updated");
+    setEditingName(false);
+    fetchData();
+  };
 
   const handleAddNote = async () => {
-    if (!newNote.title || !clientId || !user) return;
+    if (!newNote.title || !user) return;
     const { error } = await supabase.from("client_notes").insert({
-      client_id: clientId,
+      ...targetCols,
       author_id: user.id,
       title: newNote.title,
       content: newNote.content,
       category: newNote.category,
-    });
+    } as any);
     if (error) {
-      toast.error("Failed to add note");
+      toast.error("Failed to add note: " + error.message);
     } else {
       toast.success("Note added");
       setNoteDialogOpen(false);
@@ -75,14 +136,14 @@ const ClientDetail = () => {
   };
 
   const handleAddTodo = async () => {
-    if (!newTodo.title || !clientId || !user) return;
+    if (!newTodo.title || !user) return;
     const { error } = await supabase.from("client_todos").insert({
-      client_id: clientId,
+      ...targetCols,
       created_by: user.id,
       title: newTodo.title,
       description: newTodo.description,
-    });
-    if (error) toast.error("Failed to add task");
+    } as any);
+    if (error) toast.error("Failed to add task: " + error.message);
     else {
       toast.success("Task added");
       setTodoDialogOpen(false);
@@ -92,7 +153,6 @@ const ClientDetail = () => {
   };
 
   const handleDeleteDocument = async (doc: any) => {
-    // Extract storage path from public URL
     const storagePath = doc.file_url.includes("/storage/v1/object/public/client-documents/")
       ? doc.file_url.split("/storage/v1/object/public/client-documents/")[1]
       : doc.file_url;
@@ -104,10 +164,11 @@ const ClientDetail = () => {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || !clientId || !user) return;
+    if (!files || !user) return;
+    const folderId = isManual ? `manual_${manualClientId}` : realClientId;
     setUploading(true);
     for (const file of Array.from(files)) {
-      const filePath = `${clientId}/${Date.now()}_${file.name}`;
+      const filePath = `${folderId}/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage.from("client-documents").upload(filePath, file);
       if (uploadError) {
         toast.error("Upload failed: " + uploadError.message);
@@ -115,12 +176,12 @@ const ClientDetail = () => {
       }
       const { data: urlData } = supabase.storage.from("client-documents").getPublicUrl(filePath);
       await supabase.from("client_documents").insert({
-        client_id: clientId,
+        ...targetCols,
         file_name: file.name,
         file_url: urlData.publicUrl,
         file_type: file.type,
         uploaded_by: user.id,
-      });
+      } as any);
     }
     fetchData();
     setUploading(false);
@@ -148,35 +209,83 @@ const ClientDetail = () => {
             <ArrowLeft size={14} /> Back to Clients
           </Link>
 
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold">{profile.full_name}</h1>
-              <p className="text-sm text-muted-foreground">Client since {format(new Date(profile.created_at), "MMMM yyyy")}</p>
+          <div className="flex items-center justify-between mb-8 gap-4">
+            <div className="min-w-0 flex-1">
+              {editingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={nameDraft}
+                    onChange={(e) => setNameDraft(e.target.value)}
+                    className="text-2xl font-bold h-12"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveName();
+                      if (e.key === "Escape") setEditingName(false);
+                    }}
+                  />
+                  <Button size="icon" variant="default" onClick={handleSaveName}><Check size={16} /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => setEditingName(false)}><X size={16} /></Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-3xl font-bold">{profile.full_name}</h1>
+                  {isManual && (
+                    <Badge variant="outline" className="text-[10px]">manual</Badge>
+                  )}
+                  {canRename && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      onClick={() => { setNameDraft(profile.full_name); setEditingName(true); }}
+                      title="Rename client"
+                    >
+                      <Pencil size={13} />
+                    </Button>
+                  )}
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">
+                {isManual ? "Added " : "Client since "}
+                {format(new Date(profile.created_at), "MMMM yyyy")}
+                {isManual && profile.email && <> · {profile.email}</>}
+                {isManual && profile.phone && <> · {profile.phone}</>}
+              </p>
+              {isManual && !profile.linked_user_id && (
+                <Link
+                  to="/admin/manual-clients"
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
+                >
+                  <UserPlus size={12} /> Pair with a registered account to grant portal access
+                </Link>
+              )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               <Badge variant="secondary" className="gap-1"><Calendar size={12} /> {sessions.length} sessions</Badge>
               <Badge variant="secondary" className="gap-1"><FileText size={12} /> {notes.length} notes</Badge>
             </div>
           </div>
 
-          <Tabs defaultValue="overview" className="space-y-6">
+          <Tabs defaultValue={isManual ? "notes" : "overview"} className="space-y-6">
             <TabsList className="rounded-full">
-              <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>
+              {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="notes" className="rounded-full">Documentation</TabsTrigger>
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview">
-              <div className="bg-card border border-border/50 rounded-2xl p-6">
-                <h2 className="text-lg font-semibold mb-4">Client overview</h2>
-                <p className="text-xs text-muted-foreground mb-5">
-                  Manual fields (stage, tags, risk, summary). Everything else on this page is auto-populated.
-                </p>
-                {clientId && <ClientOverviewPanel clientId={clientId} />}
-              </div>
-            </TabsContent>
+            {!isManual && (
+              <TabsContent value="overview">
+                <div className="bg-card border border-border/50 rounded-2xl p-6">
+                  <h2 className="text-lg font-semibold mb-4">Client overview</h2>
+                  <p className="text-xs text-muted-foreground mb-5">
+                    Manual fields (stage, tags, risk, summary). Everything else on this page is auto-populated.
+                  </p>
+                  {realClientId && <ClientOverviewPanel clientId={realClientId} />}
+                </div>
+              </TabsContent>
+            )}
 
             <TabsContent value="notes">
               <div className="flex items-center justify-between mb-4">

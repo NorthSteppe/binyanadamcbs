@@ -401,22 +401,14 @@ const ClientsOverview = () => {
                   </div>
                 );
 
-                if (c.is_manual) {
-                  return (
-                    <Link
-                      key={c.id}
-                      to="/admin/manual-clients"
-                      className="block bg-white/95 backdrop-blur rounded-2xl border border-black/5 hover:border-primary/30 hover:shadow-lg transition-all p-5"
-                    >
-                      {inner}
-                    </Link>
-                  );
-                }
+                const targetUrl = c.is_manual
+                  ? `/admin/clients/${c.id}` // c.id already prefixed with "manual:"
+                  : `/admin/clients/${c.id}`;
 
                 return (
                   <Link
                     key={c.id}
-                    to={`/admin/clients/${c.id}`}
+                    to={targetUrl}
                     className="block bg-white/95 backdrop-blur rounded-2xl border border-black/5 hover:border-primary/30 hover:shadow-lg transition-all p-5"
                   >
                     {inner}

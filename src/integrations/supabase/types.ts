@@ -572,69 +572,91 @@ export type Database = {
       }
       client_documents: {
         Row: {
-          client_id: string
+          client_id: string | null
           created_at: string
           file_name: string
           file_type: string
           file_url: string
           id: string
+          manual_client_id: string | null
           notes: string
           uploaded_by: string
         }
         Insert: {
-          client_id: string
+          client_id?: string | null
           created_at?: string
           file_name: string
           file_type?: string
           file_url: string
           id?: string
+          manual_client_id?: string | null
           notes?: string
           uploaded_by: string
         }
         Update: {
-          client_id?: string
+          client_id?: string | null
           created_at?: string
           file_name?: string
           file_type?: string
           file_url?: string
           id?: string
+          manual_client_id?: string | null
           notes?: string
           uploaded_by?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_documents_manual_client_id_fkey"
+            columns: ["manual_client_id"]
+            isOneToOne: false
+            referencedRelation: "manual_clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_notes: {
         Row: {
           author_id: string
           category: string
-          client_id: string
+          client_id: string | null
           content: string
           created_at: string
           id: string
+          manual_client_id: string | null
           title: string
           updated_at: string
         }
         Insert: {
           author_id: string
           category?: string
-          client_id: string
+          client_id?: string | null
           content?: string
           created_at?: string
           id?: string
+          manual_client_id?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           author_id?: string
           category?: string
-          client_id?: string
+          client_id?: string | null
           content?: string
           created_at?: string
           id?: string
+          manual_client_id?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_manual_client_id_fkey"
+            columns: ["manual_client_id"]
+            isOneToOne: false
+            referencedRelation: "manual_clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_overview: {
         Row: {
@@ -674,72 +696,94 @@ export type Database = {
       }
       client_todos: {
         Row: {
-          client_id: string
+          client_id: string | null
           created_at: string
           created_by: string
           description: string
           due_date: string | null
           id: string
           is_completed: boolean
+          manual_client_id: string | null
           title: string
           updated_at: string
         }
         Insert: {
-          client_id: string
+          client_id?: string | null
           created_at?: string
           created_by: string
           description?: string
           due_date?: string | null
           id?: string
           is_completed?: boolean
+          manual_client_id?: string | null
           title: string
           updated_at?: string
         }
         Update: {
-          client_id?: string
+          client_id?: string | null
           created_at?: string
           created_by?: string
           description?: string
           due_date?: string | null
           id?: string
           is_completed?: boolean
+          manual_client_id?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_todos_manual_client_id_fkey"
+            columns: ["manual_client_id"]
+            isOneToOne: false
+            referencedRelation: "manual_clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clinical_entries: {
         Row: {
-          client_id: string
+          client_id: string | null
           created_at: string
           entry_data: Json
           entry_date: string
           filled_by: string
           id: string
+          manual_client_id: string | null
           notes: string
           tool_type: string
         }
         Insert: {
-          client_id: string
+          client_id?: string | null
           created_at?: string
           entry_data?: Json
           entry_date?: string
           filled_by: string
           id?: string
+          manual_client_id?: string | null
           notes?: string
           tool_type: string
         }
         Update: {
-          client_id?: string
+          client_id?: string | null
           created_at?: string
           entry_data?: Json
           entry_date?: string
           filled_by?: string
           id?: string
+          manual_client_id?: string | null
           notes?: string
           tool_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clinical_entries_manual_client_id_fkey"
+            columns: ["manual_client_id"]
+            isOneToOne: false
+            referencedRelation: "manual_clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_overrides: {
         Row: {
