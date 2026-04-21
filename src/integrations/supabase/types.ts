@@ -1525,6 +1525,51 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_integrations: {
+        Row: {
+          access_token: string
+          account_email: string
+          account_name: string
+          created_at: string
+          extra_data: Json
+          id: string
+          provider: string
+          refresh_token: string
+          scope: string
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_email?: string
+          account_name?: string
+          created_at?: string
+          extra_data?: Json
+          id?: string
+          provider: string
+          refresh_token?: string
+          scope?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_email?: string
+          account_name?: string
+          created_at?: string
+          extra_data?: Json
+          id?: string
+          provider?: string
+          refresh_token?: string
+          scope?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       staff_todos: {
         Row: {
           assigned_to: string
