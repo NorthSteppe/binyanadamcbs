@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, CheckCircle2, CreditCard, XCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CheckCircle2, CreditCard, XCircle, Video, MapPin, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -71,6 +71,8 @@ const Booking = () => {
           date: selectedDate.toISOString(),
           time: selectedTime,
           description,
+          meeting_platform: platform === "in_person" ? null : platform,
+          meeting_url: generateMeetingLink(platform) || null,
         },
       });
 
@@ -86,12 +88,16 @@ const Booking = () => {
       const sessionDate = new Date(selectedDate);
       sessionDate.setHours(parseInt(h), parseInt(m), 0, 0);
 
+      const meetingUrl = generateMeetingLink(platform);
+
       const { error } = await supabase.from("sessions").insert({
         client_id: user.id,
         title: selectedService.name,
         description: description || null,
         session_date: sessionDate.toISOString(),
         duration_minutes: selectedService.duration_minutes,
+        meeting_platform: platform === "in_person" ? null : platform,
+        meeting_url: meetingUrl || null,
       });
 
       setLoading(false);
