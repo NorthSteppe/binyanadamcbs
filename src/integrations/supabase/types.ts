@@ -1057,6 +1057,77 @@ export type Database = {
         }
         Relationships: []
       }
+      fba_intake_assignments: {
+        Row: {
+          assigned_by: string
+          child_name: string
+          client_id: string
+          created_at: string
+          id: string
+          notes: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_by: string
+          child_name?: string
+          client_id: string
+          created_at?: string
+          id?: string
+          notes?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string
+          child_name?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          notes?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fba_intake_responses: {
+        Row: {
+          assignment_id: string
+          client_id: string
+          created_at: string
+          id: string
+          responses: Json
+          updated_at: string
+        }
+        Insert: {
+          assignment_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+          responses?: Json
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          responses?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fba_intake_responses_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: true
+            referencedRelation: "fba_intake_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       focus_blocks: {
         Row: {
           created_at: string

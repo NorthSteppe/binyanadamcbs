@@ -42,6 +42,7 @@ import ToolkitACTMatrix from "./pages/portal/ToolkitACTMatrix";
 import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
 import MindfulnessSounds from "./pages/portal/MindfulnessSounds";
 import Productivity from "./pages/portal/Productivity";
+import FBAIntake from "./pages/portal/FBAIntake";
 // Admin portal
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCalendar from "./pages/admin/AdminCalendar";
@@ -175,6 +176,7 @@ const App = () => (
                   <Route path="/portal/toolkit/pomodoro" element={<ProtectedRoute><ToolkitPomodoro /></ProtectedRoute>} />
                   <Route path="/portal/toolkit/mindfulness" element={<ProtectedRoute><MindfulnessSounds /></ProtectedRoute>} />
                   <Route path="/portal/productivity" element={<ProtectedRoute><Productivity /></ProtectedRoute>} />
+                  <Route path="/portal/fba-intake" element={<ProtectedRoute><FBAIntake /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
                   {/* Admin portal */}
