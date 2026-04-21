@@ -745,12 +745,34 @@ const AdminCalendar = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate(1)}><ChevronRight size={18} /></Button>
           </div>
 
+          {/* 3D Glossy calendar shell — matches landing widget aesthetic */}
+          <div
+            className="relative rounded-3xl overflow-hidden"
+            style={{
+              background: "linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%)",
+              boxShadow: `
+                0 1px 0 0 hsla(0, 0%, 100%, 0.6) inset,
+                0 -1px 0 0 hsla(0, 0%, 0%, 0.04) inset,
+                0 30px 60px -20px hsla(0, 0%, 0%, 0.18),
+                0 18px 36px -18px hsla(0, 0%, 0%, 0.22),
+                0 4px 8px -4px hsla(0, 0%, 0%, 0.08)
+              `,
+              border: "1px solid hsl(var(--border))",
+            }}
+          >
+            {/* Glossy top sheen */}
+            <div
+              className="absolute inset-x-0 top-0 h-24 pointer-events-none opacity-50 z-0"
+              style={{ background: "linear-gradient(180deg, hsla(0,0%,100%,0.5) 0%, transparent 100%)" }}
+            />
+            <div className="relative z-10 p-3 md:p-5">
+
           {/* ===== MONTH VIEW ===== */}
           {viewMode === "month" && (
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-              <div className="grid grid-cols-7 border-b border-border/30">
+            <div className="overflow-hidden">
+              <div className="grid grid-cols-7 mb-2">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="text-center text-[10px] font-medium text-muted-foreground py-2">{d}</div>
+                  <div key={d} className="text-center text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 font-medium py-2">{d}</div>
                 ))}
               </div>
               <div className="grid grid-cols-7">
