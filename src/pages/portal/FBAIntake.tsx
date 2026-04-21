@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, ClipboardList, CheckCircle2, Save, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +31,6 @@ interface AssignmentRow {
 
 const FBAIntake = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -89,7 +88,7 @@ const FBAIntake = () => {
       );
     if (upErr) throw upErr;
     if (markStatus) {
-      const update: Record<string, unknown> = { status: markStatus };
+      const update: { status: string; submitted_at?: string } = { status: markStatus };
       if (markStatus === "submitted") update.submitted_at = new Date().toISOString();
       const { error: aErr } = await supabase
         .from("fba_intake_assignments")
