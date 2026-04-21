@@ -268,10 +268,11 @@ const ClientDetail = () => {
           </div>
 
           <Tabs defaultValue={isManual ? "notes" : "overview"} className="space-y-6">
-            <TabsList className="rounded-full">
+            <TabsList className="rounded-full flex-wrap h-auto">
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="notes" className="rounded-full">Documentation</TabsTrigger>
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
+              <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
             </TabsList>
