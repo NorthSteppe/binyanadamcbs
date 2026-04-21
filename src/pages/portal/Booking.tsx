@@ -88,7 +88,36 @@ const Booking = () => {
       const sessionDate = new Date(selectedDate);
       sessionDate.setHours(parseInt(h), parseInt(m), 0, 0);
 
-      const meetingUrl = generateMeetingLink(platform);
+      // For virtual platforms, try to auto-generate a real link via the assigned therapist's connected account.
+      let meetingUrl = generateMeetingLink(platform);
+      if (platform !== "in_person") {
+        const providerKey = platform === "google_meet" ? "google" : platform; // "zoom" | "microsoft" | "google"
+        try {
+          // Find the assigned therapist (host)
+          const { data: assignment } = await supabase
+            .from("client_assignments")
+            .select("assignee_id")
+            .eq("client_id", user.id)
+            .limit(1)
+            .maybeSingle();
+
+          if (assignment?.assignee_id) {
+            const { data: meet, error: meetErr } = await supabase.functions.invoke("create-meeting", {
+              body: {
+                host_user_id: assignment.assignee_id,
+                provider: providerKey,
+                title: selectedService.name,
+                start_iso: sessionDate.toISOString(),
+                duration_minutes: selectedService.duration_minutes,
+                attendee_email: user.email,
+              },
+            });
+            if (!meetErr && meet?.join_url) meetingUrl = meet.join_url;
+          }
+        } catch (e) {
+          console.warn("Auto meeting creation failed, falling back to instant link", e);
+        }
+      }
 
       const { error } = await supabase.from("sessions").insert({
         client_id: user.id,
