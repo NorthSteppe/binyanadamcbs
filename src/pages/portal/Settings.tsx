@@ -4,6 +4,7 @@ import { usePreferences } from "@/hooks/usePreferences";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/i18n/LanguageContext";
 import NotificationSettings from "@/components/portal/NotificationSettings";
+import ConnectedAccounts from "@/components/portal/ConnectedAccounts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -129,6 +130,9 @@ const Settings = () => {
 
             {/* Telegram Setup (only if enabled) */}
             {prefs.notifyTelegram && isStaff && <NotificationSettings />}
+
+            {/* Connected Accounts (staff only) */}
+            {isStaff && <ConnectedAccounts />}
 
             {/* Mobile */}
             <Card className="border-border/50">
