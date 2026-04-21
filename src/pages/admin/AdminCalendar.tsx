@@ -792,14 +792,14 @@ const AdminCalendar = () => {
                       onDragOver={(e) => handleDragOver(e, `month-${key}`)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, day)}
-                      className={`min-h-[90px] border-b border-r border-border/20 p-1.5 cursor-pointer transition-colors
-                        ${isT ? "bg-primary/5" : "hover:bg-muted/30"}
-                        ${!isCur ? "opacity-40" : ""}
-                        ${isOver ? "bg-primary/10" : ""}
-                        ${dayHolidays.some(h => h.isYomTov) ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}`}
+                      className={`min-h-[96px] m-0.5 rounded-2xl p-1.5 cursor-pointer transition-all duration-300
+                        ${isT ? "bg-primary/10 ring-1 ring-primary/30 shadow-[0_4px_12px_-4px_hsla(0,0%,0%,0.12)]" : "hover:bg-muted/60 hover:shadow-[0_4px_12px_-4px_hsla(0,0%,0%,0.08)] hover:-translate-y-0.5"}
+                        ${!isCur ? "opacity-30" : ""}
+                        ${isOver ? "bg-primary/15 ring-2 ring-primary/40" : ""}
+                        ${dayHolidays.some(h => h.isYomTov) ? "bg-amber-50/60 dark:bg-amber-950/20" : ""}`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className={`text-[11px] font-medium ${isT ? "text-primary" : "text-muted-foreground"}`}>{format(day, "d")}</span>
+                        <span className={`text-[11px] font-semibold ${isT ? "text-primary" : "text-foreground/80"}`}>{format(day, "d")}</span>
                         <span className="text-[9px] text-muted-foreground/60 font-light" dir="rtl">{hebDay}</span>
                       </div>
                       {dayHolidays.length > 0 && (
@@ -812,20 +812,23 @@ const AdminCalendar = () => {
                           {dayHolidays.length > 2 && <span className="text-[7px] text-muted-foreground">+{dayHolidays.length - 2}</span>}
                         </div>
                       )}
-                      <div className="mt-0.5 space-y-0.5">
+                      <div className="mt-1 space-y-0.5">
                         {dayEvents.slice(0, maxEv).map((ev) => (
                           <div
                             key={ev.id} draggable
                             onDragStart={(e) => handleDragStart(e, ev)}
                             onDragEnd={handleDragEnd}
                             onClick={(e) => handleEventClick(e, ev)}
-                            className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab active:cursor-grabbing hover:opacity-80 flex items-center justify-between"
-                            style={{ backgroundColor: `${ev.color}20`, color: ev.color }}
+                            className="text-[9px] px-1.5 py-0.5 rounded-md truncate cursor-grab active:cursor-grabbing hover:opacity-90 hover:shadow-sm transition-all flex items-center justify-between font-medium"
+                            style={{
+                              backgroundColor: `${ev.color}1f`,
+                              color: ev.color,
+                              borderLeft: `2px solid ${ev.color}`,
+                            }}
                           >
                             <span className="truncate">{ev.type === "session" && format(ev.start, "HH:mm") + " "}{ev.clientName || ev.title}</span>
                             <span className="flex items-center gap-0.5 shrink-0">
-                              {isAdmin && ev.type === "session" && !ev.isPaid && <DollarSign size={7} className="text-destructive" />}
-                              {ev.plaudRecordingId && <Sparkles size={8} className="ml-0.5 text-primary opacity-80" />}
+                              {ev.plaudRecordingId && <Sparkles size={8} className="ml-0.5 opacity-80" />}
                             </span>
                           </div>
                         ))}
@@ -842,7 +845,7 @@ const AdminCalendar = () => {
 
           {/* ===== WEEK VIEW ===== */}
           {viewMode === "week" && (
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+            <div className="overflow-hidden rounded-2xl">
               <div className="grid grid-cols-[50px_repeat(7,1fr)] border-b border-border bg-muted/30">
                 <div className="p-1" />
                 {days.map((day) => {
@@ -924,7 +927,7 @@ const AdminCalendar = () => {
 
           {/* ===== DAY VIEW ===== */}
           {viewMode === "day" && (
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+            <div className="overflow-hidden rounded-2xl">
               {/* Day view header with Hebrew date and holidays */}
               {(() => {
                 const dayHolidays = getAllHolidays(currentDate);
