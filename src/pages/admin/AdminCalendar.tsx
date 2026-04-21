@@ -362,6 +362,10 @@ const AdminCalendar = () => {
       meeting_url: newSession.meeting_url || null,
       attendee_ids: newSession.attendee_ids,
       is_paid: false,
+      service_option_id: newSession.service_option_id || null,
+      price_cents: newSession.price_cents || 0,
+      therapist_id: newSession.therapist_id || null,
+      therapist_rate_cents: newSession.therapist_rate_cents || 0,
     } as any;
 
     // Calculate dates for recurring sessions
@@ -398,14 +402,14 @@ const AdminCalendar = () => {
     // Send invite notifications to attendees
     for (const aid of newSession.attendee_ids) {
       await supabase.rpc("create_notification", {
-        _user_id: aid, _type: "session", _title: "Session Invite",
-        _message: `You've been invited to "${newSession.title}" on ${format(selectedDate, "MMM d")} at ${newSession.time}${dates.length > 1 ? ` (recurring × ${dates.length})` : ""}`,
+        _user_id: aid, _type: "session", _title: "Session Invitation",
+        _message: `You have been invited to "${newSession.title}"`,
         _link: "/admin/calendar",
       });
     }
     toast.success(dates.length > 1 ? `${dates.length} recurring sessions created` : "Session created");
     setCreateOpen(false);
-    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4 });
+    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false });
     qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
