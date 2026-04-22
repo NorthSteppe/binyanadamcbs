@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   FBA_INTAKE_SECTIONS,
   IntakeQuestion,
-  TOTAL_INTAKE_QUESTIONS,
   calcCompletion,
 } from "@/lib/fbaIntakeQuestions";
 import { ArrowRight, Sparkles } from "lucide-react";
