@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Users, ListTodo, BookOpen, Wrench, Calendar, ClipboardList, MessageSquare,
-  Timer, BarChart3, Settings, CheckCircle2, Clock, Briefcase, ArrowRight, ChevronRight,
+  Timer, BarChart3, Settings, CheckCircle2, Clock, Briefcase, ArrowRight, ChevronRight, Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -44,6 +44,7 @@ const StaffDashboard = () => {
     const clinicalTools = [
         { label: portalT.calLabel || "Calendar", path: "/staff/calendar", icon: Calendar, description: portalT.calDesc || "View and manage all sessions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
         { label: portalT.toolsLabel || "Clinical Tools", path: "/staff/clinical-tools", icon: ClipboardList, description: portalT.toolsDesc || "CBS data collection tools", accentColor: "#8b5cf6", iconBg: "rgba(139,92,246,0.10)" },
+        { label: "Parent FBA Intakes", path: "/staff/fba-intakes", icon: Send, description: "Send & review parent intake forms", accentColor: "#0ea5e9", iconBg: "rgba(14,165,233,0.10)" },
         { label: portalT.clientTodosLabel || "Client To-Dos", path: "/staff/todos", icon: ListTodo, description: portalT.clientTodosDesc || "Manage client task lists", accentColor: "#f59e0b", iconBg: "rgba(245,158,11,0.10)" },
         { label: portalT.matrixLabel || "ACT Matrix", path: "/staff/toolkit/act-matrix", icon: Wrench, description: portalT.matrixDesc || "ACT Matrix for clients", accentColor: "#10b981", iconBg: "rgba(16,185,129,0.10)" },
         { label: portalT.plannerLabel || "Business Planner", path: "/planner", icon: Briefcase, description: portalT.plannerDesc || "Financials, TME matrix, and roadmap", accentColor: "#6366f1", iconBg: "rgba(99,102,241,0.10)" },
