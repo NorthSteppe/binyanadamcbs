@@ -121,6 +121,84 @@ const FBAIntakeManager = () => {
     setViewResponses(((data?.responses as Record<string, string>) ?? {}) || {});
   };
 
+  const openFill = async (a: AssignmentRow) => {
+    setFilling(a);
+    setFillLoading(true);
+    const { data } = await supabase
+      .from("fba_intake_responses")
+      .select("responses")
+      .eq("assignment_id", a.id)
+      .maybeSingle();
+    setFillResponses(((data?.responses as Record<string, string>) ?? {}) || {});
+    setFillLoading(false);
+  };
+
+  const updateFillResponse = (key: string, value: string) =>
+    setFillResponses((r) => ({ ...r, [key]: value }));
+
+  const persistFill = async (markStatus?: "in_progress" | "submitted") => {
+    if (!filling) return;
+    const { error: upErr } = await supabase
+      .from("fba_intake_responses")
+      .upsert(
+        { assignment_id: filling.id, client_id: filling.client_id, responses: fillResponses },
+        { onConflict: "assignment_id" },
+      );
+    if (upErr) throw upErr;
+    if (markStatus) {
+      const update: { status: string; submitted_at?: string } = { status: markStatus };
+      if (markStatus === "submitted") update.submitted_at = new Date().toISOString();
+      const { error: aErr } = await supabase
+        .from("fba_intake_assignments")
+        .update(update)
+        .eq("id", filling.id);
+      if (aErr) throw aErr;
+    }
+  };
+
+  const handleFillSave = async (submit: boolean) => {
+    setFillSaving(true);
+    try {
+      await persistFill(submit ? "submitted" : (filling?.status === "pending" ? "in_progress" : undefined));
+      toast.success(submit ? "Intake submitted" : "Progress saved");
+      if (submit) setFilling(null);
+      loadAll();
+    } catch (e: any) {
+      toast.error(e.message || "Could not save");
+    } finally {
+      setFillSaving(false);
+    }
+  };
+
+  const renderFillField = (q: IntakeQuestion) => {
+    const v = fillResponses[q.key] ?? "";
+    if (q.type === "textarea")
+      return <Textarea rows={q.rows ?? 3} value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
+    if (q.type === "date")
+      return <Input type="date" value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
+    if (q.type === "radio")
+      return (
+        <div className="flex flex-wrap gap-2">
+          {(q.options ?? []).map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => updateFillResponse(q.key, opt)}
+              className={`px-3 py-1.5 rounded-full border text-xs transition-all ${
+                v === opt
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background border-border hover:border-primary/40"
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      );
+    return <Input value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
+  };
+
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
