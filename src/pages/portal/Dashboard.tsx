@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Calendar, MessageSquare, BookOpen, Upload, FileText,
   CheckCircle2, ListTodo, Phone, Mail, Timer, Sparkles,
-  Files, ArrowRight, TrendingUp, Bell, ChevronRight, Trash2,
+  Files, ArrowRight, TrendingUp, Bell, ChevronRight, Trash2, ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -28,6 +28,13 @@ interface ClientDoc {
   file_name: string;
   file_url: string;
   created_at: string;
+}
+
+interface FBAIntakeAssignment {
+  id: string;
+  child_name: string;
+  status: string;
+  notes: string;
 }
 
 // ── Mock data for local preview ───────────────────────────────────────────────
@@ -129,6 +136,7 @@ const Dashboard = () => {
   const [unreadCount, setUnreadCount] = useState(import.meta.env.DEV ? 2 : 0);
   const [todos, setTodos] = useState<ClientTodo[]>(import.meta.env.DEV ? DEV_TODOS : []);
   const [documents, setDocuments] = useState<ClientDoc[]>([]);
+  const [fbaIntakes, setFbaIntakes] = useState<FBAIntakeAssignment[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -153,6 +161,11 @@ const Dashboard = () => {
       .then(({ data }) => { if (data) setTodos(data as ClientTodo[]); });
     supabase.from("client_documents").select("*").eq("client_id", user.id).order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setDocuments(data as ClientDoc[]); });
+    supabase.from("fba_intake_assignments")
+      .select("id, child_name, status, notes")
+      .eq("client_id", user.id)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => { if (data) setFbaIntakes(data as FBAIntakeAssignment[]); });
   }, [user]);
 
   const toggleTodo = async (todo: ClientTodo) => {
