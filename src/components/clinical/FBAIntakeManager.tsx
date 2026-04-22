@@ -10,9 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Eye, Send, Loader2, ClipboardList } from "lucide-react";
+import { Plus, Eye, Send, Loader2, ClipboardList, PencilLine, Save } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FBA_INTAKE_SECTIONS, calcCompletion } from "@/lib/fbaIntakeQuestions";
+import { FBA_INTAKE_SECTIONS, IntakeQuestion, calcCompletion } from "@/lib/fbaIntakeQuestions";
 
 interface ClientOption {
   id: string;
@@ -48,6 +48,10 @@ const FBAIntakeManager = () => {
   const [viewing, setViewing] = useState<AssignmentRow | null>(null);
   const [viewResponses, setViewResponses] = useState<Record<string, string>>({});
   const [profilesById, setProfilesById] = useState<Record<string, string>>({});
+  const [filling, setFilling] = useState<AssignmentRow | null>(null);
+  const [fillResponses, setFillResponses] = useState<Record<string, string>>({});
+  const [fillLoading, setFillLoading] = useState(false);
+  const [fillSaving, setFillSaving] = useState(false);
 
   const loadAll = async () => {
     if (!user) return;
@@ -116,6 +120,84 @@ const FBAIntakeManager = () => {
       .maybeSingle();
     setViewResponses(((data?.responses as Record<string, string>) ?? {}) || {});
   };
+
+  const openFill = async (a: AssignmentRow) => {
+    setFilling(a);
+    setFillLoading(true);
+    const { data } = await supabase
+      .from("fba_intake_responses")
+      .select("responses")
+      .eq("assignment_id", a.id)
+      .maybeSingle();
+    setFillResponses(((data?.responses as Record<string, string>) ?? {}) || {});
+    setFillLoading(false);
+  };
+
+  const updateFillResponse = (key: string, value: string) =>
+    setFillResponses((r) => ({ ...r, [key]: value }));
+
+  const persistFill = async (markStatus?: "in_progress" | "submitted") => {
+    if (!filling) return;
+    const { error: upErr } = await supabase
+      .from("fba_intake_responses")
+      .upsert(
+        { assignment_id: filling.id, client_id: filling.client_id, responses: fillResponses },
+        { onConflict: "assignment_id" },
+      );
+    if (upErr) throw upErr;
+    if (markStatus) {
+      const update: { status: string; submitted_at?: string } = { status: markStatus };
+      if (markStatus === "submitted") update.submitted_at = new Date().toISOString();
+      const { error: aErr } = await supabase
+        .from("fba_intake_assignments")
+        .update(update)
+        .eq("id", filling.id);
+      if (aErr) throw aErr;
+    }
+  };
+
+  const handleFillSave = async (submit: boolean) => {
+    setFillSaving(true);
+    try {
+      await persistFill(submit ? "submitted" : (filling?.status === "pending" ? "in_progress" : undefined));
+      toast.success(submit ? "Intake submitted" : "Progress saved");
+      if (submit) setFilling(null);
+      loadAll();
+    } catch (e: any) {
+      toast.error(e.message || "Could not save");
+    } finally {
+      setFillSaving(false);
+    }
+  };
+
+  const renderFillField = (q: IntakeQuestion) => {
+    const v = fillResponses[q.key] ?? "";
+    if (q.type === "textarea")
+      return <Textarea rows={q.rows ?? 3} value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
+    if (q.type === "date")
+      return <Input type="date" value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
+    if (q.type === "radio")
+      return (
+        <div className="flex flex-wrap gap-2">
+          {(q.options ?? []).map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => updateFillResponse(q.key, opt)}
+              className={`px-3 py-1.5 rounded-full border text-xs transition-all ${
+                v === opt
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background border-border hover:border-primary/40"
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      );
+    return <Input value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
+  };
+
 
   return (
     <div className="space-y-3">
@@ -193,9 +275,16 @@ const FBAIntakeManager = () => {
                     {new Date(a.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                   </td>
                   <td className="p-2.5 text-right">
-                    <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openView(a)}>
-                      <Eye size={12} /> View
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      {a.status !== "submitted" && (
+                        <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openFill(a)}>
+                          <PencilLine size={12} /> Fill
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openView(a)}>
+                        <Eye size={12} /> View
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -237,6 +326,48 @@ const FBAIntakeManager = () => {
               );
             })}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!filling} onOpenChange={(o) => !o && setFilling(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Fill intake with parent {filling?.child_name ? `— ${filling.child_name}` : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-[11px] text-muted-foreground -mt-2 mb-3">
+            {calcCompletion(fillResponses)}% complete · saving as the client. The parent can keep editing in their portal.
+          </div>
+          {fillLoading ? (
+            <div className="py-8 flex justify-center"><Loader2 className="animate-spin text-muted-foreground" size={18} /></div>
+          ) : (
+            <div className="space-y-5">
+              {FBA_INTAKE_SECTIONS.map((sec) => (
+                <div key={sec.id} className="rounded-lg border border-border p-4">
+                  <h4 className="text-sm font-semibold mb-1">{sec.title}</h4>
+                  {sec.description && <p className="text-[11px] text-muted-foreground mb-3">{sec.description}</p>}
+                  <div className="space-y-4">
+                    {sec.questions.map((q) => (
+                      <div key={q.key} className="space-y-1.5">
+                        <Label className="text-xs font-medium leading-snug">{q.label}</Label>
+                        {q.hint && <p className="text-[10px] text-muted-foreground">{q.hint}</p>}
+                        {renderFillField(q)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => handleFillSave(false)} disabled={fillSaving} className="gap-2">
+              {fillSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Save progress
+            </Button>
+            <Button onClick={() => handleFillSave(true)} disabled={fillSaving} className="gap-2">
+              {fillSaving ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Mark submitted
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
