@@ -18,6 +18,7 @@ import {
   IntakeQuestion,
   calcCompletion,
 } from "@/lib/fbaIntakeQuestions";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 interface AssignmentRow {
   id: string;
@@ -43,6 +44,29 @@ const FBAIntake = () => {
     [assignments, activeId],
   );
   const completion = calcCompletion(responses);
+
+  const allQuestions = useMemo(
+    () => FBA_INTAKE_SECTIONS.flatMap((s) => s.questions.map((q) => ({ ...q, sectionId: s.id, sectionTitle: s.title }))),
+    [],
+  );
+  const answeredCount = useMemo(
+    () => Object.values(responses).filter((v) => (v ?? "").toString().trim().length > 0).length,
+    [responses],
+  );
+  const nextQuestion = useMemo(
+    () => allQuestions.find((q) => !(responses[q.key] ?? "").toString().trim()),
+    [allQuestions, responses],
+  );
+  const hasStarted = answeredCount > 0;
+
+  const scrollToQuestion = (key: string) => {
+    const el = document.getElementById(`q-${key}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      const input = el.querySelector("input, textarea, button") as HTMLElement | null;
+      setTimeout(() => input?.focus(), 400);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -224,26 +248,78 @@ const FBAIntake = () => {
 
               {active && (
                 <>
-                  <div className="rounded-2xl border border-border bg-card/50 p-5 mb-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm font-medium">
-                        {active.child_name ? `Intake for ${active.child_name}` : "FBA intake"}
+                  <div className="rounded-2xl border border-border bg-card/50 p-5 mb-4">
+                    <div className="flex items-start justify-between mb-3 gap-3">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+                          Intake for
+                        </p>
+                        <div className="text-lg font-serif text-foreground">
+                          {active.child_name || "Your child"}
+                        </div>
                       </div>
-                      <Badge variant="outline" className="text-[10px] uppercase">
-                        {active.status.replace("_", " ")}
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] uppercase ${
+                          active.status === "submitted"
+                            ? "border-primary/40 text-primary bg-primary/5"
+                            : active.status === "in_progress"
+                              ? "border-primary/30 text-primary bg-primary/5"
+                              : "border-border text-muted-foreground"
+                        }`}
+                      >
+                        {active.status === "pending"
+                          ? "Pending — not started"
+                          : active.status.replace("_", " ")}
                       </Badge>
                     </div>
                     {active.notes && (
                       <p className="text-xs text-muted-foreground mb-3 italic">"{active.notes}"</p>
                     )}
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1.5">
+                      <span>
+                        {answeredCount} of {allQuestions.length} answered
+                      </span>
+                      <span className="font-medium text-foreground">{completion}%</span>
+                    </div>
                     <Progress value={completion} className="h-2" />
-                    <p className="text-[11px] text-muted-foreground mt-1">{completion}% complete</p>
                   </div>
 
+                  {active.status !== "submitted" && nextQuestion && (
+                    <motion.button
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      type="button"
+                      onClick={() => scrollToQuestion(nextQuestion.key)}
+                      className="w-full text-left rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 p-4 mb-6 transition-all group"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="bg-primary/10 text-primary rounded-lg p-2 shrink-0">
+                          <Sparkles size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] uppercase tracking-wider text-primary font-medium mb-1">
+                            {hasStarted ? "Continue where you left off" : "Start your intake"}
+                          </p>
+                          <p className="text-sm font-medium text-foreground line-clamp-2 mb-1">
+                            {nextQuestion.label}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {nextQuestion.sectionTitle}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          size={18}
+                          className="text-primary mt-1 shrink-0 group-hover:translate-x-0.5 transition-transform"
+                        />
+                      </div>
+                    </motion.button>
+                  )}
+
                   {active.status === "submitted" && (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 mb-6 flex items-start gap-2">
-                      <CheckCircle2 className="text-emerald-600 mt-0.5 shrink-0" size={16} />
-                      <p className="text-xs text-emerald-800">
+                    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-6 flex items-start gap-2">
+                      <CheckCircle2 className="text-primary mt-0.5 shrink-0" size={16} />
+                      <p className="text-xs text-foreground">
                         Submitted on{" "}
                         {active.submitted_at
                           ? new Date(active.submitted_at).toLocaleDateString(undefined, {
@@ -271,13 +347,22 @@ const FBAIntake = () => {
                           <p className="text-xs text-muted-foreground mb-5 leading-relaxed">{sec.description}</p>
                         )}
                         <div className="space-y-5">
-                          {sec.questions.map((q) => (
-                            <div key={q.key} className="space-y-1.5">
-                              <Label className="text-sm font-medium leading-snug">{q.label}</Label>
-                              {q.hint && <p className="text-[11px] text-muted-foreground">{q.hint}</p>}
-                              {renderField(q)}
-                            </div>
-                          ))}
+                          {sec.questions.map((q) => {
+                            const isNext = nextQuestion?.key === q.key;
+                            return (
+                              <div
+                                key={q.key}
+                                id={`q-${q.key}`}
+                                className={`space-y-1.5 scroll-mt-24 rounded-lg transition-all ${
+                                  isNext ? "ring-2 ring-primary/40 bg-primary/5 p-3 -m-3" : ""
+                                }`}
+                              >
+                                <Label className="text-sm font-medium leading-snug">{q.label}</Label>
+                                {q.hint && <p className="text-[11px] text-muted-foreground">{q.hint}</p>}
+                                {renderField(q)}
+                              </div>
+                            );
+                          })}
                         </div>
                       </motion.div>
                     ))}
