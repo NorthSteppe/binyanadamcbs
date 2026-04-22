@@ -48,6 +48,10 @@ const FBAIntakeManager = () => {
   const [viewing, setViewing] = useState<AssignmentRow | null>(null);
   const [viewResponses, setViewResponses] = useState<Record<string, string>>({});
   const [profilesById, setProfilesById] = useState<Record<string, string>>({});
+  const [filling, setFilling] = useState<AssignmentRow | null>(null);
+  const [fillResponses, setFillResponses] = useState<Record<string, string>>({});
+  const [fillLoading, setFillLoading] = useState(false);
+  const [fillSaving, setFillSaving] = useState(false);
 
   const loadAll = async () => {
     if (!user) return;
