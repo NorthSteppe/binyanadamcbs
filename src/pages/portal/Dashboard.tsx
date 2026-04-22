@@ -330,6 +330,45 @@ const Dashboard = () => {
 
       <div className="container max-w-5xl py-8 space-y-5">
 
+        {/* ── FBA intake call-to-action (when therapist has assigned one) ── */}
+        {fbaIntakes.some((a) => a.status !== "submitted") && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Link
+              to="/portal/fba-intake"
+              className="block rounded-2xl p-5 sm:p-6 border border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-orange-50/60
+                shadow-[0_4px_24px_rgba(245,158,11,0.18),0_1px_4px_rgba(0,0,0,0.06)]
+                hover:shadow-[0_14px_44px_rgba(245,158,11,0.22),0_2px_8px_rgba(0,0,0,0.08)]
+                hover:-translate-y-0.5 transition-all duration-500 ease-out"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                  <ClipboardList size={20} className="text-amber-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold text-foreground">
+                      Your therapist has requested an FBA intake form
+                    </p>
+                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 font-bold">
+                      {fbaIntakes.find((a) => a.status !== "submitted")?.status === "in_progress" ? "In progress" : "Action needed"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Open-ended questions about{" "}
+                    {fbaIntakes.find((a) => a.status !== "submitted")?.child_name || "your child"}{" "}
+                    that help your therapist before assessment. Your answers save automatically — finish whenever you can.
+                  </p>
+                </div>
+                <ArrowRight size={16} className="text-amber-600 shrink-0 mt-3" />
+              </div>
+            </Link>
+          </motion.div>
+        )}
+
         {/* ── At a Glance stat tiles ─────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
