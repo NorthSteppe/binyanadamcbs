@@ -46,6 +46,29 @@ const FBAIntake = () => {
   );
   const completion = calcCompletion(responses);
 
+  const allQuestions = useMemo(
+    () => FBA_INTAKE_SECTIONS.flatMap((s) => s.questions.map((q) => ({ ...q, sectionId: s.id, sectionTitle: s.title }))),
+    [],
+  );
+  const answeredCount = useMemo(
+    () => Object.values(responses).filter((v) => (v ?? "").toString().trim().length > 0).length,
+    [responses],
+  );
+  const nextQuestion = useMemo(
+    () => allQuestions.find((q) => !(responses[q.key] ?? "").toString().trim()),
+    [allQuestions, responses],
+  );
+  const hasStarted = answeredCount > 0;
+
+  const scrollToQuestion = (key: string) => {
+    const el = document.getElementById(`q-${key}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      const input = el.querySelector("input, textarea, button") as HTMLElement | null;
+      setTimeout(() => input?.focus(), 400);
+    }
+  };
+
   useEffect(() => {
     if (!user) return;
     (async () => {
