@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { motion } from "framer-motion";
-import { ClipboardList, Activity, Target, Brain, BarChart3, FileText } from "lucide-react";
+import { ClipboardList, Activity, Target, Brain, BarChart3, FileText, Send } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -98,6 +98,13 @@ const ClinicalTools = () => {
             icon: FileText,
             description: staffT.caseDesc || "Structured CBS case conceptualisation with functional analysis summary",
             color: "bg-accent text-accent-foreground",
+        },
+        {
+            label: "Parent FBA Intakes",
+            path: "/staff/fba-intakes",
+            icon: Send,
+            description: "Send the Hanley open-ended interview to a parent and review their submitted answers",
+            color: "bg-primary/10 text-primary",
         },
     ];
     
