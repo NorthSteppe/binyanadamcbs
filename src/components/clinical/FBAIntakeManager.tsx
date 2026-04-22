@@ -328,6 +328,48 @@ const FBAIntakeManager = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!filling} onOpenChange={(o) => !o && setFilling(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Fill intake with parent {filling?.child_name ? `— ${filling.child_name}` : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-[11px] text-muted-foreground -mt-2 mb-3">
+            {calcCompletion(fillResponses)}% complete · saving as the client. The parent can keep editing in their portal.
+          </div>
+          {fillLoading ? (
+            <div className="py-8 flex justify-center"><Loader2 className="animate-spin text-muted-foreground" size={18} /></div>
+          ) : (
+            <div className="space-y-5">
+              {FBA_INTAKE_SECTIONS.map((sec) => (
+                <div key={sec.id} className="rounded-lg border border-border p-4">
+                  <h4 className="text-sm font-semibold mb-1">{sec.title}</h4>
+                  {sec.description && <p className="text-[11px] text-muted-foreground mb-3">{sec.description}</p>}
+                  <div className="space-y-4">
+                    {sec.questions.map((q) => (
+                      <div key={q.key} className="space-y-1.5">
+                        <Label className="text-xs font-medium leading-snug">{q.label}</Label>
+                        {q.hint && <p className="text-[10px] text-muted-foreground">{q.hint}</p>}
+                        {renderFillField(q)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => handleFillSave(false)} disabled={fillSaving} className="gap-2">
+              {fillSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Save progress
+            </Button>
+            <Button onClick={() => handleFillSave(true)} disabled={fillSaving} className="gap-2">
+              {fillSaving ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Mark submitted
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
