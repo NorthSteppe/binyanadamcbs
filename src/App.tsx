@@ -75,6 +75,7 @@ import ValuesBullsEye from "./pages/staff/ValuesBullsEye";
 import HexaflexTracker from "./pages/staff/HexaflexTracker";
 import BehaviourLog from "./pages/staff/BehaviourLog";
 import CaseFormulation from "./pages/staff/CaseFormulation";
+import FBAIntakes from "./pages/staff/FBAIntakes";
 // Courses
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
@@ -228,6 +229,7 @@ const App = () => (
                   <Route path="/staff/clinical/hexaflex" element={<StaffRoute><HexaflexTracker /></StaffRoute>} />
                   <Route path="/staff/clinical/behaviour-log" element={<StaffRoute><BehaviourLog /></StaffRoute>} />
                   <Route path="/staff/clinical/case-formulation" element={<StaffRoute><CaseFormulation /></StaffRoute>} />
+                  <Route path="/staff/fba-intakes" element={<StaffRoute><FBAIntakes /></StaffRoute>} />
 
                   {/* Supervisee portal */}
                   <Route path="/supervisee" element={<SuperviseeRoute><SuperviseeDashboard /></SuperviseeRoute>} />
