@@ -10,9 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Eye, Send, Loader2, ClipboardList } from "lucide-react";
+import { Plus, Eye, Send, Loader2, ClipboardList, PencilLine, Save } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FBA_INTAKE_SECTIONS, calcCompletion } from "@/lib/fbaIntakeQuestions";
+import { FBA_INTAKE_SECTIONS, IntakeQuestion, calcCompletion } from "@/lib/fbaIntakeQuestions";
 
 interface ClientOption {
   id: string;
