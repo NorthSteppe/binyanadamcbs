@@ -275,9 +275,16 @@ const FBAIntakeManager = () => {
                     {new Date(a.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                   </td>
                   <td className="p-2.5 text-right">
-                    <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openView(a)}>
-                      <Eye size={12} /> View
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      {a.status !== "submitted" && (
+                        <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openFill(a)}>
+                          <PencilLine size={12} /> Fill
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openView(a)}>
+                        <Eye size={12} /> View
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
