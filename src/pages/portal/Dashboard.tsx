@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FBAPathway from "@/components/clinical/FBAPathway";
 
 interface ClientTodo {
   id: string;
