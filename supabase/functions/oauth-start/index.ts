@@ -3,6 +3,7 @@
 // callback can attribute the returned tokens to the right staff member.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { signState } from "../_shared/oauth-state.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -67,7 +68,7 @@ Deno.serve(async (req) => {
     if (!clientId) throw new Error(`${provider} OAuth not configured`);
 
     const redirectUri = `${FUNCTIONS_BASE}/${cfg.callbackPath}`;
-    const state = btoa(JSON.stringify({ user_id: user.id, ts: Date.now() }));
+    const state = await signState({ user_id: user.id, ts: Date.now() });
 
     const params = new URLSearchParams({
       client_id: clientId,

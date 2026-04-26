@@ -189,6 +189,30 @@ const initialData: FBAData = {
 
 // ── Styled HTML report generator ───────────────────────────────────────────────
 
+// Escape user-supplied text before injecting into HTML to prevent XSS.
+// Newlines are preserved as <br> tags after entity escaping.
+function escHtml(s: unknown): string {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/\n/g, "<br>");
+}
+
+// Escape for use inside HTML attribute values (no <br> conversion).
+function escAttr(s: unknown): string {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, isRTL: boolean, assessmentMethodsLabels: string[]): string {
   const colorReport = d.reportColor;
   const firstName = d.clientName.split(" ")[0] || d.clientName;
@@ -211,7 +235,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
     content.trim()
       ? `<div class="section">
           <div class="section-header">${title}</div>
-          <div class="section-content">${content.replace(/\n/g, "<br>")}</div>
+          <div class="section-content">${escHtml(content)}</div>
         </div>`
       : "";
 
@@ -220,7 +244,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
       ? `<div class="subsection">
           <div class="subsection-title">${title}</div>
           ${hint ? `<div class="subsection-hint">${hint}</div>` : ""}
-          <div class="subsection-body">${content.replace(/\n/g, "<br>")}</div>
+          <div class="subsection-body">${escHtml(content)}</div>
         </div>`
       : "";
 
@@ -231,53 +255,53 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
           ${d.supportingDocs.filter((doc) => doc.title.trim()).map((doc, i) => `
             <div class="doc-card">
               <div class="doc-meta">
-                <strong>${i + 1}. ${doc.title}</strong>
-                ${doc.docType ? ` &mdash; <em>${doc.docType}</em>` : ""}
-                ${doc.professional ? ` &mdash; ${doc.professional}` : ""}
+                <strong>${i + 1}. ${escHtml(doc.title)}</strong>
+                ${doc.docType ? ` &mdash; <em>${escHtml(doc.docType)}</em>` : ""}
+                ${doc.professional ? ` &mdash; ${escHtml(doc.professional)}` : ""}
                 ${doc.docDate ? ` &mdash; ${new Date(doc.docDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}
                 ${doc.fileUrl ? ` <span class="doc-attached">${t.fbaTool.report.fileAttached}</span>` : ""}
               </div>
-              ${doc.keyFindings ? `<div class="doc-findings">${doc.keyFindings.replace(/\n/g, "<br>")}</div>` : ""}
+              ${doc.keyFindings ? `<div class="doc-findings">${escHtml(doc.keyFindings)}</div>` : ""}
             </div>`).join("")}
         </div>
       </div>`
     : "";
 
   const strengthsHtml = d.strengths.filter((s) => s.title.trim()).map((s, i) =>
-    `<div class="strength-item"><strong>${i + 1}. ${s.title}</strong>${s.description ? `<br><span style="color:#444;">${s.description.replace(/\n/g, "<br>")}</span>` : ""}</div>`
+    `<div class="strength-item"><strong>${i + 1}. ${escHtml(s.title)}</strong>${s.description ? `<br><span style="color:#444;">${escHtml(s.description)}</span>` : ""}</div>`
   ).join("");
 
   const behavioursHtml = d.behaviours.filter((b) => b.name.trim()).map((b, i) =>
     `<div class="behaviour-card">
-      <strong>${i + 1}. ${b.name}</strong>
-      ${b.topography ? `<div><span class="field-label">${t.fbaTool.report.topography}</span> ${b.topography}</div>` : ""}
+      <strong>${i + 1}. ${escHtml(b.name)}</strong>
+      ${b.topography ? `<div><span class="field-label">${t.fbaTool.report.topography}</span> ${escHtml(b.topography)}</div>` : ""}
       <div class="behaviour-grid">
-        ${b.frequency ? `<div><span class="field-label">${t.fbaTool.report.frequency}</span> ${b.frequency}</div>` : ""}
-        ${b.intensity ? `<div><span class="field-label">${t.fbaTool.report.intensity}</span> ${b.intensity}</div>` : ""}
-        ${b.duration  ? `<div><span class="field-label">${t.fbaTool.report.duration}</span> ${b.duration}</div>`  : ""}
+        ${b.frequency ? `<div><span class="field-label">${t.fbaTool.report.frequency}</span> ${escHtml(b.frequency)}</div>` : ""}
+        ${b.intensity ? `<div><span class="field-label">${t.fbaTool.report.intensity}</span> ${escHtml(b.intensity)}</div>` : ""}
+        ${b.duration  ? `<div><span class="field-label">${t.fbaTool.report.duration}</span> ${escHtml(b.duration)}</div>`  : ""}
       </div>
-      ${b.context ? `<div><span class="field-label">${t.fbaTool.report.antecedents}</span> ${b.context}</div>` : ""}
+      ${b.context ? `<div><span class="field-label">${t.fbaTool.report.antecedents}</span> ${escHtml(b.context)}</div>` : ""}
     </div>`
   ).join("");
 
   const obsHtml = d.observations.filter((o) => o.date || o.observations).map((o) =>
     `<div class="obs-card">
-      <div class="obs-header">${t.fbaTool.form.session} ${o.sessionNumber}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>
-      ${o.setting      ? `<div><span class="field-label">${t.fbaTool.report.setting}</span> ${o.setting}</div>` : ""}
-      ${o.participants ? `<div><span class="field-label">${t.fbaTool.report.participants}</span> ${o.participants}</div>` : ""}
-      ${o.purpose      ? `<div><span class="field-label">${t.fbaTool.report.purpose}</span> ${o.purpose}</div>` : ""}
-      ${o.observations ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.obsDesc}</span><br>${o.observations.replace(/\n/g, "<br>")}</div>` : ""}
-      ${o.analysis     ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.analysis}</span><br>${o.analysis.replace(/\n/g, "<br>")}</div>` : ""}
+      <div class="obs-header">${t.fbaTool.form.session} ${escHtml(o.sessionNumber)}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>
+      ${o.setting      ? `<div><span class="field-label">${t.fbaTool.report.setting}</span> ${escHtml(o.setting)}</div>` : ""}
+      ${o.participants ? `<div><span class="field-label">${t.fbaTool.report.participants}</span> ${escHtml(o.participants)}</div>` : ""}
+      ${o.purpose      ? `<div><span class="field-label">${t.fbaTool.report.purpose}</span> ${escHtml(o.purpose)}</div>` : ""}
+      ${o.observations ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.obsDesc}</span><br>${escHtml(o.observations)}</div>` : ""}
+      ${o.analysis     ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.analysis}</span><br>${escHtml(o.analysis)}</div>` : ""}
     </div>`
   ).join("");
 
   const hypHtml = d.hypotheses.filter((h) => h.behaviour.trim()).map((h, i) =>
     `<div class="hyp-card">
-      <strong>${i + 1}. ${h.behaviour}</strong>
-      ${h.function ? `<div><span class="field-label">${t.fbaTool.form.identifiedFunction}:</span> ${h.function}</div>` : ""}
-      ${h.benefitsOfBehaviour ? `<div><span class="field-label">${t.fbaTool.form.benefitsOfBehaviour}:</span> ${h.benefitsOfBehaviour}</div>` : ""}
-      ${h.costsOfAlternatives ? `<div><span class="field-label">${t.fbaTool.form.costsOfAlternatives}:</span> ${h.costsOfAlternatives}</div>` : ""}
-      ${h.hypothesis ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.hypothesis}</span><br>${h.hypothesis.replace(/\n/g, "<br>")}</div>` : ""}
+      <strong>${i + 1}. ${escHtml(h.behaviour)}</strong>
+      ${h.function ? `<div><span class="field-label">${t.fbaTool.form.identifiedFunction}:</span> ${escHtml(h.function)}</div>` : ""}
+      ${h.benefitsOfBehaviour ? `<div><span class="field-label">${t.fbaTool.form.benefitsOfBehaviour}:</span> ${escHtml(h.benefitsOfBehaviour)}</div>` : ""}
+      ${h.costsOfAlternatives ? `<div><span class="field-label">${t.fbaTool.form.costsOfAlternatives}:</span> ${escHtml(h.costsOfAlternatives)}</div>` : ""}
+      ${h.hypothesis ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.hypothesis}</span><br>${escHtml(h.hypothesis)}</div>` : ""}
     </div>`
   ).join("");
 
@@ -287,7 +311,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
 <html lang="${isRTL ? 'he' : 'en'}" dir="${isRTL ? 'rtl' : 'ltr'}">
 <head>
 <meta charset="UTF-8">
-<title>FBA Report — ${d.clientName}</title>
+<title>FBA Report — ${escHtml(d.clientName)}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: ${fontObj.value}; font-size: 11pt; color: #1a1a2e; background: white; }
@@ -437,12 +461,12 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
   <h1>${t.fbaTool.report.title}</h1>
   <div class="subtitle">${t.fbaTool.report.subtitle}</div>
   <div class="client-grid">
-    <div><span class="field-label">${t.fbaTool.report.client}</span> ${d.clientName || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.client}</span> ${escHtml(d.clientName) || "—"}</div>
     <div><span class="field-label">${t.fbaTool.report.dob}</span> ${d.clientDOB ? new Date(d.clientDOB).toLocaleDateString("en-GB") : "—"}</div>
-    <div><span class="field-label">${t.fbaTool.report.diagnosis}</span> ${d.diagnosis || "—"}</div>
-    <div><span class="field-label">${t.fbaTool.report.setting}</span> ${d.settingType}${d.settingName ? " — " + d.settingName : ""}</div>
-    <div><span class="field-label">${t.fbaTool.report.assessedBy}</span> ${aName}${aCreds ? ", " + aCreds : ""}</div>
-    <div><span class="field-label">${t.fbaTool.report.assessmentDates}</span> ${d.assessmentDates || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.diagnosis}</span> ${escHtml(d.diagnosis) || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.setting}</span> ${escHtml(d.settingType)}${d.settingName ? " — " + escHtml(d.settingName) : ""}</div>
+    <div><span class="field-label">${t.fbaTool.report.assessedBy}</span> ${escHtml(aName)}${aCreds ? ", " + escHtml(aCreds) : ""}</div>
+    <div><span class="field-label">${t.fbaTool.report.assessmentDates}</span> ${escHtml(d.assessmentDates) || "—"}</div>
     <div><span class="field-label">${t.fbaTool.report.reportDate}</span> ${today}</div>
   </div>
   <div class="confidential">${t.fbaTool.report.confidential.replace(" | ", " &nbsp;|&nbsp; ")}</div>
@@ -455,7 +479,7 @@ ${d.referralReason ? sec("REASON FOR REFERRAL", d.referralReason) : ""}
 ${enabledMethods.length ? `<div class="section">
   <div class="section-header">${t.fbaTool.report.assessmentMethods}</div>
   <ul class="methods-list">
-    ${enabledMethods.map((m) => `<li>${m}</li>`).join("")}
+    ${enabledMethods.map((m) => `<li>${escHtml(m)}</li>`).join("")}
   </ul>
 </div>` : ""}
 
@@ -467,11 +491,11 @@ ${docsSection}
   <div class="section-header">${t.fbaTool.report.background}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:10px;">
-      ${t.fbaTool.report.backgroundIntro.replace("the client", firstName || "the client")}
+      ${t.fbaTool.report.backgroundIntro.replace("the client", escHtml(firstName) || "the client")}
     </p>
-    ${d.background ? d.background.replace(/\n/g, "<br>") : "—"}
-    ${d.environment ? `<br><br><strong>${t.fbaTool.report.envTitle}</strong><br>${d.environment.replace(/\n/g, "<br>")}` : ""}
-    ${d.supportStaff ? `<br><br><strong>${t.fbaTool.report.supportStaffTitle}</strong><br>${d.supportStaff.replace(/\n/g, "<br>")}` : ""}
+    ${d.background ? escHtml(d.background) : "—"}
+    ${d.environment ? `<br><br><strong>${t.fbaTool.report.envTitle}</strong><br>${escHtml(d.environment)}` : ""}
+    ${d.supportStaff ? `<br><br><strong>${t.fbaTool.report.supportStaffTitle}</strong><br>${escHtml(d.supportStaff)}` : ""}
   </div>
 </div>
 
@@ -552,9 +576,9 @@ ${d.recommendations ? `<div class="section page-break">
   <div class="section-header">${t.fbaTool.report.recommendations}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:10px;">
-      ${t.fbaTool.report.recommendationsIntro.replace("the client", firstName || "the client")}
+      ${t.fbaTool.report.recommendationsIntro.replace("the client", escHtml(firstName) || "the client")}
     </p>
-    ${d.recommendations.replace(/\n/g, "<br>")}
+    ${escHtml(d.recommendations)}
   </div>
 </div>` : ""}
 
@@ -578,12 +602,12 @@ ${d.additionalNotes ? sec("ADDITIONAL NOTES / CAVEATS", d.additionalNotes) : ""}
 <!-- ═══ FOOTER ═══════════════════════════════════════════════════════ -->
 <div class="report-footer">
   <div class="footer-assessor">
-    <strong>${aName}</strong><br>
-    ${aRole}${aCreds ? " · " + aCreds : ""}<br>
-    <span class="creds">adamdayan@bacbs.com &nbsp;·&nbsp; ${aWeb}</span><br>
+    <strong>${escHtml(aName)}</strong><br>
+    ${escHtml(aRole)}${aCreds ? " · " + escHtml(aCreds) : ""}<br>
+    <span class="creds">adamdayan@bacbs.com &nbsp;·&nbsp; ${escHtml(aWeb)}</span><br>
     <span class="footer-date">${t.fbaTool.report.reportCompleted} ${today}</span>
   </div>
-  ${aSig ? `<div class="footer-sig"><img src="${aSig}" alt="Signature" onerror="this.parentNode.innerHTML='&nbsp;'"></div>` : ""}
+  ${aSig ? `<div class="footer-sig"><img src="${escAttr(aSig)}" alt="Signature" onerror="this.parentNode.innerHTML='&nbsp;'"></div>` : ""}
 </div>
 
 </body></html>`;

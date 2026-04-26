@@ -2,6 +2,7 @@
 // stores them in staff_integrations, and redirects back to the app.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { verifyState } from "../_shared/oauth-state.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -25,7 +26,13 @@ Deno.serve(async (req) => {
   if (error || !code || !stateRaw) return redirectBack("error", error || "missing_code");
 
   try {
-    const state = JSON.parse(atob(stateRaw)) as { user_id: string };
+    let state: { user_id: string };
+    try {
+      state = await verifyState(stateRaw);
+    } catch (e) {
+      console.error("Microsoft callback state verification failed:", e);
+      return redirectBack("error", "invalid_state");
+    }
     const callbackUrl = `${SUPABASE_URL}/functions/v1/oauth-microsoft-callback`;
 
     const tokenRes = await fetch(`https://login.microsoftonline.com/${TENANT}/oauth2/v2.0/token`, {
