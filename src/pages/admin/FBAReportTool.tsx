@@ -189,6 +189,30 @@ const initialData: FBAData = {
 
 // ── Styled HTML report generator ───────────────────────────────────────────────
 
+// Escape user-supplied text before injecting into HTML to prevent XSS.
+// Newlines are preserved as <br> tags after entity escaping.
+function escHtml(s: unknown): string {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/\n/g, "<br>");
+}
+
+// Escape for use inside HTML attribute values (no <br> conversion).
+function escAttr(s: unknown): string {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, isRTL: boolean, assessmentMethodsLabels: string[]): string {
   const colorReport = d.reportColor;
   const firstName = d.clientName.split(" ")[0] || d.clientName;
