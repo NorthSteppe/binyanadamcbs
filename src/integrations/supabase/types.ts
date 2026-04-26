@@ -2015,6 +2015,51 @@ export type Database = {
         }
         Relationships: []
       }
+      support_agreements: {
+        Row: {
+          body: string
+          client_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          signature_data_url: string
+          signed_at: string | null
+          signed_name: string
+          signed_pdf_url: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          signature_data_url?: string
+          signed_at?: string | null
+          signed_name?: string
+          signed_pdf_url?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          signature_data_url?: string
+          signed_at?: string | null
+          signed_name?: string
+          signed_pdf_url?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
