@@ -2401,6 +2401,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_team_member_rate: {
+        Args: { _team_member_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
