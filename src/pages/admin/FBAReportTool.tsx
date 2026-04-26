@@ -655,20 +655,21 @@ const FBAReportTool = () => {
         if (value === undefined || value === null) return;
         if (typeof value === "string" && value.trim().length === 0) return;
         if (k === "behaviours" && Array.isArray(value) && value.length) {
-          // Replace if first slot is empty, else append.
+          const incoming = value as TargetBehaviour[];
           const first = next.behaviours[0];
           const slotEmpty = first && !first.name?.trim() && !first.topography?.trim();
           next.behaviours = slotEmpty
-            ? [...value, ...next.behaviours.slice(1)]
-            : [...next.behaviours, ...value];
+            ? [...incoming, ...next.behaviours.slice(1)]
+            : [...next.behaviours, ...incoming];
           return;
         }
         if (k === "hypotheses" && Array.isArray(value) && value.length) {
+          const incoming = value as BehaviourHypothesis[];
           const first = next.hypotheses[0];
           const slotEmpty = first && !first.behaviour?.trim() && !first.hypothesis?.trim();
           next.hypotheses = slotEmpty
-            ? [...value, ...next.hypotheses.slice(1)]
-            : [...next.hypotheses, ...value];
+            ? [...incoming, ...next.hypotheses.slice(1)]
+            : [...next.hypotheses, ...incoming];
           return;
         }
         // Plain string fields — only fill if empty so we don't clobber the assessor's edits.
