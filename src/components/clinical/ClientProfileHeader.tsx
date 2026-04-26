@@ -130,14 +130,17 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
     const path = `${clientId}/${Date.now()}_${file.name}`;
     const { error: upErr } = await supabase.storage.from("client-photos").upload(path, file, { upsert: true });
     if (upErr) { toast.error(upErr.message); setUploading(false); return; }
-    const { data: urlData } = supabase.storage.from("client-photos").getPublicUrl(path);
-    const newUrl = urlData.publicUrl;
+    // Store the storage path (not a public URL) since the bucket is private.
     const { error: updErr } = await supabase
       .from("client_profile_extras")
-      .upsert({ client_id: clientId, photo_url: newUrl }, { onConflict: "client_id" });
+      .upsert({ client_id: clientId, photo_url: path }, { onConflict: "client_id" });
     setUploading(false);
     if (updErr) toast.error(updErr.message);
-    else { setExtras((prev) => ({ ...prev, photo_url: newUrl })); toast.success("Photo updated"); }
+    else {
+      setExtras((prev) => ({ ...prev, photo_url: path }));
+      resolvePhotoUrl(path);
+      toast.success("Photo updated");
+    }
     if (fileRef.current) fileRef.current.value = "";
   };
 
