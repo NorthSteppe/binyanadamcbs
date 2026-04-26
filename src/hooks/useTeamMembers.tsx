@@ -19,8 +19,13 @@ export interface TeamMember {
   user_id: string | null;
   long_bio: string;
   profile_image_url: string | null;
-  default_session_rate_cents: number;
+  default_session_rate_cents?: number;
 }
+
+// Public-safe column list — excludes default_session_rate_cents which is
+// restricted to admins/team members at the database level.
+const PUBLIC_TEAM_MEMBER_COLUMNS =
+  "id,name,role,bio,initials,slug,avatar_url,display_order,is_active,credentials,signature_url,social_linkedin,social_twitter,social_website,user_id,long_bio,profile_image_url";
 
 export const useTeamMembers = () =>
   useQuery({
@@ -28,10 +33,10 @@ export const useTeamMembers = () =>
     queryFn: async () => {
       const { data, error } = await supabase
         .from("team_members")
-        .select("*")
+        .select(PUBLIC_TEAM_MEMBER_COLUMNS)
         .order("display_order");
       if (error) throw error;
-      return data as TeamMember[];
+      return data as unknown as TeamMember[];
     },
   });
 
