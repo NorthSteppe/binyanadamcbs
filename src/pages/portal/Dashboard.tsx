@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Calendar, MessageSquare, BookOpen, Upload, FileText,
   CheckCircle2, ListTodo, Phone, Mail, Timer, Sparkles,
-  Files, ArrowRight, TrendingUp, Bell, ChevronRight, Trash2, ClipboardList,
+  Files, ArrowRight, TrendingUp, Bell, ChevronRight, Trash2, ClipboardList, Map,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
