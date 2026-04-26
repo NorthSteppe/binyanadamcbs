@@ -235,7 +235,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
     content.trim()
       ? `<div class="section">
           <div class="section-header">${title}</div>
-          <div class="section-content">${content.replace(/\n/g, "<br>")}</div>
+          <div class="section-content">${escHtml(content)}</div>
         </div>`
       : "";
 
@@ -244,7 +244,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
       ? `<div class="subsection">
           <div class="subsection-title">${title}</div>
           ${hint ? `<div class="subsection-hint">${hint}</div>` : ""}
-          <div class="subsection-body">${content.replace(/\n/g, "<br>")}</div>
+          <div class="subsection-body">${escHtml(content)}</div>
         </div>`
       : "";
 
@@ -255,53 +255,53 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
           ${d.supportingDocs.filter((doc) => doc.title.trim()).map((doc, i) => `
             <div class="doc-card">
               <div class="doc-meta">
-                <strong>${i + 1}. ${doc.title}</strong>
-                ${doc.docType ? ` &mdash; <em>${doc.docType}</em>` : ""}
-                ${doc.professional ? ` &mdash; ${doc.professional}` : ""}
+                <strong>${i + 1}. ${escHtml(doc.title)}</strong>
+                ${doc.docType ? ` &mdash; <em>${escHtml(doc.docType)}</em>` : ""}
+                ${doc.professional ? ` &mdash; ${escHtml(doc.professional)}` : ""}
                 ${doc.docDate ? ` &mdash; ${new Date(doc.docDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}
                 ${doc.fileUrl ? ` <span class="doc-attached">${t.fbaTool.report.fileAttached}</span>` : ""}
               </div>
-              ${doc.keyFindings ? `<div class="doc-findings">${doc.keyFindings.replace(/\n/g, "<br>")}</div>` : ""}
+              ${doc.keyFindings ? `<div class="doc-findings">${escHtml(doc.keyFindings)}</div>` : ""}
             </div>`).join("")}
         </div>
       </div>`
     : "";
 
   const strengthsHtml = d.strengths.filter((s) => s.title.trim()).map((s, i) =>
-    `<div class="strength-item"><strong>${i + 1}. ${s.title}</strong>${s.description ? `<br><span style="color:#444;">${s.description.replace(/\n/g, "<br>")}</span>` : ""}</div>`
+    `<div class="strength-item"><strong>${i + 1}. ${escHtml(s.title)}</strong>${s.description ? `<br><span style="color:#444;">${escHtml(s.description)}</span>` : ""}</div>`
   ).join("");
 
   const behavioursHtml = d.behaviours.filter((b) => b.name.trim()).map((b, i) =>
     `<div class="behaviour-card">
-      <strong>${i + 1}. ${b.name}</strong>
-      ${b.topography ? `<div><span class="field-label">${t.fbaTool.report.topography}</span> ${b.topography}</div>` : ""}
+      <strong>${i + 1}. ${escHtml(b.name)}</strong>
+      ${b.topography ? `<div><span class="field-label">${t.fbaTool.report.topography}</span> ${escHtml(b.topography)}</div>` : ""}
       <div class="behaviour-grid">
-        ${b.frequency ? `<div><span class="field-label">${t.fbaTool.report.frequency}</span> ${b.frequency}</div>` : ""}
-        ${b.intensity ? `<div><span class="field-label">${t.fbaTool.report.intensity}</span> ${b.intensity}</div>` : ""}
-        ${b.duration  ? `<div><span class="field-label">${t.fbaTool.report.duration}</span> ${b.duration}</div>`  : ""}
+        ${b.frequency ? `<div><span class="field-label">${t.fbaTool.report.frequency}</span> ${escHtml(b.frequency)}</div>` : ""}
+        ${b.intensity ? `<div><span class="field-label">${t.fbaTool.report.intensity}</span> ${escHtml(b.intensity)}</div>` : ""}
+        ${b.duration  ? `<div><span class="field-label">${t.fbaTool.report.duration}</span> ${escHtml(b.duration)}</div>`  : ""}
       </div>
-      ${b.context ? `<div><span class="field-label">${t.fbaTool.report.antecedents}</span> ${b.context}</div>` : ""}
+      ${b.context ? `<div><span class="field-label">${t.fbaTool.report.antecedents}</span> ${escHtml(b.context)}</div>` : ""}
     </div>`
   ).join("");
 
   const obsHtml = d.observations.filter((o) => o.date || o.observations).map((o) =>
     `<div class="obs-card">
-      <div class="obs-header">${t.fbaTool.form.session} ${o.sessionNumber}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>
-      ${o.setting      ? `<div><span class="field-label">${t.fbaTool.report.setting}</span> ${o.setting}</div>` : ""}
-      ${o.participants ? `<div><span class="field-label">${t.fbaTool.report.participants}</span> ${o.participants}</div>` : ""}
-      ${o.purpose      ? `<div><span class="field-label">${t.fbaTool.report.purpose}</span> ${o.purpose}</div>` : ""}
-      ${o.observations ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.obsDesc}</span><br>${o.observations.replace(/\n/g, "<br>")}</div>` : ""}
-      ${o.analysis     ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.analysis}</span><br>${o.analysis.replace(/\n/g, "<br>")}</div>` : ""}
+      <div class="obs-header">${t.fbaTool.form.session} ${escHtml(o.sessionNumber)}${o.date ? ` — ${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>
+      ${o.setting      ? `<div><span class="field-label">${t.fbaTool.report.setting}</span> ${escHtml(o.setting)}</div>` : ""}
+      ${o.participants ? `<div><span class="field-label">${t.fbaTool.report.participants}</span> ${escHtml(o.participants)}</div>` : ""}
+      ${o.purpose      ? `<div><span class="field-label">${t.fbaTool.report.purpose}</span> ${escHtml(o.purpose)}</div>` : ""}
+      ${o.observations ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.obsDesc}</span><br>${escHtml(o.observations)}</div>` : ""}
+      ${o.analysis     ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.analysis}</span><br>${escHtml(o.analysis)}</div>` : ""}
     </div>`
   ).join("");
 
   const hypHtml = d.hypotheses.filter((h) => h.behaviour.trim()).map((h, i) =>
     `<div class="hyp-card">
-      <strong>${i + 1}. ${h.behaviour}</strong>
-      ${h.function ? `<div><span class="field-label">${t.fbaTool.form.identifiedFunction}:</span> ${h.function}</div>` : ""}
-      ${h.benefitsOfBehaviour ? `<div><span class="field-label">${t.fbaTool.form.benefitsOfBehaviour}:</span> ${h.benefitsOfBehaviour}</div>` : ""}
-      ${h.costsOfAlternatives ? `<div><span class="field-label">${t.fbaTool.form.costsOfAlternatives}:</span> ${h.costsOfAlternatives}</div>` : ""}
-      ${h.hypothesis ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.hypothesis}</span><br>${h.hypothesis.replace(/\n/g, "<br>")}</div>` : ""}
+      <strong>${i + 1}. ${escHtml(h.behaviour)}</strong>
+      ${h.function ? `<div><span class="field-label">${t.fbaTool.form.identifiedFunction}:</span> ${escHtml(h.function)}</div>` : ""}
+      ${h.benefitsOfBehaviour ? `<div><span class="field-label">${t.fbaTool.form.benefitsOfBehaviour}:</span> ${escHtml(h.benefitsOfBehaviour)}</div>` : ""}
+      ${h.costsOfAlternatives ? `<div><span class="field-label">${t.fbaTool.form.costsOfAlternatives}:</span> ${escHtml(h.costsOfAlternatives)}</div>` : ""}
+      ${h.hypothesis ? `<div class="obs-body"><span class="field-label">${t.fbaTool.report.hypothesis}</span><br>${escHtml(h.hypothesis)}</div>` : ""}
     </div>`
   ).join("");
 
@@ -311,7 +311,7 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
 <html lang="${isRTL ? 'he' : 'en'}" dir="${isRTL ? 'rtl' : 'ltr'}">
 <head>
 <meta charset="UTF-8">
-<title>FBA Report — ${d.clientName}</title>
+<title>FBA Report — ${escHtml(d.clientName)}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: ${fontObj.value}; font-size: 11pt; color: #1a1a2e; background: white; }
