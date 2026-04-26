@@ -479,7 +479,7 @@ ${d.referralReason ? sec("REASON FOR REFERRAL", d.referralReason) : ""}
 ${enabledMethods.length ? `<div class="section">
   <div class="section-header">${t.fbaTool.report.assessmentMethods}</div>
   <ul class="methods-list">
-    ${enabledMethods.map((m) => `<li>${m}</li>`).join("")}
+    ${enabledMethods.map((m) => `<li>${escHtml(m)}</li>`).join("")}
   </ul>
 </div>` : ""}
 
@@ -491,11 +491,11 @@ ${docsSection}
   <div class="section-header">${t.fbaTool.report.background}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:10px;">
-      ${t.fbaTool.report.backgroundIntro.replace("the client", firstName || "the client")}
+      ${t.fbaTool.report.backgroundIntro.replace("the client", escHtml(firstName) || "the client")}
     </p>
-    ${d.background ? d.background.replace(/\n/g, "<br>") : "—"}
-    ${d.environment ? `<br><br><strong>${t.fbaTool.report.envTitle}</strong><br>${d.environment.replace(/\n/g, "<br>")}` : ""}
-    ${d.supportStaff ? `<br><br><strong>${t.fbaTool.report.supportStaffTitle}</strong><br>${d.supportStaff.replace(/\n/g, "<br>")}` : ""}
+    ${d.background ? escHtml(d.background) : "—"}
+    ${d.environment ? `<br><br><strong>${t.fbaTool.report.envTitle}</strong><br>${escHtml(d.environment)}` : ""}
+    ${d.supportStaff ? `<br><br><strong>${t.fbaTool.report.supportStaffTitle}</strong><br>${escHtml(d.supportStaff)}` : ""}
   </div>
 </div>
 
