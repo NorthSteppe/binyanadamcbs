@@ -10,9 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Eye, Send, Loader2, ClipboardList, PencilLine, Save } from "lucide-react";
+import { Plus, Eye, Send, Loader2, ClipboardList, PencilLine, Save, FileText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FBA_INTAKE_SECTIONS, IntakeQuestion, calcCompletion } from "@/lib/fbaIntakeQuestions";
+import { useNavigate } from "react-router-dom";
+import {
+  mapIntakeToReportDraft,
+  FBA_PREFILL_STORAGE_KEY,
+  FBA_PREFILL_EVENT,
+} from "@/lib/fbaIntakeMapping";
+import FBAPathway, { FBAPathwayStep } from "@/components/clinical/FBAPathway";
 
 interface ClientOption {
   id: string;
@@ -37,6 +44,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const FBAIntakeManager = () => {
   const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +60,13 @@ const FBAIntakeManager = () => {
   const [fillResponses, setFillResponses] = useState<Record<string, string>>({});
   const [fillLoading, setFillLoading] = useState(false);
   const [fillSaving, setFillSaving] = useState(false);
+
+  const overallStep: FBAPathwayStep = (() => {
+    if (!assignments.length) return "sent";
+    if (assignments.some((a) => a.status === "submitted")) return "submitted";
+    if (assignments.some((a) => a.status === "in_progress")) return "in_progress";
+    return "sent";
+  })();
 
   const loadAll = async () => {
     if (!user) return;
@@ -198,9 +213,33 @@ const FBAIntakeManager = () => {
     return <Input value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
   };
 
+  const handleUseInReport = async (a: AssignmentRow) => {
+    const { data, error } = await supabase
+      .from("fba_intake_responses")
+      .select("responses")
+      .eq("assignment_id", a.id)
+      .maybeSingle();
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const responses = ((data?.responses as Record<string, string>) ?? {}) || {};
+    const draft = mapIntakeToReportDraft({ child_name: a.child_name, responses });
+    try {
+      localStorage.setItem(FBA_PREFILL_STORAGE_KEY, JSON.stringify(draft));
+      window.dispatchEvent(new CustomEvent(FBA_PREFILL_EVENT, { detail: draft }));
+    } catch {
+      // ignore storage errors
+    }
+    toast.success("Intake data ready — opening the FBA report builder");
+    navigate("/admin/fba-report");
+  };
+
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <FBAPathway current={overallStep} audience={isAdmin ? "admin" : "staff"} />
+
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold flex items-center gap-2">
@@ -275,7 +314,7 @@ const FBAIntakeManager = () => {
                     {new Date(a.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                   </td>
                   <td className="p-2.5 text-right">
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-end gap-1 flex-wrap">
                       {a.status !== "submitted" && (
                         <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openFill(a)}>
                           <PencilLine size={12} /> Fill
@@ -284,6 +323,16 @@ const FBAIntakeManager = () => {
                       <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openView(a)}>
                         <Eye size={12} /> View
                       </Button>
+                      {isAdmin && a.status === "submitted" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="h-7 gap-1 text-[11px]"
+                          onClick={() => handleUseInReport(a)}
+                        >
+                          <FileText size={12} /> Use in report
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -326,6 +375,13 @@ const FBAIntakeManager = () => {
               );
             })}
           </div>
+          {isAdmin && viewing?.status === "submitted" && (
+            <DialogFooter>
+              <Button onClick={() => viewing && handleUseInReport(viewing)} className="gap-2">
+                <FileText size={14} /> Use this intake to start the FBA report
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
