@@ -332,13 +332,38 @@ const Dashboard = () => {
 
       <div className="container max-w-5xl py-8 space-y-5">
 
+        {/* ── Support Pathway (always visible for clients) ──────────────── */}
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white">
+                <Compass size={16} />
+                <h2 className="text-sm font-semibold">Your support pathway</h2>
+              </div>
+              <Link
+                to="/portal/support-pathway"
+                className="text-xs text-white/70 hover:text-white inline-flex items-center gap-1"
+              >
+                Open full view <ArrowRight size={12} />
+              </Link>
+            </div>
+            <div className="rounded-2xl bg-white/85 backdrop-blur-md border border-white/70 p-4 sm:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
+              <SupportPathwayBoard clientId={user.id} pathwayKind="support" audience="client" />
+            </div>
+          </motion.div>
+        )}
+
         {/* ── FBA intake call-to-action (when therapist has assigned one) ── */}
         {fbaIntakes.some((a) => a.status !== "submitted") && (
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            className="space-y-3"
           >
             <Link
               to="/portal/fba-intake"
@@ -369,14 +394,6 @@ const Dashboard = () => {
                 <ArrowRight size={16} className="text-amber-600 shrink-0 mt-3" />
               </div>
             </Link>
-            <FBAPathway
-              audience="client"
-              current={
-                fbaIntakes.find((a) => a.status !== "submitted")?.status === "in_progress"
-                  ? "in_progress"
-                  : "sent"
-              }
-            />
           </motion.div>
         )}
 
