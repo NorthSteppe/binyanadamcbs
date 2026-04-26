@@ -153,8 +153,8 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
         <div className="shrink-0 self-center sm:self-start">
           <div className="relative">
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-muted ring-1 ring-border flex items-center justify-center">
-              {extras.photo_url ? (
-                <img src={extras.photo_url} alt={displayName} className="w-full h-full object-cover" />
+              {photoSignedUrl ? (
+                <img src={photoSignedUrl} alt={displayName} className="w-full h-full object-cover" />
               ) : (
                 <User size={36} className="text-muted-foreground" />
               )}
