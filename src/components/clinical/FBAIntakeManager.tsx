@@ -314,7 +314,7 @@ const FBAIntakeManager = () => {
                     {new Date(a.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                   </td>
                   <td className="p-2.5 text-right">
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-end gap-1 flex-wrap">
                       {a.status !== "submitted" && (
                         <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openFill(a)}>
                           <PencilLine size={12} /> Fill
@@ -323,6 +323,16 @@ const FBAIntakeManager = () => {
                       <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => openView(a)}>
                         <Eye size={12} /> View
                       </Button>
+                      {isAdmin && a.status === "submitted" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="h-7 gap-1 text-[11px]"
+                          onClick={() => handleUseInReport(a)}
+                        >
+                          <FileText size={12} /> Use in report
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>
