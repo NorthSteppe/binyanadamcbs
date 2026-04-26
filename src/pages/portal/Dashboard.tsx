@@ -336,6 +336,7 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="space-y-3"
           >
             <Link
               to="/portal/fba-intake"
@@ -366,6 +367,14 @@ const Dashboard = () => {
                 <ArrowRight size={16} className="text-amber-600 shrink-0 mt-3" />
               </div>
             </Link>
+            <FBAPathway
+              audience="client"
+              current={
+                fbaIntakes.find((a) => a.status !== "submitted")?.status === "in_progress"
+                  ? "in_progress"
+                  : "sent"
+              }
+            />
           </motion.div>
         )}
 
