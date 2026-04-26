@@ -694,6 +694,110 @@ export type Database = {
         }
         Relationships: []
       }
+      client_pathway_steps: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          description: string
+          display_order: number
+          icon: string
+          id: string
+          label: string
+          link: string
+          notes: string
+          pathway_kind: string
+          status: string
+          step_type: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          label: string
+          link?: string
+          notes?: string
+          pathway_kind?: string
+          status?: string
+          step_type?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          label?: string
+          link?: string
+          notes?: string
+          pathway_kind?: string
+          status?: string
+          step_type?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_pathway_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "pathway_step_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_profile_extras: {
+        Row: {
+          child_name: string
+          client_id: string
+          created_at: string
+          date_of_birth: string | null
+          diagnosis: string
+          email: string
+          notes: string
+          parent_name: string
+          phone: string
+          photo_url: string
+          updated_at: string
+        }
+        Insert: {
+          child_name?: string
+          client_id: string
+          created_at?: string
+          date_of_birth?: string | null
+          diagnosis?: string
+          email?: string
+          notes?: string
+          parent_name?: string
+          phone?: string
+          photo_url?: string
+          updated_at?: string
+        }
+        Update: {
+          child_name?: string
+          client_id?: string
+          created_at?: string
+          date_of_birth?: string | null
+          diagnosis?: string
+          email?: string
+          notes?: string
+          parent_name?: string
+          phone?: string
+          photo_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_todos: {
         Row: {
           client_id: string | null
@@ -1405,6 +1509,48 @@ export type Database = {
           is_active?: boolean
           link_url?: string | null
           name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pathway_step_templates: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          icon: string
+          id: string
+          is_active: boolean
+          label: string
+          link: string
+          pathway_kind: string
+          step_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          link?: string
+          pathway_kind?: string
+          step_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          link?: string
+          pathway_kind?: string
+          step_type?: string
           updated_at?: string
         }
         Relationships: []
