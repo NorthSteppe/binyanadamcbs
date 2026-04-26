@@ -10,9 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Eye, Send, Loader2, ClipboardList, PencilLine, Save } from "lucide-react";
+import { Plus, Eye, Send, Loader2, ClipboardList, PencilLine, Save, FileText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FBA_INTAKE_SECTIONS, IntakeQuestion, calcCompletion } from "@/lib/fbaIntakeQuestions";
+import { useNavigate } from "react-router-dom";
+import {
+  mapIntakeToReportDraft,
+  FBA_PREFILL_STORAGE_KEY,
+  FBA_PREFILL_EVENT,
+} from "@/lib/fbaIntakeMapping";
+import FBAPathway, { FBAPathwayStep } from "@/components/clinical/FBAPathway";
 
 interface ClientOption {
   id: string;
