@@ -576,9 +576,9 @@ ${d.recommendations ? `<div class="section page-break">
   <div class="section-header">${t.fbaTool.report.recommendations}</div>
   <div class="section-content">
     <p style="font-style:italic;color:#555;margin-bottom:10px;">
-      ${t.fbaTool.report.recommendationsIntro.replace("the client", firstName || "the client")}
+      ${t.fbaTool.report.recommendationsIntro.replace("the client", escHtml(firstName) || "the client")}
     </p>
-    ${d.recommendations.replace(/\n/g, "<br>")}
+    ${escHtml(d.recommendations)}
   </div>
 </div>` : ""}
 
