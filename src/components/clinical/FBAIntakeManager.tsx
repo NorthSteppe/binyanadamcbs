@@ -44,6 +44,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const FBAIntakeManager = () => {
   const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +60,13 @@ const FBAIntakeManager = () => {
   const [fillResponses, setFillResponses] = useState<Record<string, string>>({});
   const [fillLoading, setFillLoading] = useState(false);
   const [fillSaving, setFillSaving] = useState(false);
+
+  const overallStep: FBAPathwayStep = (() => {
+    if (!assignments.length) return "sent";
+    if (assignments.some((a) => a.status === "submitted")) return "submitted";
+    if (assignments.some((a) => a.status === "in_progress")) return "in_progress";
+    return "sent";
+  })();
 
   const loadAll = async () => {
     if (!user) return;
