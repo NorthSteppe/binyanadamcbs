@@ -602,12 +602,12 @@ ${d.additionalNotes ? sec("ADDITIONAL NOTES / CAVEATS", d.additionalNotes) : ""}
 <!-- ═══ FOOTER ═══════════════════════════════════════════════════════ -->
 <div class="report-footer">
   <div class="footer-assessor">
-    <strong>${aName}</strong><br>
-    ${aRole}${aCreds ? " · " + aCreds : ""}<br>
-    <span class="creds">adamdayan@bacbs.com &nbsp;·&nbsp; ${aWeb}</span><br>
+    <strong>${escHtml(aName)}</strong><br>
+    ${escHtml(aRole)}${aCreds ? " · " + escHtml(aCreds) : ""}<br>
+    <span class="creds">adamdayan@bacbs.com &nbsp;·&nbsp; ${escHtml(aWeb)}</span><br>
     <span class="footer-date">${t.fbaTool.report.reportCompleted} ${today}</span>
   </div>
-  ${aSig ? `<div class="footer-sig"><img src="${aSig}" alt="Signature" onerror="this.parentNode.innerHTML='&nbsp;'"></div>` : ""}
+  ${aSig ? `<div class="footer-sig"><img src="${escAttr(aSig)}" alt="Signature" onerror="this.parentNode.innerHTML='&nbsp;'"></div>` : ""}
 </div>
 
 </body></html>`;
