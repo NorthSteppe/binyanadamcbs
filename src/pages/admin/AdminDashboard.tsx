@@ -33,6 +33,7 @@ const categories = [
       { label: "Clients Overview", path: "/admin/clients", icon: ClipboardList, description: "Auto-populated dashboard of every client — sessions, notes, risk, engagement" },
       { label: "Parent FBA Intakes", path: "/staff/fba-intakes", icon: ClipboardList, description: "Send Hanley intake forms to parents and pull answers straight into the report" },
       { label: "FBA Report Tool", path: "/admin/fba-report", icon: Brain, description: "ACT-informed, constructional Functional Behaviour Assessment report builder" },
+      { label: "Pathway Templates", path: "/admin/pathway-templates", icon: ListTodo, description: "Edit the default Support and FBA pathway steps every client sees" },
     ],
   },
   {

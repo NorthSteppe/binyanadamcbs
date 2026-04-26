@@ -43,6 +43,9 @@ import ToolkitPomodoro from "./pages/portal/ToolkitPomodoro";
 import MindfulnessSounds from "./pages/portal/MindfulnessSounds";
 import Productivity from "./pages/portal/Productivity";
 import FBAIntake from "./pages/portal/FBAIntake";
+import PortalSupportPathway from "./pages/portal/SupportPathway";
+import SupportAgreement from "./pages/portal/SupportAgreement";
+import PathwayTemplateManager from "./pages/admin/PathwayTemplateManager";
 // Admin portal
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCalendar from "./pages/admin/AdminCalendar";
@@ -179,6 +182,8 @@ const App = () => (
                   <Route path="/portal/toolkit/mindfulness" element={<ProtectedRoute><MindfulnessSounds /></ProtectedRoute>} />
                   <Route path="/portal/productivity" element={<ProtectedRoute><Productivity /></ProtectedRoute>} />
                   <Route path="/portal/fba-intake" element={<ProtectedRoute><FBAIntake /></ProtectedRoute>} />
+                  <Route path="/portal/support-pathway" element={<ProtectedRoute><PortalSupportPathway /></ProtectedRoute>} />
+                  <Route path="/portal/support-agreement" element={<ProtectedRoute><SupportAgreement /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
                   {/* Admin portal */}
@@ -207,6 +212,7 @@ const App = () => (
                   <Route path="/admin/assistant" element={<AdminRoute><AssistantManager /></AdminRoute>} />
                   <Route path="/admin/fba-report" element={<AdminRoute><FBAReportTool /></AdminRoute>} />
                   <Route path="/admin/story-engine" element={<AdminRoute><StoryEngine /></AdminRoute>} />
+                  <Route path="/admin/pathway-templates" element={<AdminRoute><PathwayTemplateManager /></AdminRoute>} />
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />

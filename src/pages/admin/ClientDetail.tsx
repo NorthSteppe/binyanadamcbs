@@ -15,6 +15,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
+import ClientProfileHeader from "@/components/clinical/ClientProfileHeader";
+import SupportPathwayBoard from "@/components/clinical/SupportPathwayBoard";
 import { toast } from "sonner";
 
 // Per-session notes editor with voice transcription
@@ -327,10 +329,18 @@ const ClientDetail = () => {
             <TabsList className="rounded-full flex-wrap h-auto">
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
+              {!isManual && <TabsTrigger value="pathway" className="rounded-full">Pathway</TabsTrigger>}
               <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
             </TabsList>
+
+            {!isManual && realClientId && (
+              <TabsContent value="pathway" className="space-y-6">
+                <ClientProfileHeader clientId={realClientId} audience={isAdmin ? "admin" : "staff"} fallbackName={profile.full_name} />
+                <SupportPathwayBoard clientId={realClientId} pathwayKind="support" audience={isAdmin ? "admin" : "staff"} />
+              </TabsContent>
+            )}
 
             {!isManual && (
               <TabsContent value="overview">
