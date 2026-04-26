@@ -59,11 +59,12 @@ export async function verifyState(
   const parts = state.split(".");
   if (parts.length !== 2) throw new Error("invalid_state");
   const [payloadB64, sigB64] = parts;
+  const sigBytes = b64urlDecode(sigB64);
   const key = await hmacKey();
   const ok = await crypto.subtle.verify(
     "HMAC",
     key,
-    b64urlDecode(sigB64),
+    sigBytes.buffer.slice(sigBytes.byteOffset, sigBytes.byteOffset + sigBytes.byteLength) as ArrayBuffer,
     enc.encode(payloadB64),
   );
   if (!ok) throw new Error("invalid_state_signature");
