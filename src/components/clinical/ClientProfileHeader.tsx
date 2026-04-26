@@ -36,6 +36,7 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
   const { user, isAdmin } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [extras, setExtras] = useState<Extras>(empty(clientId));
+  const [photoSignedUrl, setPhotoSignedUrl] = useState<string>("");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -43,14 +44,31 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
   const canEdit = audience !== "client";
   const canUploadPhoto = isAdmin || audience === "staff";
 
+  // photo_url is now a storage path inside the private "client-photos" bucket.
+  // Backwards compatible: if a legacy full URL is stored, use it directly.
+  const resolvePhotoUrl = async (value: string) => {
+    if (!value) { setPhotoSignedUrl(""); return; }
+    if (/^https?:\/\//i.test(value)) { setPhotoSignedUrl(value); return; }
+    const { data, error } = await supabase.storage
+      .from("client-photos")
+      .createSignedUrl(value, 60 * 60); // 1 hour
+    setPhotoSignedUrl(error ? "" : data?.signedUrl ?? "");
+  };
+
   const load = async () => {
     const { data } = await supabase
       .from("client_profile_extras")
       .select("*")
       .eq("client_id", clientId)
       .maybeSingle();
-    if (data) setExtras({ ...empty(clientId), ...(data as any) });
-    else setExtras(empty(clientId));
+    if (data) {
+      const next = { ...empty(clientId), ...(data as any) };
+      setExtras(next);
+      resolvePhotoUrl(next.photo_url);
+    } else {
+      setExtras(empty(clientId));
+      setPhotoSignedUrl("");
+    }
   };
 
   useEffect(() => { if (clientId) load(); /* eslint-disable-next-line */ }, [clientId]);
@@ -112,14 +130,17 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
     const path = `${clientId}/${Date.now()}_${file.name}`;
     const { error: upErr } = await supabase.storage.from("client-photos").upload(path, file, { upsert: true });
     if (upErr) { toast.error(upErr.message); setUploading(false); return; }
-    const { data: urlData } = supabase.storage.from("client-photos").getPublicUrl(path);
-    const newUrl = urlData.publicUrl;
+    // Store the storage path (not a public URL) since the bucket is private.
     const { error: updErr } = await supabase
       .from("client_profile_extras")
-      .upsert({ client_id: clientId, photo_url: newUrl }, { onConflict: "client_id" });
+      .upsert({ client_id: clientId, photo_url: path }, { onConflict: "client_id" });
     setUploading(false);
     if (updErr) toast.error(updErr.message);
-    else { setExtras((prev) => ({ ...prev, photo_url: newUrl })); toast.success("Photo updated"); }
+    else {
+      setExtras((prev) => ({ ...prev, photo_url: path }));
+      resolvePhotoUrl(path);
+      toast.success("Photo updated");
+    }
     if (fileRef.current) fileRef.current.value = "";
   };
 
@@ -132,8 +153,8 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
         <div className="shrink-0 self-center sm:self-start">
           <div className="relative">
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-muted ring-1 ring-border flex items-center justify-center">
-              {extras.photo_url ? (
-                <img src={extras.photo_url} alt={displayName} className="w-full h-full object-cover" />
+              {photoSignedUrl ? (
+                <img src={photoSignedUrl} alt={displayName} className="w-full h-full object-cover" />
               ) : (
                 <User size={36} className="text-muted-foreground" />
               )}
