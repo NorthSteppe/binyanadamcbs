@@ -640,6 +640,69 @@ const FBAReportTool = () => {
     localStorage.setItem("fba-report-draft", JSON.stringify(data));
   }, [data]);
 
+  // Save to draft on change
+  useEffect(() => {
+    localStorage.setItem("fba-report-draft", JSON.stringify(data));
+  }, [data]);
+
+  // Apply a partial patch coming from a submitted parent intake.
+  const applyPrefill = (patch: FBAReportDraftPatch) => {
+    if (!patch || typeof patch !== "object") return;
+    setData((d) => {
+      const next: FBAData = { ...d };
+      (Object.keys(patch) as (keyof FBAReportDraftPatch)[]).forEach((k) => {
+        const value = patch[k];
+        if (value === undefined || value === null) return;
+        if (typeof value === "string" && value.trim().length === 0) return;
+        if (k === "behaviours" && Array.isArray(value) && value.length) {
+          // Replace if first slot is empty, else append.
+          const first = next.behaviours[0];
+          const slotEmpty = first && !first.name?.trim() && !first.topography?.trim();
+          next.behaviours = slotEmpty
+            ? [...value, ...next.behaviours.slice(1)]
+            : [...next.behaviours, ...value];
+          return;
+        }
+        if (k === "hypotheses" && Array.isArray(value) && value.length) {
+          const first = next.hypotheses[0];
+          const slotEmpty = first && !first.behaviour?.trim() && !first.hypothesis?.trim();
+          next.hypotheses = slotEmpty
+            ? [...value, ...next.hypotheses.slice(1)]
+            : [...next.hypotheses, ...value];
+          return;
+        }
+        // Plain string fields — only fill if empty so we don't clobber the assessor's edits.
+        const current = (next as any)[k];
+        if (typeof current === "string" && current.trim().length > 0) return;
+        (next as any)[k] = value;
+      });
+      return next;
+    });
+    setStep(1);
+    toast.success("Parent intake answers loaded into the report");
+  };
+
+  // Pick up prefill triggered from FBAIntakeManager (same-window navigation).
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(FBA_PREFILL_STORAGE_KEY);
+      if (stored) {
+        const patch = JSON.parse(stored) as FBAReportDraftPatch;
+        applyPrefill(patch);
+        localStorage.removeItem(FBA_PREFILL_STORAGE_KEY);
+      }
+    } catch {
+      // ignore
+    }
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as FBAReportDraftPatch | undefined;
+      if (detail) applyPrefill(detail);
+    };
+    window.addEventListener(FBA_PREFILL_EVENT, handler);
+    return () => window.removeEventListener(FBA_PREFILL_EVENT, handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const set = <K extends keyof FBAData>(key: K, value: FBAData[K]) =>
     setData((d) => ({ ...d, [key]: value }));
 
