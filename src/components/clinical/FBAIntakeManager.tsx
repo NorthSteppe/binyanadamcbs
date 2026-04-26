@@ -213,6 +213,28 @@ const FBAIntakeManager = () => {
     return <Input value={v} onChange={(e) => updateFillResponse(q.key, e.target.value)} />;
   };
 
+  const handleUseInReport = async (a: AssignmentRow) => {
+    const { data, error } = await supabase
+      .from("fba_intake_responses")
+      .select("responses")
+      .eq("assignment_id", a.id)
+      .maybeSingle();
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const responses = ((data?.responses as Record<string, string>) ?? {}) || {};
+    const draft = mapIntakeToReportDraft({ child_name: a.child_name, responses });
+    try {
+      localStorage.setItem(FBA_PREFILL_STORAGE_KEY, JSON.stringify(draft));
+      window.dispatchEvent(new CustomEvent(FBA_PREFILL_EVENT, { detail: draft }));
+    } catch {
+      // ignore storage errors
+    }
+    toast.success("Intake data ready — opening the FBA report builder");
+    navigate("/admin/fba-report");
+  };
+
 
   return (
     <div className="space-y-3">
