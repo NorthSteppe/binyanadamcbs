@@ -36,6 +36,7 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
   const { user, isAdmin } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [extras, setExtras] = useState<Extras>(empty(clientId));
+  const [photoSignedUrl, setPhotoSignedUrl] = useState<string>("");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -43,14 +44,31 @@ const ClientProfileHeader = ({ clientId, audience, fallbackName }: Props) => {
   const canEdit = audience !== "client";
   const canUploadPhoto = isAdmin || audience === "staff";
 
+  // photo_url is now a storage path inside the private "client-photos" bucket.
+  // Backwards compatible: if a legacy full URL is stored, use it directly.
+  const resolvePhotoUrl = async (value: string) => {
+    if (!value) { setPhotoSignedUrl(""); return; }
+    if (/^https?:\/\//i.test(value)) { setPhotoSignedUrl(value); return; }
+    const { data, error } = await supabase.storage
+      .from("client-photos")
+      .createSignedUrl(value, 60 * 60); // 1 hour
+    setPhotoSignedUrl(error ? "" : data?.signedUrl ?? "");
+  };
+
   const load = async () => {
     const { data } = await supabase
       .from("client_profile_extras")
       .select("*")
       .eq("client_id", clientId)
       .maybeSingle();
-    if (data) setExtras({ ...empty(clientId), ...(data as any) });
-    else setExtras(empty(clientId));
+    if (data) {
+      const next = { ...empty(clientId), ...(data as any) };
+      setExtras(next);
+      resolvePhotoUrl(next.photo_url);
+    } else {
+      setExtras(empty(clientId));
+      setPhotoSignedUrl("");
+    }
   };
 
   useEffect(() => { if (clientId) load(); /* eslint-disable-next-line */ }, [clientId]);
