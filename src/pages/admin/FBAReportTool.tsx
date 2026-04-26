@@ -461,12 +461,12 @@ function generateStyledHTML(d: FBAData, assessor: AssessorInfo | null, t: any, i
   <h1>${t.fbaTool.report.title}</h1>
   <div class="subtitle">${t.fbaTool.report.subtitle}</div>
   <div class="client-grid">
-    <div><span class="field-label">${t.fbaTool.report.client}</span> ${d.clientName || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.client}</span> ${escHtml(d.clientName) || "—"}</div>
     <div><span class="field-label">${t.fbaTool.report.dob}</span> ${d.clientDOB ? new Date(d.clientDOB).toLocaleDateString("en-GB") : "—"}</div>
-    <div><span class="field-label">${t.fbaTool.report.diagnosis}</span> ${d.diagnosis || "—"}</div>
-    <div><span class="field-label">${t.fbaTool.report.setting}</span> ${d.settingType}${d.settingName ? " — " + d.settingName : ""}</div>
-    <div><span class="field-label">${t.fbaTool.report.assessedBy}</span> ${aName}${aCreds ? ", " + aCreds : ""}</div>
-    <div><span class="field-label">${t.fbaTool.report.assessmentDates}</span> ${d.assessmentDates || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.diagnosis}</span> ${escHtml(d.diagnosis) || "—"}</div>
+    <div><span class="field-label">${t.fbaTool.report.setting}</span> ${escHtml(d.settingType)}${d.settingName ? " — " + escHtml(d.settingName) : ""}</div>
+    <div><span class="field-label">${t.fbaTool.report.assessedBy}</span> ${escHtml(aName)}${aCreds ? ", " + escHtml(aCreds) : ""}</div>
+    <div><span class="field-label">${t.fbaTool.report.assessmentDates}</span> ${escHtml(d.assessmentDates) || "—"}</div>
     <div><span class="field-label">${t.fbaTool.report.reportDate}</span> ${today}</div>
   </div>
   <div class="confidential">${t.fbaTool.report.confidential.replace(" | ", " &nbsp;|&nbsp; ")}</div>
