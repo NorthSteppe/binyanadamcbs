@@ -237,7 +237,9 @@ const FBAIntakeManager = () => {
 
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <FBAPathway current={overallStep} audience={isAdmin ? "admin" : "staff"} />
+
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold flex items-center gap-2">
