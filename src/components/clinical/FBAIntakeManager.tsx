@@ -375,6 +375,13 @@ const FBAIntakeManager = () => {
               );
             })}
           </div>
+          {isAdmin && viewing?.status === "submitted" && (
+            <DialogFooter>
+              <Button onClick={() => viewing && handleUseInReport(viewing)} className="gap-2">
+                <FileText size={14} /> Use this intake to start the FBA report
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
