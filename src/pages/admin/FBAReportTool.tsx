@@ -22,7 +22,6 @@ import { METAL_BG } from "@/components/portal/PortalShell";
 import { toast } from "sonner";
 import { useLanguage } from "@/i18n/LanguageContext";
 import FBAIntakeManager from "@/components/clinical/FBAIntakeManager";
-import FBAPathway from "@/components/clinical/FBAPathway";
 import {
   FBA_PREFILL_EVENT,
   FBA_PREFILL_STORAGE_KEY,
