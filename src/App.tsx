@@ -45,6 +45,7 @@ import Productivity from "./pages/portal/Productivity";
 import FBAIntake from "./pages/portal/FBAIntake";
 import PortalSupportPathway from "./pages/portal/SupportPathway";
 import SupportAgreement from "./pages/portal/SupportAgreement";
+import BetweenSessions from "./pages/portal/BetweenSessions";
 import PathwayTemplateManager from "./pages/admin/PathwayTemplateManager";
 // Admin portal
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -184,6 +185,7 @@ const App = () => (
                   <Route path="/portal/fba-intake" element={<ProtectedRoute><FBAIntake /></ProtectedRoute>} />
                   <Route path="/portal/support-pathway" element={<ProtectedRoute><PortalSupportPathway /></ProtectedRoute>} />
                   <Route path="/portal/support-agreement" element={<ProtectedRoute><SupportAgreement /></ProtectedRoute>} />
+                  <Route path="/portal/between-sessions" element={<ProtectedRoute><BetweenSessions /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
                   {/* Admin portal */}
