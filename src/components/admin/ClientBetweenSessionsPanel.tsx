@@ -48,7 +48,7 @@ const ClientBetweenSessionsPanel = ({ clientId }: Props) => {
     setEntries(entriesData);
     setTopics(topicsData);
 
-    const sessionIds: string[] = [...new Set(topicsData.map((t: Topic) => t.session_id as string))];
+    const sessionIds: string[] = Array.from(new Set(topicsData.map((t: Topic) => t.session_id))) as string[];
     if (sessionIds.length) {
       const { data: sData } = await supabase.from("sessions").select("id,title,session_date").in("id", sessionIds);
       const map: Record<string, SessionLite> = {};
