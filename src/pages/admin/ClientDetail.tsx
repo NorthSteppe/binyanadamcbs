@@ -118,6 +118,9 @@ const ClientDetail = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [todos, setTodos] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [intakes, setIntakes] = useState<any[]>([]);
+  const [intakeResponses, setIntakeResponses] = useState<Record<string, Record<string, string>>>({});
+  const [viewingIntakeId, setViewingIntakeId] = useState<string | null>(null);
   const [todoDialogOpen, setTodoDialogOpen] = useState(false);
   const [newTodo, setNewTodo] = useState({ title: "", description: "" });
   const [uploading, setUploading] = useState(false);
