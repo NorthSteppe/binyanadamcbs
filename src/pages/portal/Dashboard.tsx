@@ -398,6 +398,9 @@ const Dashboard = () => {
           </motion.div>
         )}
 
+        {/* ── My Care Team ──────────────────────────────────────────────── */}
+        <MyCareTeam />
+
         {/* ── At a Glance stat tiles ─────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
