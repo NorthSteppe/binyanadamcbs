@@ -356,6 +356,11 @@ const ClientDetail = () => {
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
               {!isManual && <TabsTrigger value="pathway" className="rounded-full">Pathway</TabsTrigger>}
+              {!isManual && (
+                <TabsTrigger value="intake" className="rounded-full gap-1">
+                  <ClipboardList size={12} /> FBA Intake{intakes.length > 0 ? ` (${intakes.length})` : ""}
+                </TabsTrigger>
+              )}
               <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
