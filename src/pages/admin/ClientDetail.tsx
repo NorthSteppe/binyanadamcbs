@@ -361,7 +361,7 @@ const ClientDetail = () => {
                   <ClipboardList size={12} /> FBA Intake{intakes.length > 0 ? ` (${intakes.length})` : ""}
                 </TabsTrigger>
               )}
-              <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
+              {isAdmin && <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>}
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
             </TabsList>
