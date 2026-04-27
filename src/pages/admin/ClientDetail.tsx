@@ -415,6 +415,13 @@ const ClientDetail = () => {
               )}
             </TabsContent>
 
+            {!isManual && realClientId && (
+              <TabsContent value="between">
+                <h2 className="text-lg font-semibold mb-4">Between Sessions</h2>
+                <ClientBetweenSessionsPanel clientId={realClientId} />
+              </TabsContent>
+            )}
+
             {isAdmin && (
               <TabsContent value="financial">
                 <h2 className="text-lg font-semibold mb-4">Financial Overview</h2>
