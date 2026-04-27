@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling, Save } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling, Save, ClipboardList, Eye } from "lucide-react";
+import { FBA_INTAKE_SECTIONS, calcCompletion } from "@/lib/fbaIntakeQuestions";
 import ClientFinancialTab from "@/components/admin/ClientFinancialTab";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import { Button } from "@/components/ui/button";
