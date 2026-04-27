@@ -158,19 +158,41 @@ const ClientDetail = () => {
       if (todosRes.data) setTodos(todosRes.data);
       if (docsRes.data) setDocuments(docsRes.data);
     } else if (realClientId) {
-      const [profileRes, sessionsRes, notesRes, todosRes, docsRes, assignRes] = await Promise.all([
+      const [profileRes, sessionsRes, notesRes, todosRes, docsRes, assignRes, intakesRes] = await Promise.all([
         supabase.from("profiles").select("full_name, created_at").eq("id", realClientId).single(),
         supabase.from("sessions").select("*").eq("client_id", realClientId).order("session_date", { ascending: false }),
         supabase.from("client_notes").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
         supabase.from("client_todos").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
         supabase.from("client_documents").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
         supabase.from("client_assignments").select("assignee_id").eq("client_id", realClientId),
+        supabase
+          .from("fba_intake_assignments")
+          .select("id, child_name, status, notes, submitted_at, created_at")
+          .eq("client_id", realClientId)
+          .order("created_at", { ascending: false }),
       ]);
       if (profileRes.data) setProfile(profileRes.data);
       if (sessionsRes.data) setSessions(sessionsRes.data);
       if (notesRes.data) setNotes(notesRes.data);
       if (todosRes.data) setTodos(todosRes.data);
       if (docsRes.data) setDocuments(docsRes.data);
+      if (intakesRes.data) {
+        setIntakes(intakesRes.data);
+        const submittedIds = intakesRes.data.filter((i) => i.status === "submitted").map((i) => i.id);
+        if (submittedIds.length) {
+          const { data: respRows } = await supabase
+            .from("fba_intake_responses")
+            .select("assignment_id, responses")
+            .in("assignment_id", submittedIds);
+          const map: Record<string, Record<string, string>> = {};
+          (respRows ?? []).forEach((r: any) => {
+            map[r.assignment_id] = (r.responses as Record<string, string>) ?? {};
+          });
+          setIntakeResponses(map);
+        } else {
+          setIntakeResponses({});
+        }
+      }
       const isAssigned = (assignRes.data ?? []).some((a) => a.assignee_id === user?.id);
       setCanRename(isAdmin || isAssigned);
     }
