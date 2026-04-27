@@ -455,7 +455,7 @@ const AdminCalendar = () => {
     }
 
     setCreateOpen(false);
-    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false });
+    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false, already_paid: false, paid_method: "cash" });
     qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
