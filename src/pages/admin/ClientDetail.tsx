@@ -470,6 +470,82 @@ const ClientDetail = () => {
                 </div>
               )}
             </TabsContent>
+
+            {!isManual && (
+              <TabsContent value="intake">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Parent FBA Intake Forms</h2>
+                  <Link to="/staff/fba-intakes" className="text-xs text-primary hover:underline">
+                    Manage all intakes →
+                  </Link>
+                </div>
+                {intakes.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl border border-border/50">
+                    No intake forms have been sent to this client yet.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {intakes.map((intake) => {
+                      const responses = intakeResponses[intake.id] ?? {};
+                      const isOpen = viewingIntakeId === intake.id;
+                      const completion = calcCompletion(responses);
+                      return (
+                        <div key={intake.id} className="bg-card border border-border/50 rounded-2xl overflow-hidden">
+                          <div className="flex items-center justify-between p-4 gap-3">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-medium text-sm">{intake.child_name || "Unnamed child"}</p>
+                                <Badge variant="outline" className="text-[10px] uppercase">
+                                  {intake.status.replace("_", " ")}
+                                </Badge>
+                                {intake.status === "submitted" && (
+                                  <span className="text-[11px] text-muted-foreground">{completion}% complete</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                Sent {format(new Date(intake.created_at), "MMM d, yyyy")}
+                                {intake.submitted_at && ` · Submitted ${format(new Date(intake.submitted_at), "MMM d, yyyy")}`}
+                              </p>
+                            </div>
+                            {intake.status === "submitted" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="rounded-full gap-1.5 shrink-0"
+                                onClick={() => setViewingIntakeId(isOpen ? null : intake.id)}
+                              >
+                                <Eye size={12} /> {isOpen ? "Hide" : "View"} responses
+                              </Button>
+                            )}
+                          </div>
+                          {isOpen && intake.status === "submitted" && (
+                            <div className="border-t border-border/50 p-4 space-y-4 bg-muted/20">
+                              {FBA_INTAKE_SECTIONS.map((sec) => {
+                                const answered = sec.questions.filter((q) => (responses[q.key] ?? "").toString().trim());
+                                if (!answered.length) return null;
+                                return (
+                                  <div key={sec.id} className="rounded-lg border border-border bg-card p-4">
+                                    <h4 className="text-sm font-semibold mb-3">{sec.title}</h4>
+                                    <dl className="space-y-3">
+                                      {answered.map((q) => (
+                                        <div key={q.key}>
+                                          <dt className="text-[11px] uppercase tracking-wide text-muted-foreground mb-0.5">{q.label}</dt>
+                                          <dd className="text-sm whitespace-pre-wrap leading-relaxed">{(responses[q.key] ?? "").toString()}</dd>
+                                        </div>
+                                      ))}
+                                    </dl>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </section>
