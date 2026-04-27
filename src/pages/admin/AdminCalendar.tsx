@@ -101,7 +101,7 @@ const AdminCalendar = () => {
   const [dayDetailOpen, setDayDetailOpen] = useState(false);
 
   // New session form
-  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], recurrence: "none" as string, recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false });
+  const [newSession, setNewSession] = useState({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [] as string[], recurrence: "none" as string, recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false, already_paid: false, paid_method: "cash" as string });
   // New task form
   const [newTask, setNewTask] = useState({ title: "", assigned_to: "", description: "" });
   // Edit session form
@@ -390,7 +390,10 @@ const AdminCalendar = () => {
       meeting_platform: newSession.meeting_platform || null,
       meeting_url: newSession.meeting_url || null,
       attendee_ids: newSession.attendee_ids,
-      is_paid: false,
+      is_paid: !!newSession.already_paid,
+      payment_method: newSession.already_paid ? newSession.paid_method : "",
+      paid_at: newSession.already_paid ? new Date().toISOString() : null,
+      paid_confirmed_by: newSession.already_paid ? user!.id : null,
       service_option_id: newSession.service_option_id || null,
       price_cents: newSession.price_cents || 0,
       therapist_id: newSession.therapist_id || null,
@@ -455,7 +458,7 @@ const AdminCalendar = () => {
     }
 
     setCreateOpen(false);
-    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false });
+    setNewSession({ title: "", client_id: "", time: "09:00", duration_minutes: 60, description: "", meeting_platform: "", meeting_url: "", attendee_ids: [], recurrence: "none", recurrence_count: 4, service_option_id: "", price_cents: 0, therapist_id: "", therapist_rate_cents: 0, send_payment_link: false, already_paid: false, paid_method: "cash" });
     qc.invalidateQueries({ queryKey: ["team_sessions"] });
   };
 
@@ -1173,9 +1176,34 @@ const AdminCalendar = () => {
                     </span>
                     <Switch
                       checked={newSession.send_payment_link}
-                      onCheckedChange={(v) => setNewSession({ ...newSession, send_payment_link: v })}
+                      onCheckedChange={(v) => setNewSession({ ...newSession, send_payment_link: v, already_paid: v ? false : newSession.already_paid })}
                     />
                   </label>
+                  <label className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/50">
+                    <span className="text-[11px] text-muted-foreground leading-tight">
+                      Already paid
+                      <span className="block text-[10px] opacity-70">Mark this session as paid at booking time.</span>
+                    </span>
+                    <Switch
+                      checked={newSession.already_paid}
+                      onCheckedChange={(v) => setNewSession({ ...newSession, already_paid: v, send_payment_link: v ? false : newSession.send_payment_link })}
+                    />
+                  </label>
+                  {newSession.already_paid && (
+                    <div className="pt-1">
+                      <Label className="text-[11px]">Payment method</Label>
+                      <Select value={newSession.paid_method} onValueChange={(v) => setNewSession({ ...newSession, paid_method: v })}>
+                        <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="bank_transfer">Bank transfer</SelectItem>
+                          <SelectItem value="stripe">Stripe</SelectItem>
+                          <SelectItem value="card">Card</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 <div>
