@@ -264,7 +264,7 @@ const ClientDetail = () => {
       <Header />
       <section className="pt-28 pb-20">
         <div className="container max-w-4xl">
-          <Link to="/admin/clients" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <Link to={isAdmin ? "/admin/clients" : "/staff/clients"} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft size={14} /> Back to Clients
           </Link>
 
