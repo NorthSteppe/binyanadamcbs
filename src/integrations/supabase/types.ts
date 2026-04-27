@@ -614,6 +614,39 @@ export type Database = {
           },
         ]
       }
+      client_journal_entries: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string
+          id: string
+          is_shared_with_therapist: boolean
+          mood: string
+          related_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_shared_with_therapist?: boolean
+          mood?: string
+          related_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_shared_with_therapist?: boolean
+          mood?: string
+          related_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_notes: {
         Row: {
           author_id: string
@@ -1671,6 +1704,36 @@ export type Database = {
           name?: string
           price_cents?: number
           stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      session_topics: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string
+          id: string
+          is_addressed: boolean
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_addressed?: boolean
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_addressed?: boolean
+          session_id?: string
           updated_at?: string
         }
         Relationships: []

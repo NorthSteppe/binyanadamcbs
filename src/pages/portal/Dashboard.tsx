@@ -622,6 +622,14 @@ const Dashboard = () => {
           <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               {
+                to: "/portal/between-sessions",
+                label: "Between Sessions",
+                desc: "Journal & topics",
+                icon: Sparkles,
+                color: "#0ea5e9",
+                bg: "rgba(14,165,233,0.08)",
+              },
+              {
                 to: "/portal/messages",
                 label: portalT.messages || "Messages",
                 desc: unreadCount > 0 ? `${unreadCount} ${portalT.unread || "unread"}` : (portalT.chatWithTherapist || "Chat with therapist"),

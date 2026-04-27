@@ -17,6 +17,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
 import ClientAutoOverview from "@/components/admin/ClientAutoOverview";
+import ClientBetweenSessionsPanel from "@/components/admin/ClientBetweenSessionsPanel";
 import ClientProfileHeader from "@/components/clinical/ClientProfileHeader";
 import SupportPathwayBoard from "@/components/clinical/SupportPathwayBoard";
 import { toast } from "sonner";
@@ -356,6 +357,7 @@ const ClientDetail = () => {
             <TabsList className="rounded-full flex-wrap h-auto">
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
+              {!isManual && <TabsTrigger value="between" className="rounded-full">Between Sessions</TabsTrigger>}
               {!isManual && <TabsTrigger value="pathway" className="rounded-full">Pathway</TabsTrigger>}
               {!isManual && (
                 <TabsTrigger value="intake" className="rounded-full gap-1">
@@ -413,6 +415,13 @@ const ClientDetail = () => {
                 </div>
               )}
             </TabsContent>
+
+            {!isManual && realClientId && (
+              <TabsContent value="between">
+                <h2 className="text-lg font-semibold mb-4">Between Sessions</h2>
+                <ClientBetweenSessionsPanel clientId={realClientId} />
+              </TabsContent>
+            )}
 
             {isAdmin && (
               <TabsContent value="financial">
