@@ -17,6 +17,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
 import ClientAutoOverview from "@/components/admin/ClientAutoOverview";
+import ClientBetweenSessionsPanel from "@/components/admin/ClientBetweenSessionsPanel";
 import ClientProfileHeader from "@/components/clinical/ClientProfileHeader";
 import SupportPathwayBoard from "@/components/clinical/SupportPathwayBoard";
 import { toast } from "sonner";
