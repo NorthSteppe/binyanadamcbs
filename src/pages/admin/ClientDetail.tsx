@@ -356,6 +356,7 @@ const ClientDetail = () => {
             <TabsList className="rounded-full flex-wrap h-auto">
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
+              {!isManual && <TabsTrigger value="between" className="rounded-full">Between Sessions</TabsTrigger>}
               {!isManual && <TabsTrigger value="pathway" className="rounded-full">Pathway</TabsTrigger>}
               {!isManual && (
                 <TabsTrigger value="intake" className="rounded-full gap-1">
