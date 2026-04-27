@@ -1176,9 +1176,34 @@ const AdminCalendar = () => {
                     </span>
                     <Switch
                       checked={newSession.send_payment_link}
-                      onCheckedChange={(v) => setNewSession({ ...newSession, send_payment_link: v })}
+                      onCheckedChange={(v) => setNewSession({ ...newSession, send_payment_link: v, already_paid: v ? false : newSession.already_paid })}
                     />
                   </label>
+                  <label className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/50">
+                    <span className="text-[11px] text-muted-foreground leading-tight">
+                      Already paid
+                      <span className="block text-[10px] opacity-70">Mark this session as paid at booking time.</span>
+                    </span>
+                    <Switch
+                      checked={newSession.already_paid}
+                      onCheckedChange={(v) => setNewSession({ ...newSession, already_paid: v, send_payment_link: v ? false : newSession.send_payment_link })}
+                    />
+                  </label>
+                  {newSession.already_paid && (
+                    <div className="pt-1">
+                      <Label className="text-[11px]">Payment method</Label>
+                      <Select value={newSession.paid_method} onValueChange={(v) => setNewSession({ ...newSession, paid_method: v })}>
+                        <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="bank_transfer">Bank transfer</SelectItem>
+                          <SelectItem value="stripe">Stripe</SelectItem>
+                          <SelectItem value="card">Card</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 <div>
