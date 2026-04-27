@@ -375,11 +375,26 @@ const ClientDetail = () => {
             )}
 
             {!isManual && (
-              <TabsContent value="overview">
+              <TabsContent value="overview" className="space-y-6">
                 <div className="bg-card border border-border/50 rounded-2xl p-6">
-                  <h2 className="text-lg font-semibold mb-4">Client overview</h2>
+                  <h2 className="text-lg font-semibold mb-1">At a glance</h2>
                   <p className="text-xs text-muted-foreground mb-5">
-                    Manual fields (stage, tags, risk, summary). Everything else on this page is auto-populated.
+                    Auto-populated from sessions, notes, intakes, to-dos and documents already on this page.
+                  </p>
+                  <ClientAutoOverview
+                    profile={profile}
+                    sessions={sessions}
+                    notes={notes}
+                    todos={todos}
+                    documents={documents}
+                    intakes={intakes}
+                    intakeResponses={intakeResponses}
+                  />
+                </div>
+                <div className="bg-card border border-border/50 rounded-2xl p-6">
+                  <h2 className="text-lg font-semibold mb-1">Manual notes</h2>
+                  <p className="text-xs text-muted-foreground mb-5">
+                    Stage, tags, risk and a private summary — only edit what isn't already captured elsewhere.
                   </p>
                   {realClientId && <ClientOverviewPanel clientId={realClientId} />}
                 </div>
