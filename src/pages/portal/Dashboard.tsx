@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SupportPathwayBoard from "@/components/clinical/SupportPathwayBoard";
+import MyCareTeam from "@/components/portal/MyCareTeam";
 import { Compass } from "lucide-react";
 
 interface ClientTodo {
