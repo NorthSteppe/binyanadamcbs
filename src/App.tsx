@@ -216,6 +216,8 @@ const App = () => (
 
                   {/* Staff/Therapist portal */}
                   <Route path="/staff" element={<StaffRoute><StaffDashboard /></StaffRoute>} />
+                  <Route path="/staff/clients" element={<StaffRoute><ClientsOverview /></StaffRoute>} />
+                  <Route path="/staff/clients/:clientId" element={<StaffRoute><ClientDetail /></StaffRoute>} />
                   <Route path="/staff/calendar" element={<StaffRoute><AdminCalendar /></StaffRoute>} />
                   <Route path="/staff/todos" element={<StaffRoute><TodoManager /></StaffRoute>} />
                   <Route path="/staff/staff-todos" element={<StaffRoute><StaffTodoManager /></StaffRoute>} />

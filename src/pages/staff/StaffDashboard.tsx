@@ -42,6 +42,7 @@ const StaffDashboard = () => {
   const firstName = profile?.full_name?.split(" ")[0] || "";
 
     const clinicalTools = [
+        { label: "My Clients", path: "/staff/clients", icon: Users, description: "Your assigned caseload at a glance", accentColor: "#14b8a6", iconBg: "rgba(20,184,166,0.10)" },
         { label: portalT.calLabel || "Calendar", path: "/staff/calendar", icon: Calendar, description: portalT.calDesc || "View and manage all sessions", accentColor: "#3b82f6", iconBg: "rgba(59,130,246,0.10)" },
         { label: portalT.toolsLabel || "Clinical Tools", path: "/staff/clinical-tools", icon: ClipboardList, description: portalT.toolsDesc || "CBS data collection tools", accentColor: "#8b5cf6", iconBg: "rgba(139,92,246,0.10)" },
         { label: "Parent FBA Intakes", path: "/staff/fba-intakes", icon: Send, description: "Send & review parent intake forms", accentColor: "#0ea5e9", iconBg: "rgba(14,165,233,0.10)" },

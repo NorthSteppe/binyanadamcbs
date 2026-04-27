@@ -401,9 +401,8 @@ const ClientsOverview = () => {
                   </div>
                 );
 
-                const targetUrl = c.is_manual
-                  ? `/admin/clients/${c.id}` // c.id already prefixed with "manual:"
-                  : `/admin/clients/${c.id}`;
+                const basePath = isAdmin ? "/admin/clients" : "/staff/clients";
+                const targetUrl = `${basePath}/${c.id}`;
 
                 return (
                   <Link
