@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling, Save } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, FileText, Clock, Upload, CheckCircle2, Circle, Trash2, Pencil, Check, X, UserPlus, PoundSterling, Save, ClipboardList, Eye } from "lucide-react";
+import { FBA_INTAKE_SECTIONS, calcCompletion } from "@/lib/fbaIntakeQuestions";
 import ClientFinancialTab from "@/components/admin/ClientFinancialTab";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import { Button } from "@/components/ui/button";
@@ -117,6 +118,9 @@ const ClientDetail = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [todos, setTodos] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [intakes, setIntakes] = useState<any[]>([]);
+  const [intakeResponses, setIntakeResponses] = useState<Record<string, Record<string, string>>>({});
+  const [viewingIntakeId, setViewingIntakeId] = useState<string | null>(null);
   const [todoDialogOpen, setTodoDialogOpen] = useState(false);
   const [newTodo, setNewTodo] = useState({ title: "", description: "" });
   const [uploading, setUploading] = useState(false);
@@ -154,19 +158,41 @@ const ClientDetail = () => {
       if (todosRes.data) setTodos(todosRes.data);
       if (docsRes.data) setDocuments(docsRes.data);
     } else if (realClientId) {
-      const [profileRes, sessionsRes, notesRes, todosRes, docsRes, assignRes] = await Promise.all([
+      const [profileRes, sessionsRes, notesRes, todosRes, docsRes, assignRes, intakesRes] = await Promise.all([
         supabase.from("profiles").select("full_name, created_at").eq("id", realClientId).single(),
         supabase.from("sessions").select("*").eq("client_id", realClientId).order("session_date", { ascending: false }),
         supabase.from("client_notes").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
         supabase.from("client_todos").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
         supabase.from("client_documents").select("*").eq("client_id", realClientId).order("created_at", { ascending: false }),
         supabase.from("client_assignments").select("assignee_id").eq("client_id", realClientId),
+        supabase
+          .from("fba_intake_assignments")
+          .select("id, child_name, status, notes, submitted_at, created_at")
+          .eq("client_id", realClientId)
+          .order("created_at", { ascending: false }),
       ]);
       if (profileRes.data) setProfile(profileRes.data);
       if (sessionsRes.data) setSessions(sessionsRes.data);
       if (notesRes.data) setNotes(notesRes.data);
       if (todosRes.data) setTodos(todosRes.data);
       if (docsRes.data) setDocuments(docsRes.data);
+      if (intakesRes.data) {
+        setIntakes(intakesRes.data);
+        const submittedIds = intakesRes.data.filter((i) => i.status === "submitted").map((i) => i.id);
+        if (submittedIds.length) {
+          const { data: respRows } = await supabase
+            .from("fba_intake_responses")
+            .select("assignment_id, responses")
+            .in("assignment_id", submittedIds);
+          const map: Record<string, Record<string, string>> = {};
+          (respRows ?? []).forEach((r: any) => {
+            map[r.assignment_id] = (r.responses as Record<string, string>) ?? {};
+          });
+          setIntakeResponses(map);
+        } else {
+          setIntakeResponses({});
+        }
+      }
       const isAssigned = (assignRes.data ?? []).some((a) => a.assignee_id === user?.id);
       setCanRename(isAdmin || isAssigned);
     }
@@ -330,6 +356,11 @@ const ClientDetail = () => {
               {!isManual && <TabsTrigger value="overview" className="rounded-full">Overview</TabsTrigger>}
               <TabsTrigger value="sessions" className="rounded-full">Sessions</TabsTrigger>
               {!isManual && <TabsTrigger value="pathway" className="rounded-full">Pathway</TabsTrigger>}
+              {!isManual && (
+                <TabsTrigger value="intake" className="rounded-full gap-1">
+                  <ClipboardList size={12} /> FBA Intake{intakes.length > 0 ? ` (${intakes.length})` : ""}
+                </TabsTrigger>
+              )}
               <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
@@ -439,6 +470,82 @@ const ClientDetail = () => {
                 </div>
               )}
             </TabsContent>
+
+            {!isManual && (
+              <TabsContent value="intake">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Parent FBA Intake Forms</h2>
+                  <Link to="/staff/fba-intakes" className="text-xs text-primary hover:underline">
+                    Manage all intakes →
+                  </Link>
+                </div>
+                {intakes.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl border border-border/50">
+                    No intake forms have been sent to this client yet.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {intakes.map((intake) => {
+                      const responses = intakeResponses[intake.id] ?? {};
+                      const isOpen = viewingIntakeId === intake.id;
+                      const completion = calcCompletion(responses);
+                      return (
+                        <div key={intake.id} className="bg-card border border-border/50 rounded-2xl overflow-hidden">
+                          <div className="flex items-center justify-between p-4 gap-3">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-medium text-sm">{intake.child_name || "Unnamed child"}</p>
+                                <Badge variant="outline" className="text-[10px] uppercase">
+                                  {intake.status.replace("_", " ")}
+                                </Badge>
+                                {intake.status === "submitted" && (
+                                  <span className="text-[11px] text-muted-foreground">{completion}% complete</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                Sent {format(new Date(intake.created_at), "MMM d, yyyy")}
+                                {intake.submitted_at && ` · Submitted ${format(new Date(intake.submitted_at), "MMM d, yyyy")}`}
+                              </p>
+                            </div>
+                            {intake.status === "submitted" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="rounded-full gap-1.5 shrink-0"
+                                onClick={() => setViewingIntakeId(isOpen ? null : intake.id)}
+                              >
+                                <Eye size={12} /> {isOpen ? "Hide" : "View"} responses
+                              </Button>
+                            )}
+                          </div>
+                          {isOpen && intake.status === "submitted" && (
+                            <div className="border-t border-border/50 p-4 space-y-4 bg-muted/20">
+                              {FBA_INTAKE_SECTIONS.map((sec) => {
+                                const answered = sec.questions.filter((q) => (responses[q.key] ?? "").toString().trim());
+                                if (!answered.length) return null;
+                                return (
+                                  <div key={sec.id} className="rounded-lg border border-border bg-card p-4">
+                                    <h4 className="text-sm font-semibold mb-3">{sec.title}</h4>
+                                    <dl className="space-y-3">
+                                      {answered.map((q) => (
+                                        <div key={q.key}>
+                                          <dt className="text-[11px] uppercase tracking-wide text-muted-foreground mb-0.5">{q.label}</dt>
+                                          <dd className="text-sm whitespace-pre-wrap leading-relaxed">{(responses[q.key] ?? "").toString()}</dd>
+                                        </div>
+                                      ))}
+                                    </dl>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </section>

@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let loadedUserId: string | null = null;
 
     const applySession = async (nextSession: Session | null) => {
       if (!mounted) return;
@@ -59,21 +60,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(nextSession?.user ?? null);
 
       if (!nextSession?.user) {
+        loadedUserId = null;
         setProfile(null);
         setRoles([]);
+        return;
+      }
+
+      // Only re-fetch profile/roles when the user actually changes.
+      // This prevents transient empty role states during TOKEN_REFRESHED events
+      // (which would otherwise cause role-gated routes/UI to flicker or redirect).
+      if (loadedUserId === nextSession.user.id) {
         return;
       }
 
       try {
         const userData = await fetchUserData(nextSession.user.id);
         if (!mounted) return;
+        loadedUserId = nextSession.user.id;
         setProfile(userData.profile);
         setRoles(userData.roles);
       } catch (error) {
         console.error("Failed to load authenticated user data", error);
-        if (!mounted) return;
-        setProfile(null);
-        setRoles([]);
+        // Do not clear roles on transient fetch failure — keep last known good value.
       }
     };
 
