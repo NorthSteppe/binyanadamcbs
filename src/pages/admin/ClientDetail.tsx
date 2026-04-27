@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ClientOverviewPanel from "@/components/admin/ClientOverviewPanel";
+import ClientAutoOverview from "@/components/admin/ClientAutoOverview";
 import ClientProfileHeader from "@/components/clinical/ClientProfileHeader";
 import SupportPathwayBoard from "@/components/clinical/SupportPathwayBoard";
 import { toast } from "sonner";
@@ -361,7 +362,7 @@ const ClientDetail = () => {
                   <ClipboardList size={12} /> FBA Intake{intakes.length > 0 ? ` (${intakes.length})` : ""}
                 </TabsTrigger>
               )}
-              <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>
+              {isAdmin && <TabsTrigger value="financial" className="rounded-full gap-1"><PoundSterling size={12} /> Financial</TabsTrigger>}
               <TabsTrigger value="todos" className="rounded-full">To-Dos</TabsTrigger>
               <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
             </TabsList>
@@ -374,11 +375,26 @@ const ClientDetail = () => {
             )}
 
             {!isManual && (
-              <TabsContent value="overview">
+              <TabsContent value="overview" className="space-y-6">
                 <div className="bg-card border border-border/50 rounded-2xl p-6">
-                  <h2 className="text-lg font-semibold mb-4">Client overview</h2>
+                  <h2 className="text-lg font-semibold mb-1">At a glance</h2>
                   <p className="text-xs text-muted-foreground mb-5">
-                    Manual fields (stage, tags, risk, summary). Everything else on this page is auto-populated.
+                    Auto-populated from sessions, notes, intakes, to-dos and documents already on this page.
+                  </p>
+                  <ClientAutoOverview
+                    profile={profile}
+                    sessions={sessions}
+                    notes={notes}
+                    todos={todos}
+                    documents={documents}
+                    intakes={intakes}
+                    intakeResponses={intakeResponses}
+                  />
+                </div>
+                <div className="bg-card border border-border/50 rounded-2xl p-6">
+                  <h2 className="text-lg font-semibold mb-1">Manual notes</h2>
+                  <p className="text-xs text-muted-foreground mb-5">
+                    Stage, tags, risk and a private summary — only edit what isn't already captured elsewhere.
                   </p>
                   {realClientId && <ClientOverviewPanel clientId={realClientId} />}
                 </div>
@@ -398,10 +414,12 @@ const ClientDetail = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="financial">
-              <h2 className="text-lg font-semibold mb-4">Financial Overview</h2>
-              <ClientFinancialTab clientId={realClientId} manualClientId={manualClientId} isManual={isManual} />
-            </TabsContent>
+            {isAdmin && (
+              <TabsContent value="financial">
+                <h2 className="text-lg font-semibold mb-4">Financial Overview</h2>
+                <ClientFinancialTab clientId={realClientId} manualClientId={manualClientId} isManual={isManual} />
+              </TabsContent>
+            )}
 
             <TabsContent value="todos">
               <div className="flex items-center justify-between mb-4">
