@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, CheckCircle2, CreditCard, XCircle, Video, MapPin, Link2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CheckCircle2, CreditCard, XCircle, Video, MapPin, Link2, Repeat, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +32,11 @@ const TIME_SLOTS = [
   "15:00", "15:30", "16:00", "16:30", "17:00"
 ];
 
+type BookingMode = "single" | "recurring" | "block";
+type RecurrencePattern = "weekly" | "biweekly" | "monthly";
+
+const PENDING_KEY = "binyan-pending-booking";
+
 const Booking = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -40,6 +47,7 @@ const Booking = () => {
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [selectedService, setSelectedService] = useState<ServiceOption | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [blockDates, setBlockDates] = useState<Date[]>([]);
   const [selectedTime, setSelectedTime] = useState("");
   const [platform, setPlatform] = useState<MeetingPlatform>("in_person");
   const [description, setDescription] = useState("");
@@ -47,9 +55,21 @@ const Booking = () => {
   const [success, setSuccess] = useState(false);
   const [canceled, setCanceled] = useState(false);
 
+  // Multi-session state
+  const [bookingMode, setBookingMode] = useState<BookingMode>("single");
+  const [recurrencePattern, setRecurrencePattern] = useState<RecurrencePattern>("weekly");
+  const [recurrenceCount, setRecurrenceCount] = useState(4);
+
   useEffect(() => {
-    if (searchParams.get("success") === "true") setSuccess(true);
-    if (searchParams.get("canceled") === "true") setCanceled(true);
+    if (searchParams.get("success") === "true") {
+      setSuccess(true);
+      // Finalize pending paid booking sessions, if any
+      finalizePendingPaidBooking();
+    }
+    if (searchParams.get("canceled") === "true") {
+      setCanceled(true);
+      try { localStorage.removeItem(PENDING_KEY); } catch {}
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -57,22 +77,158 @@ const Booking = () => {
       .then(({ data }) => { if (data) setServices(data as unknown as ServiceOption[]); });
   }, []);
 
+  // Compute the list of session datetimes based on current selections
+  const computeSessionDates = (): Date[] => {
+    if (!selectedTime) return [];
+    const [h, m] = selectedTime.split(":").map((v) => parseInt(v));
+
+    if (bookingMode === "block") {
+      return [...blockDates]
+        .sort((a, b) => a.getTime() - b.getTime())
+        .map((d) => {
+          const x = new Date(d);
+          x.setHours(h, m, 0, 0);
+          return x;
+        });
+    }
+
+    if (!selectedDate) return [];
+    const base = new Date(selectedDate);
+    base.setHours(h, m, 0, 0);
+
+    if (bookingMode === "single") return [base];
+
+    const count = Math.max(2, Math.min(12, recurrenceCount || 2));
+    const out: Date[] = [];
+    for (let i = 0; i < count; i++) {
+      const next = new Date(base);
+      if (recurrencePattern === "weekly") next.setDate(base.getDate() + 7 * i);
+      else if (recurrencePattern === "biweekly") next.setDate(base.getDate() + 14 * i);
+      else if (recurrencePattern === "monthly") next.setMonth(base.getMonth() + i);
+      out.push(next);
+    }
+    return out;
+  };
+
+  const sessionDates = computeSessionDates();
+  const sessionCount = sessionDates.length;
+  const totalPriceCents = (selectedService?.price_cents || 0) * sessionCount;
+
+  const finalizePendingPaidBooking = async () => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      if (!raw) return;
+      const pending = JSON.parse(raw) as {
+        user_id: string;
+        service: ServiceOption;
+        dates: string[]; // ISO
+        platform: MeetingPlatform;
+        meeting_url: string | null;
+        description: string;
+      };
+      const { data: u } = await supabase.auth.getUser();
+      if (!u?.user || u.user.id !== pending.user_id) {
+        localStorage.removeItem(PENDING_KEY);
+        return;
+      }
+      const sorted = pending.dates.map((d) => new Date(d)).sort((a, b) => a.getTime() - b.getTime());
+      const first = sorted[0];
+
+      const baseRow = {
+        client_id: pending.user_id,
+        title: pending.service.name,
+        description: pending.description || null,
+        duration_minutes: pending.service.duration_minutes,
+        meeting_platform: pending.platform === "in_person" ? null : pending.platform,
+        meeting_url: pending.meeting_url || null,
+        payment_status: "paid" as const,
+      };
+
+      const { data: firstInserted, error: firstErr } = await supabase
+        .from("sessions")
+        .insert({ ...baseRow, session_date: first.toISOString() })
+        .select("id")
+        .single();
+
+      if (firstErr || !firstInserted) {
+        console.error("Failed to insert paid session", firstErr);
+        return;
+      }
+
+      if (sorted.length > 1) {
+        const extra = sorted.slice(1).map((d) => ({
+          ...baseRow,
+          session_date: d.toISOString(),
+          recurrence_parent_id: firstInserted.id,
+        }));
+        const { error: extraErr } = await supabase.from("sessions").insert(extra);
+        if (extraErr) console.error("Failed to insert extra paid sessions", extraErr);
+      }
+
+      localStorage.removeItem(PENDING_KEY);
+    } catch (e) {
+      console.warn("finalizePendingPaidBooking failed", e);
+    }
+  };
+
   const handleBook = async () => {
-    if (!user || !selectedService || !selectedDate || !selectedTime) return;
+    if (!user || !selectedService || sessionCount === 0) return;
     setLoading(true);
 
-    const isPaid = selectedService.price_cents > 0 && selectedService.stripe_price_id;
+    const isPaid = selectedService.price_cents > 0 && !!selectedService.stripe_price_id;
+
+    // Resolve a meeting URL once and reuse for all sessions in the block.
+    let meetingUrl: string | null = generateMeetingLink(platform);
+    if (platform !== "in_person") {
+      const providerKey = platform === "google_meet" ? "google" : platform;
+      try {
+        const { data: assignment } = await supabase
+          .from("client_assignments")
+          .select("assignee_id")
+          .eq("client_id", user.id)
+          .limit(1)
+          .maybeSingle();
+
+        if (assignment?.assignee_id) {
+          const { data: meet, error: meetErr } = await supabase.functions.invoke("create-meeting", {
+            body: {
+              host_user_id: assignment.assignee_id,
+              provider: providerKey,
+              title: selectedService.name,
+              start_iso: sessionDates[0].toISOString(),
+              duration_minutes: selectedService.duration_minutes,
+              attendee_email: user.email,
+            },
+          });
+          if (!meetErr && meet?.join_url) meetingUrl = meet.join_url;
+        }
+      } catch (e) {
+        console.warn("Auto meeting creation failed, falling back to instant link", e);
+      }
+    }
 
     if (isPaid) {
-      // Redirect to Stripe Checkout
+      // Stash the planned sessions; finalize after Stripe success redirect.
+      try {
+        localStorage.setItem(PENDING_KEY, JSON.stringify({
+          user_id: user.id,
+          service: selectedService,
+          dates: sessionDates.map((d) => d.toISOString()),
+          platform,
+          meeting_url: meetingUrl,
+          description,
+        }));
+      } catch {}
+
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           service_option_id: selectedService.id,
-          date: selectedDate.toISOString(),
+          quantity: sessionCount,
+          date: sessionDates[0].toISOString(),
           time: selectedTime,
           description,
           meeting_platform: platform === "in_person" ? null : platform,
-          meeting_url: generateMeetingLink(platform) || null,
+          meeting_url: meetingUrl,
         },
       });
 
@@ -82,61 +238,50 @@ const Booking = () => {
       } else if (data?.url) {
         window.open(data.url, "_blank");
       }
-    } else {
-      // Free service — book directly
-      const [h, m] = selectedTime.split(":");
-      const sessionDate = new Date(selectedDate);
-      sessionDate.setHours(parseInt(h), parseInt(m), 0, 0);
+      return;
+    }
 
-      // For virtual platforms, try to auto-generate a real link via the assigned therapist's connected account.
-      let meetingUrl = generateMeetingLink(platform);
-      if (platform !== "in_person") {
-        const providerKey = platform === "google_meet" ? "google" : platform; // "zoom" | "microsoft" | "google"
-        try {
-          // Find the assigned therapist (host)
-          const { data: assignment } = await supabase
-            .from("client_assignments")
-            .select("assignee_id")
-            .eq("client_id", user.id)
-            .limit(1)
-            .maybeSingle();
+    // Free service — insert all sessions directly
+    const baseRow = {
+      client_id: user.id,
+      title: selectedService.name,
+      description: description || null,
+      duration_minutes: selectedService.duration_minutes,
+      meeting_platform: platform === "in_person" ? null : platform,
+      meeting_url: meetingUrl,
+    };
 
-          if (assignment?.assignee_id) {
-            const { data: meet, error: meetErr } = await supabase.functions.invoke("create-meeting", {
-              body: {
-                host_user_id: assignment.assignee_id,
-                provider: providerKey,
-                title: selectedService.name,
-                start_iso: sessionDate.toISOString(),
-                duration_minutes: selectedService.duration_minutes,
-                attendee_email: user.email,
-              },
-            });
-            if (!meetErr && meet?.join_url) meetingUrl = meet.join_url;
-          }
-        } catch (e) {
-          console.warn("Auto meeting creation failed, falling back to instant link", e);
-        }
-      }
+    const { data: firstInserted, error: firstErr } = await supabase
+      .from("sessions")
+      .insert({ ...baseRow, session_date: sessionDates[0].toISOString() })
+      .select("id")
+      .single();
 
-      const { error } = await supabase.from("sessions").insert({
-        client_id: user.id,
-        title: selectedService.name,
-        description: description || null,
-        session_date: sessionDate.toISOString(),
-        duration_minutes: selectedService.duration_minutes,
-        meeting_platform: platform === "in_person" ? null : platform,
-        meeting_url: meetingUrl || null,
-      });
-
+    if (firstErr || !firstInserted) {
       setLoading(false);
-      if (error) {
-        toast({ title: "Booking failed", description: error.message, variant: "destructive" });
-      } else {
-        setSuccess(true);
-        toast({ title: portalT.bookingSuccess || "Session booked!" });
+      toast({ title: "Booking failed", description: firstErr?.message, variant: "destructive" });
+      return;
+    }
+
+    if (sessionDates.length > 1) {
+      const extra = sessionDates.slice(1).map((d) => ({
+        ...baseRow,
+        session_date: d.toISOString(),
+        recurrence_parent_id: firstInserted.id,
+      }));
+      const { error: extraErr } = await supabase.from("sessions").insert(extra);
+      if (extraErr) {
+        toast({ title: "Some sessions failed", description: extraErr.message, variant: "destructive" });
       }
     }
+
+    setLoading(false);
+    setSuccess(true);
+    toast({
+      title: sessionCount > 1
+        ? `${sessionCount} sessions booked`
+        : (portalT.bookingSuccess || "Session booked!"),
+    });
   };
 
   const resetForm = () => {
@@ -144,10 +289,13 @@ const Booking = () => {
     setCanceled(false);
     setSelectedService(null);
     setSelectedDate(undefined);
+    setBlockDates([]);
     setSelectedTime("");
     setPlatform("in_person");
     setDescription("");
-    // Clear URL params
+    setBookingMode("single");
+    setRecurrencePattern("weekly");
+    setRecurrenceCount(4);
     window.history.replaceState({}, "", "/portal/booking");
   };
 
@@ -192,6 +340,12 @@ const Booking = () => {
       </div>
     );
   }
+
+  const modeOptions: { id: BookingMode; label: string; Icon: typeof CalendarIcon; hint: string }[] = [
+    { id: "single", label: "Single session", Icon: CalendarIcon, hint: "Just one appointment" },
+    { id: "recurring", label: "Recurring", Icon: Repeat, hint: "Repeat at a regular pattern" },
+    { id: "block", label: "Block of sessions", Icon: Layers, hint: "Pick multiple custom dates" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -238,19 +392,93 @@ const Booking = () => {
             </div>
           </div>
 
+          {/* Step 1b: Booking type */}
+          {selectedService && (
+            <div className="mb-8">
+              <Label className="text-base font-semibold mb-3 block">How many sessions?</Label>
+              <div className="grid sm:grid-cols-3 gap-3">
+                {modeOptions.map(({ id, label, Icon, hint }) => (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setBookingMode(id);
+                      // Clear conflicting selections
+                      if (id === "block") setSelectedDate(undefined);
+                      else setBlockDates([]);
+                    }}
+                    className={cn(
+                      "text-start p-4 rounded-xl border-2 transition-all flex gap-3 items-start",
+                      bookingMode === id
+                        ? "border-primary bg-primary/5"
+                        : "border-border/50 bg-card hover:border-primary/30"
+                    )}
+                  >
+                    <Icon size={18} className={bookingMode === id ? "text-primary mt-0.5" : "text-muted-foreground mt-0.5"} />
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">{label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {bookingMode === "recurring" && (
+                <div className="grid sm:grid-cols-2 gap-3 mt-4 bg-card border border-border/50 rounded-xl p-4">
+                  <div>
+                    <Label className="text-xs mb-1.5 block text-muted-foreground">Pattern</Label>
+                    <Select value={recurrencePattern} onValueChange={(v) => setRecurrencePattern(v as RecurrencePattern)}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Every week</SelectItem>
+                        <SelectItem value="biweekly">Every 2 weeks</SelectItem>
+                        <SelectItem value="monthly">Every month</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1.5 block text-muted-foreground">Number of sessions</Label>
+                    <Input
+                      type="number" min={2} max={12}
+                      value={recurrenceCount}
+                      onChange={(e) => setRecurrenceCount(Math.max(2, Math.min(12, parseInt(e.target.value) || 2)))}
+                      className="h-9"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {selectedService && (
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div>
-                <Label className="text-base font-semibold mb-3 block">{portalT.step2}</Label>
+                <Label className="text-base font-semibold mb-3 block">
+                  {bookingMode === "block" ? "Pick your dates" : portalT.step2}
+                </Label>
                 <div className="bg-card rounded-xl border border-border/50 p-4 flex justify-center">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
-                    className="pointer-events-auto"
-                  />
+                  {bookingMode === "block" ? (
+                    <Calendar
+                      mode="multiple"
+                      selected={blockDates}
+                      onSelect={(d) => setBlockDates(d || [])}
+                      disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
+                      className="pointer-events-auto"
+                    />
+                  ) : (
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
+                      className="pointer-events-auto"
+                    />
+                  )}
                 </div>
+                {bookingMode === "block" && blockDates.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {blockDates.length} date{blockDates.length === 1 ? "" : "s"} selected
+                  </p>
+                )}
               </div>
               <div>
                 <Label className="text-base font-semibold mb-3 block">{portalT.step3}</Label>
@@ -270,11 +498,16 @@ const Booking = () => {
                     </button>
                   ))}
                 </div>
+                {bookingMode === "block" && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    The same time will be used for all selected dates.
+                  </p>
+                )}
               </div>
             </div>
           )}
 
-          {selectedService && selectedDate && selectedTime && (
+          {selectedService && sessionCount > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border/50 p-6 mb-6">
               <Label className="text-base font-semibold mb-3 block">{portalT.stepPlatform || "4. Meeting Format"}</Label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
@@ -307,7 +540,7 @@ const Booking = () => {
             </motion.div>
           )}
 
-          {selectedService && selectedDate && selectedTime && (
+          {selectedService && sessionCount > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border/50 p-6">
               <Label className="text-base font-semibold mb-3 block">{portalT.step4}</Label>
               <Textarea
@@ -317,33 +550,56 @@ const Booking = () => {
                 placeholder={portalT.notesPlaceholder}
               />
               <div className="bg-muted rounded-xl p-4 mb-4 text-sm">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold text-foreground">{selectedService.name}</p>
-                    <p className="text-muted-foreground">
-                      {selectedDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at {selectedTime} · {selectedService.duration_minutes} min
+                <div className="flex justify-between items-start gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground">
+                      {selectedService.name}
+                      {sessionCount > 1 && <span className="ms-2 text-xs text-primary">× {sessionCount}</span>}
                     </p>
+                    <div className="text-muted-foreground text-xs mt-1 space-y-0.5 max-h-32 overflow-auto">
+                      {sessionDates.slice(0, 6).map((d, i) => (
+                        <p key={i}>
+                          {d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {selectedTime} · {selectedService.duration_minutes} min
+                        </p>
+                      ))}
+                      {sessionDates.length > 6 && (
+                        <p className="italic">+ {sessionDates.length - 6} more…</p>
+                      )}
+                    </div>
                     {platform !== "in_person" && (
-                      <p className="text-primary text-xs mt-1 flex items-center gap-1">
+                      <p className="text-primary text-xs mt-2 flex items-center gap-1">
                         <Video size={11} /> {platform === "zoom" ? "Zoom" : platform === "teams" ? "Microsoft Teams" : "Google Meet"}
                       </p>
                     )}
                   </div>
-                  {selectedService.price_cents > 0 && (
-                    <p className="text-lg font-bold text-primary">£{(selectedService.price_cents / 100).toFixed(2)}</p>
+                  {totalPriceCents > 0 && (
+                    <div className="text-end shrink-0">
+                      <p className="text-lg font-bold text-primary">£{(totalPriceCents / 100).toFixed(2)}</p>
+                      {sessionCount > 1 && (
+                        <p className="text-[10px] text-muted-foreground">
+                          {sessionCount} × £{(selectedService.price_cents / 100).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
               <Button onClick={handleBook} className="w-full rounded-full" size="lg" disabled={loading}>
-                {selectedService.price_cents > 0 ? (
+                {totalPriceCents > 0 ? (
                   <>
                     <CreditCard size={18} className="me-2" />
-                    {loading ? portalT.redirecting : (portalT.payAndBook || "").replace("{{price}}", (selectedService.price_cents / 100).toFixed(2))}
+                    {loading
+                      ? portalT.redirecting
+                      : `Pay £${(totalPriceCents / 100).toFixed(2)} & book ${sessionCount} session${sessionCount === 1 ? "" : "s"}`}
                   </>
                 ) : (
                   <>
                     <CalendarIcon size={18} className="me-2" />
-                    {loading ? portalT.booking : portalT.confirmBooking}
+                    {loading
+                      ? portalT.booking
+                      : sessionCount > 1
+                        ? `Book ${sessionCount} sessions`
+                        : portalT.confirmBooking}
                   </>
                 )}
               </Button>
