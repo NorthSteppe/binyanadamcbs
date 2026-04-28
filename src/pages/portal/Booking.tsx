@@ -141,7 +141,9 @@ const Booking = () => {
         duration_minutes: pending.service.duration_minutes,
         meeting_platform: pending.platform === "in_person" ? null : pending.platform,
         meeting_url: pending.meeting_url || null,
-        payment_status: "paid" as const,
+        is_paid: true,
+        price_cents: pending.service.price_cents,
+        service_option_id: pending.service.id,
       };
 
       const { data: firstInserted, error: firstErr } = await supabase
