@@ -25,8 +25,9 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { service_option_id, date, time, description, meeting_platform, meeting_url } = await req.json();
+    const { service_option_id, date, time, description, meeting_platform, meeting_url, quantity } = await req.json();
     if (!service_option_id) throw new Error("Missing service_option_id");
+    const qty = Math.max(1, Math.min(12, parseInt(String(quantity || 1)) || 1));
 
     // Fetch the service option to get stripe_price_id
     const { data: svc, error: svcErr } = await supabaseClient
