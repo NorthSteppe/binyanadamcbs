@@ -65,14 +65,14 @@ const Index = () => {
               contentKey="landing.title"
               defaultValue={t.landing.title}
               as="h1"
-              className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6 font-display tracking-tight"
+              className="text-4xl md:text-5xl lg:text-6xl text-foreground leading-[1.1] mb-6 font-display font-light tracking-tight text-balance"
             />
 
             <EditableText
               contentKey="landing.subtitle"
               defaultValue={t.landing.subtitle}
               as="p"
-              className="text-base md:text-lg text-muted-foreground leading-relaxed mb-10 max-w-lg"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed mb-10 max-w-lg font-light"
             />
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -123,7 +123,7 @@ const Index = () => {
           transition={{ delay: 1.2 }}
           className="absolute bottom-8 right-8 z-10 hidden md:flex flex-col items-center gap-2"
         >
-          <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 [writing-mode:vertical-lr]">Scroll</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60 [writing-mode:vertical-lr] font-sans">Scroll, slowly</span>
           <div className="w-px h-12 bg-gradient-to-b from-muted-foreground/30 to-transparent" />
         </motion.div>
       </section>
