@@ -134,35 +134,36 @@ const Index = () => {
       {/* Personal calendar for signed-in users */}
       {user && <LandingCalendarWidget />}
 
-      {/* Blog CTA */}
-      <section className="py-16 md:py-24">
+      {/* Insights / writing CTA */}
+      <section className="py-20 md:py-28 texture-paper">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-10 md:p-16 text-center"
+            transition={{ duration: 0.7 }}
+            className="relative overflow-hidden rounded-[2rem] bg-dusk p-10 md:p-16 text-center"
           >
             <div className="relative z-10">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-foreground/10 mb-6">
                 <BookOpen className="w-7 h-7 text-primary-foreground" />
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4 font-display">
-                Insights &amp; Resources
+              <p className="label-eyebrow text-primary-foreground/70 mb-4">Slow reading</p>
+              <h2 className="text-3xl md:text-5xl text-primary-foreground mb-5 font-display font-light">
+                Notes from the practice
               </h2>
-              <p className="text-primary-foreground/70 max-w-lg mx-auto mb-8 text-base md:text-lg font-light">
-                Evidence-based strategies for schools, families, and professionals — translated into practical, everyday systems.
+              <p className="text-primary-foreground/80 max-w-xl mx-auto mb-8 text-base md:text-lg font-light leading-relaxed">
+                Quiet writing for parents, teachers, and practitioners — about what behaviour might be telling us, and how we might listen back.
               </p>
-              <Button size="lg" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full px-10 h-13 text-[15px] font-medium shadow-apple-lg">
+              <Button size="lg" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full px-10 h-12 text-[14px] font-medium shadow-soft">
                 <Link to="/insights" className="inline-flex items-center gap-3">
-                  Explore the Blog <ArrowRight size={16} />
+                  Read the writing <ArrowRight size={16} />
                 </Link>
               </Button>
             </div>
-            {/* Decorative circles */}
-            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-primary-foreground/5" />
-            <div className="absolute -bottom-16 -left-16 w-40 h-40 rounded-full bg-primary-foreground/5" />
+            {/* Decorative organic circles */}
+            <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary-foreground/5" />
+            <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-primary-foreground/5" />
           </motion.div>
         </div>
       </section>
