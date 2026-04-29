@@ -15,31 +15,31 @@ export const translations = {
 
     // Landing page
     landing: {
-      title: "Welcome to Binyan Adam",
-      subtitle: "Constructional Behaviour Services to support individuals, organisations, and families. ",
-      exploreServices: "Explore Services",
+      title: "A quiet space to make sense of behaviour — and what's underneath it.",
+      subtitle: "Binyan Adam is a constructional practice for individuals, families, schools and organisations. We start with what's happened, not what's wrong — and we build from there, together.",
+      exploreServices: "Find your way in",
       logIn: "Log In",
       signUp: "Sign Up",
-      quote: "We do not remove behaviour. We build capability.",
+      quote: "We do not remove behaviour. We build capability — slowly, attentively, and in your own time.",
       quoteAuthor: "Adam Dayan, MSc",
     },
 
     // Services page
     services: {
-      tagline: "What We Do",
-      title: "Specialist Behavioural Services",
-      subtitle: "Five distinct pathways of support, each designed with clarity, dignity, and measurable outcomes at the centre.",
-      approachTagline: "Our Approach",
-      approachTitle: "Constructional, Not Reductional",
-      approachText: "We don't seek to suppress, control, or eliminate behaviour. Instead, we build new capabilities, skills, and repertoires that make meaningful change possible. Every intervention starts with understanding context and ends with measurable growth.",
+      tagline: "Ways we work together",
+      title: "Five gentle paths into the work",
+      subtitle: "Each pathway is shaped around the person in front of us — never one-size-fits-all. Choose the doorway that feels closest, and we'll meet you there.",
+      approachTagline: "How we hold the work",
+      approachTitle: "Constructional, not corrective",
+      approachText: "We don't try to suppress, control, or eliminate behaviour. Instead, we sit with the question of what behaviour is doing — and patiently help build the skills, language, and conditions for something kinder to grow in its place. The pace is yours.",
       approachPoints: [
-        "Build repertoires, don't suppress behaviour",
-        "Behaviour as communication, not defiance",
-        "System-wide thinking for sustainable change",
-        "Ethical, evidence-based, and culturally sensitive",
+        "Build capability, gently — never strip behaviour away",
+        "Behaviour is communication, asking to be understood",
+        "Hold the whole system in mind, not just the person",
+        "Ethical, evidence-led, and culturally attuned",
       ],
-      credentialsTagline: "Evidence & Credentials",
-      credentialsTitle: "Grounded in Science. Led with Integrity.",
+      credentialsTagline: "Grounded & accountable",
+      credentialsTitle: "Held by science. Led with care.",
       credentials: [
         "UKBA (Cert) Registered",
         "15+ Years' Experience",
@@ -48,30 +48,30 @@ export const translations = {
         "MEd Psychology of Education (candidate)",
         "UK-SBA & ACBS Member",
       ],
-      ctaTitle: "Let's Start a Conversation",
-      ctaText: "Whether you're a school, family, organisation, or practitioner — we're here to help build capability.",
-      ctaButton: "Book a Consultation",
-      quoteText: "We do not remove behaviour. We build capability.",
+      ctaTitle: "Begin with a conversation",
+      ctaText: "Whether you're a parent, a school, an organisation, or another practitioner — start with a quiet phone call. No commitment, no pressure. Just a chance to be heard and to think together.",
+      ctaButton: "Reach out",
+      quoteText: "What behaviour is asking for, more often than not, is to be understood — not removed.",
       quoteAuthor: "Adam Dayan, MSc",
       quoteRole: "UKBA (Cert) · Clinical Behaviour Analyst & Consultant",
       cards: {
-        education: { title: "PBS in Education", description: "Whole-school behavioural culture built on clarity and dignity. From policy to practice." },
-        therapy: { title: "Therapy", description: "Understanding behaviour through context, not blame. ACT-informed, constructional, and person-centred." },
-        family: { title: "Family Support", description: "Support for families navigating complexity. Practical, personalised, and blame-free." },
-        organisations: { title: "Organisations", description: "Behavioural science applied to systems. Culture change, governance, and performance." },
-        supervision: { title: "Supervision", description: "Developing thoughtful, ethical practitioners. UKBA supervision, mentoring, and reflective practice." },
+        education: { title: "In Schools", description: "Building a behavioural culture that's clear, dignified, and humane — from policy down to the everyday." },
+        therapy: { title: "Therapy & 1:1 Work", description: "Understanding what behaviour is for. ACT-informed, person-centred, and unhurried." },
+        family: { title: "For Families", description: "A steadying hand for families holding complexity. Practical, personalised, and never blaming." },
+        organisations: { title: "For Organisations", description: "Behavioural science applied with care to teams, governance, and the cultures we build at work." },
+        supervision: { title: "Supervision & Mentoring", description: "Companionship for thoughtful practitioners — reflective, rigorous, and quietly held." },
       },
-      learnMore: "Learn more",
+      learnMore: "Read on",
     },
 
     // Service page layout
     serviceLayout: {
-      whatWeOffer: "What We Offer",
-      packages: "Packages",
-      packagesSubtitle: "Clear, structured support tailored to your needs. Every package includes measurable outcomes and a collaborative approach.",
-      idealFor: "Ideal for:",
-      readyTitle: "Ready to Begin?",
-      readyText: "We do not remove behaviour. We build capability. Let's start with a conversation.",
+      whatWeOffer: "Ways we can walk with you",
+      packages: "Shapes this can take",
+      packagesSubtitle: "Some people want a single conversation. Others want a slow, steady companion through complexity. None of these are fixed — every package is shaped around what you actually need.",
+      idealFor: "Likely a fit if:",
+      readyTitle: "When you're ready",
+      readyText: "We don't try to take behaviour away. We try to build something kinder in its place. Begin with a conversation — there's no pressure to know what you need yet.",
     },
 
     // Offer detail page
@@ -86,10 +86,10 @@ export const translations = {
 
     // Education page
     education: {
-      title: "PBS in Education",
-      subtitle: "Schools & Education Settings",
-      tagline: "Whole-school behavioural culture built on clarity and dignity. From assessment to implementation, we build systems that sustain.",
-      ctaText: "Request a School Assessment",
+      title: "Holding behaviour with dignity, in schools",
+      subtitle: "Schools & education settings",
+      tagline: "A whole-school culture where children are understood before they're managed. We help leaders build systems that are humane, consistent, and quietly transformative.",
+      ctaText: "Start a school conversation",
       services: [
         { name: "Whole-School PBS Framework Design", slug: "whole-school-pbs" },
         { name: "Behaviour Policy Development", slug: "behaviour-policy" },
@@ -132,10 +132,10 @@ export const translations = {
 
     // Therapy page
     therapy: {
-      title: "Understanding Behaviour Through Context, Not Blame",
-      subtitle: "Therapy & Intervention",
-      tagline: "ACT-informed, constructional, and person-centred. We help individuals build the skills and flexibility to live a values-driven life.",
-      ctaText: "Book a Consultation",
+      title: "What's happened to you, not what's wrong with you",
+      subtitle: "Therapy & 1:1 work",
+      tagline: "Slow, contextual, and quietly attentive. ACT-informed therapy that helps you build a life shaped around what matters — without forcing the difficult parts away.",
+      ctaText: "Begin with a conversation",
       services: [
         { name: "ACT-Informed Therapy", slug: "act-therapy" },
         { name: "Constructional Behavioural Intervention", slug: "constructional-intervention" },
@@ -176,10 +176,10 @@ export const translations = {
 
     // Families page
     families: {
-      title: "Support for Families Navigating Complexity",
-      subtitle: "Family Support",
-      tagline: "Practical, personalised, and blame-free. We help families build consistency, communication, and confidence at home.",
-      ctaText: "Speak to Us",
+      title: "A steady hand for families holding a lot",
+      subtitle: "For families",
+      tagline: "Practical, personal, and free of blame. We help families find their footing again — building consistency, language, and confidence at home.",
+      ctaText: "Reach out, gently",
       services: [
         { name: "Behavioural Assessment at Home", slug: "home-assessment" },
         { name: "Parent Strategy Coaching", slug: "parent-strategy" },
@@ -218,10 +218,10 @@ export const translations = {
 
     // Organisations page
     organisations: {
-      title: "Behavioural Science Applied to Systems",
-      subtitle: "Organisations & Leadership",
-      tagline: "Evidence-based organisational behaviour management. We help leadership teams build culture, governance, and performance frameworks that work.",
-      ctaText: "Request an Organisational Assessment",
+      title: "Building cultures where behaviour makes sense",
+      subtitle: "Organisations & leadership",
+      tagline: "Behavioural science, applied with care. We help leadership teams shape cultures, governance, and ways of working that are humane and built to last.",
+      ctaText: "Start an organisational conversation",
       services: [
         { name: "Organisational Behaviour Management (OBM)", slug: "obm" },
         { name: "Behaviour Strategy Design", slug: "behaviour-strategy" },
@@ -262,10 +262,10 @@ export const translations = {
 
     // Supervision page
     supervision: {
-      title: "Developing Thoughtful, Ethical Practitioners",
-      subtitle: "Supervision & Development",
-      tagline: "Reflective, rigorous, and values-aligned. Supporting behaviour analysts and practitioners to grow with clarity and integrity.",
-      ctaText: "Apply for Supervision",
+      title: "Companionship for thoughtful practitioners",
+      subtitle: "Supervision & mentoring",
+      tagline: "Reflective, rigorous, and quietly held. A space for behaviour analysts and practitioners to think out loud, grow with integrity, and stay close to their values.",
+      ctaText: "Enquire about supervision",
       services: [
         { name: "UKBA Supervision", slug: "ukba-supervision" },
         { name: "Case Formulation Supervision", slug: "case-formulation" },
@@ -305,22 +305,22 @@ export const translations = {
 
     // Contact page
     contact: {
-      tagline: "Get in Touch",
-      title: "Book a Consultation",
-      subtitle: "Tell us a little about your needs and we'll respond within 48 hours. No obligation, no pressure — just a conversation about how we can help.",
+      tagline: "A quiet doorway in",
+      title: "Begin with a conversation",
+      subtitle: "Tell us a little about what's bringing you here. We'll write back within 48 hours — gently, and without pressure. Sometimes a single conversation is enough.",
       location: "Manchester, UK",
-      nameLabel: "Name",
-      namePlaceholder: "Your name",
+      nameLabel: "Your name",
+      namePlaceholder: "What shall we call you?",
       emailLabel: "Email",
       emailPlaceholder: "you@example.com",
-      interestedLabel: "I'm interested in",
-      selectService: "Select a service area",
-      serviceOptions: ["PBS in Education", "Therapy", "Family Support", "Organisations", "Supervision", "Other"],
-      messageLabel: "Message",
-      messagePlaceholder: "Tell us a little about your situation and how we might help...",
-      sendButton: "Send Message",
+      interestedLabel: "What's drawing you in?",
+      selectService: "Choose a doorway",
+      serviceOptions: ["In Schools", "Therapy & 1:1 Work", "For Families", "For Organisations", "Supervision & Mentoring", "Something else"],
+      messageLabel: "Anything you'd like us to know",
+      messagePlaceholder: "There's no need to have it all figured out — a few sentences is enough...",
+      sendButton: "Send",
       sending: "Sending...",
-      successTitle: "Message sent",
+      successTitle: "Received, with care",
       successDescription: "We'll be in touch shortly.",
     },
 
